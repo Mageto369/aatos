@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { useMutation } from '@tanstack/react-query'
+import { Link } from 'react-router-dom'
+import { useAuthStore } from '@/stores/authStore'
 import { Eye, EyeOff, Mail, Lock, ArrowRight } from 'lucide-react'
-import api from '@/lib/api'
 
 interface LoginFormData {
   email: string
@@ -11,21 +11,18 @@ interface LoginFormData {
 export function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [formData, setFormData] = useState<LoginFormData>({ email: '', password: '' })
+  const [error, setError] = useState('')
+  const { login, isLoading } = useAuthStore()
 
-  const loginMutation = useMutation({
-    mutationFn: async (data: LoginFormData) => {
-      const res = await api.post('/auth/login', data)
-      return res.data
-    },
-    onSuccess: (data) => {
-      localStorage.setItem('aatos_token', data.accessToken)
-      window.location.href = '/'
-    },
-  })
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    loginMutation.mutate(formData)
+    setError('')
+    try {
+      await login(formData.email, formData.password)
+      window.location.href = '/'
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Invalid email or password.')
+    }
   }
 
   return (
@@ -128,10 +125,10 @@ export function LoginPage() {
 
             <button
               type="submit"
-              disabled={loginMutation.isPending}
+              disabled={isLoading}
               className="w-full btn-primary py-2.5"
             >
-              {loginMutation.isPending ? (
+              {isLoading ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto" />
               ) : (
                 <>
@@ -141,10 +138,8 @@ export function LoginPage() {
               )}
             </button>
 
-            {loginMutation.isError && (
-              <p className="text-sm text-red-600 text-center">
-                Invalid email or password. Please try again.
-              </p>
+            {error && (
+              <p className="text-sm text-red-600 text-center">{error}</p>
             )}
           </form>
 
@@ -153,6 +148,15 @@ export function LoginPage() {
             <a href="#" className="text-primary-600 font-medium hover:text-primary-700">
               Get started
             </a>
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+text-primary-700">
+              Get started
+            </Link>
           </p>
         </div>
       </div>

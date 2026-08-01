@@ -1,20 +1,42 @@
 import { Routes, Route } from 'react-router-dom'
 import { AppShell } from '@/components/layout/AppShell'
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
+import { LoginPage } from '@/pages/LoginPage'
+import { RegisterPage } from '@/pages/RegisterPage'
 import { DashboardPage } from '@/pages/DashboardPage'
 import { ProductsPage } from '@/pages/ProductsPage'
 import { DealsPage } from '@/pages/DealsPage'
 import { OrganizationPage } from '@/pages/OrganizationPage'
+import { RfqsPage } from '@/pages/RfqsPage'
+import { RfqCreatePage } from '@/pages/RfqCreatePage'
+import { DealRoomPage } from '@/pages/DealRoomPage'
+import { DocumentsPage } from '@/pages/DocumentsPage'
 
 function App() {
   return (
-    <AppShell>
-      <Routes>
-        <Route path="/" element={<DashboardPage />} />
-        <Route path="/products" element={<ProductsPage />} />
-        <Route path="/deals" element={<DealsPage />} />
-        <Route path="/organization" element={<OrganizationPage />} />
-      </Routes>
-    </AppShell>
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route
+        path="/*"
+        element={
+          <ProtectedRoute>
+            <AppShell>
+              <Routes>
+                <Route path="/" element={<DashboardPage />} />
+                <Route path="/products" element={<ProductsPage />} />
+                <Route path="/rfqs" element={<RfqsPage />} />
+                <Route path="/rfqs/new" element={<RfqCreatePage />} />
+                <Route path="/deals" element={<DealsPage />} />
+                <Route path="/deals/:id" element={<DealRoomPage />} />
+                <Route path="/organization" element={<OrganizationPage />} />
+                <Route path="/documents" element={<DocumentsPage />} />
+              </Routes>
+            </AppShell>
+          </ProtectedRoute>
+        }
+      />
+    </Routes>
   )
 }
 

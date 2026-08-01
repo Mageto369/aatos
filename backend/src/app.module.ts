@@ -8,6 +8,7 @@ import { RfqsModule } from './rfqs/rfqs.module';
 import { DealsModule } from './deals/deals.module';
 import { MessagesModule } from './messages/messages.module';
 import { ComplianceModule } from './compliance/compliance.module';
+import { DocumentsModule } from './documents/documents.module';
 import { CommonModule } from './common/common.module';
 import * as Joi from 'joi';
 
@@ -37,6 +38,7 @@ import * as Joi from 'joi';
     DealsModule,
     MessagesModule,
     ComplianceModule,
+    DocumentsModule,
   ],
 })
 export class AppModule {}
