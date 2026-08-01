@@ -1,6 +1,71 @@
-import { Shield, MapPin, Users, Building2, Award } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { Shield, MapPin, Users, Building2, Award, Mail, Globe, Phone } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import api from '@/lib/api'
+
+interface Organization {
+  id: string
+  name: string
+  legalName: string
+  type: string
+  status: string
+  verificationLevel: string
+  trustScore: number
+  description: string
+  registrationNumber: string
+  taxId: string
+  website: string
+  email: string
+  phone: string
+  address: string
+  city: string
+  countryCode: string
+  employeeCount: string
+  foundedYear: number
+  annualCapacity: string
+}
+
+interface Member {
+  id: string
+  user: {
+    firstName: string
+    lastName: string
+    email: string
+  }
+  role: string
+  isPrimaryContact: boolean
+}
 
 export function OrganizationPage() {
+  const { data: org } = useQuery<Organization>({
+    queryKey: ['my-organization'],
+    queryFn: async () => {
+      // Try to get the user's primary organization
+      const res = await api.get('/organizations?limit=1')
+      return res.data.items?.[0]
+    },
+  })
+
+  const { data: membersData } = useQuery<{ items: Member[] }>({
+    queryKey: ['org-members', org?.id],
+    queryFn: async () => {
+      if (!org?.id) return { items: [] }
+      const res = await api.get(`/organizations/${org.id}/members`)
+      return { items: res.data }
+    },
+    enabled: !!org?.id,
+  })
+
+  const members = membersData?.items || []
+
+  const verificationItems = [
+    { label: 'Business Registration', status: org?.verificationLevel !== 'none' ? 'verified' : 'pending' },
+    { label: 'Physical Site Verified', status: ['full', 'enhanced'].includes(org?.verificationLevel || '') ? 'verified' : 'pending' },
+    { label: 'Banking Verified', status: org?.verificationLevel !== 'none' ? 'verified' : 'pending' },
+    { label: 'Trade References', status: ['enhanced'].includes(org?.verificationLevel || '') ? 'verified' : 'pending' },
+    { label: 'Certification', status: 'pending' },
+  ]
+
   return (
     <div className="space-y-6">
       <div>
@@ -17,25 +82,30 @@ export function OrganizationPage() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-xl font-bold text-gray-900">Nairobi Coffee Exporters Ltd</h2>
-                <span className="badge-success flex items-center gap-1">
+                <h2 className="text-xl font-bold text-gray-900">{org?.name || 'Loading...'}</h2>
+                <span className={cn(
+                  'badge flex items-center gap-1',
+                  org?.verificationLevel === 'full' || org?.verificationLevel === 'enhanced'
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-gray-100 text-gray-800'
+                )}>
                   <Shield className="w-3 h-3" />
-                  Fully Verified
+                  {org?.verificationLevel === 'full' || org?.verificationLevel === 'enhanced'
+                    ? 'Fully Verified'
+                    : 'Verification Pending'}
                 </span>
               </div>
-              <p className="text-gray-500 mt-1">Exporter · Kenya · Since 2015</p>
+              <p className="text-gray-500 mt-1 capitalize">
+                {org?.type || 'Organization'} · {org?.countryCode || ''} · {org?.foundedYear ? `Since ${org.foundedYear}` : ''}
+              </p>
               <div className="flex gap-4 mt-3">
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-gray-900">87</p>
+                  <p className="text-2xl font-bold text-gray-900">{org?.trustScore || 0}</p>
                   <p className="text-xs text-gray-500">Trust Score</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-gray-900">47</p>
-                  <p className="text-xs text-gray-500">Deals</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-gray-900">12</p>
-                  <p className="text-xs text-gray-500">Products</p>
+                  <p className="text-2xl font-bold text-gray-900">{members.length}</p>
+                  <p className="text-xs text-gray-500">Members</p>
                 </div>
               </div>
             </div>
@@ -49,26 +119,56 @@ export function OrganizationPage() {
         <div className="card">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Business Details</h3>
           <div className="space-y-3">
-            <div className="flex justify-between">
-              <span className="text-gray-600">Registration Number</span>
-              <span className="font-medium">BRN-KE-2018-001234</span>
+            {org?.registrationNumber && (
+              <div className="flex justify-between">
+                <span className="text-gray-600">Registration Number</span>
+                <span className="font-medium">{org.registrationNumber}</span>
+              </div>
+            )}
+            {org?.taxId && (
+              <div className="flex justify-between">
+                <span className="text-gray-600">Tax ID</span>
+                <span className="font-medium">{org.taxId}</span>
+              </div>
+            )}
+            {org?.employeeCount && (
+              <div className="flex justify-between">
+                <span className="text-gray-600">Employees</span>
+                <span className="font-medium">{org.employeeCount}</span>
+              </div>
+            )}
+            {org?.annualCapacity && (
+              <div className="flex justify-between">
+                <span className="text-gray-600">Annual Capacity</span>
+                <span className="font-medium">{org.annualCapacity}</span>
+              </div>
+            )}
+            <div className="flex items-center gap-2 pt-2">
+              <MapPin className="w-4 h-4 text-gray-400" />
+              <span className="text-sm text-gray-600">
+                {org ? `${org.address || ''}, ${org.city || ''}, ${org.countryCode || ''}` : 'Address not set'}
+              </span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Tax ID</span>
-              <span className="font-medium">TIN-KE-987654321</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Employees</span>
-              <span className="font-medium">11-50</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Annual Capacity</span>
-              <span className="font-medium">5,000 MT</span>
-            </div>
-            <div className="flex items-start gap-2 pt-2">
-              <MapPin className="w-4 h-4 text-gray-400 mt-0.5" />
-              <span className="text-sm text-gray-600">123 Mombasa Road, Industrial Area, Nairobi, Kenya</span>
-            </div>
+            {org?.email && (
+              <div className="flex items-center gap-2">
+                <Mail className="w-4 h-4 text-gray-400" />
+                <span className="text-sm text-gray-600">{org.email}</span>
+              </div>
+            )}
+            {org?.website && (
+              <div className="flex items-center gap-2">
+                <Globe className="w-4 h-4 text-gray-400" />
+                <a href={org.website} target="_blank" rel="noopener noreferrer" className="text-sm text-primary-600 hover:underline">
+                  {org.website}
+                </a>
+              </div>
+            )}
+            {org?.phone && (
+              <div className="flex items-center gap-2">
+                <Phone className="w-4 h-4 text-gray-400" />
+                <span className="text-sm text-gray-600">{org.phone}</span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -76,22 +176,16 @@ export function OrganizationPage() {
         <div className="card">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Verification Status</h3>
           <div className="space-y-3">
-            {[
-              { label: 'Business Registration', status: 'verified' },
-              { label: 'Physical Site Verified', status: 'verified' },
-              { label: 'Banking Verified', status: 'verified' },
-              { label: 'Trade References', status: 'verified' },
-              { label: 'Organic Certification', status: 'pending' },
-            ].map((item) => (
+            {verificationItems.map((item) => (
               <div key={item.label} className="flex items-center justify-between">
                 <span className="text-gray-700">{item.label}</span>
                 {item.status === 'verified' ? (
-                  <span className="badge-success flex items-center gap-1">
+                  <span className="badge bg-green-100 text-green-800 flex items-center gap-1">
                     <Award className="w-3 h-3" />
                     Verified
                   </span>
                 ) : (
-                  <span className="badge-warning">Pending Review</span>
+                  <span className="badge bg-amber-100 text-amber-800">Pending Review</span>
                 )}
               </div>
             ))}
@@ -106,24 +200,31 @@ export function OrganizationPage() {
           <button className="btn-secondary text-sm">Invite Member</button>
         </div>
         <div className="space-y-3">
-          {[
-            { name: 'Jane Doe', role: 'Owner', email: 'jane@nairobicoffee.co.ke' },
-            { name: 'John Smith', role: 'Operations Manager', email: 'john@nairobicoffee.co.ke' },
-            { name: 'Sarah Kimani', role: 'Compliance Officer', email: 'sarah@nairobicoffee.co.ke' },
-          ].map((member) => (
-            <div key={member.email} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center">
-                  <Users className="w-4 h-4 text-gray-500" />
+          {members.length === 0 ? (
+            <p className="text-sm text-gray-500 py-4">No team members yet</p>
+          ) : (
+            members.map((member) => (
+              <div key={member.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center">
+                    <Users className="w-4 h-4 text-gray-500" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900">
+                      {member.user?.firstName} {member.user?.lastName}
+                    </p>
+                    <p className="text-sm text-gray-500">{member.user?.email}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-medium text-gray-900">{member.name}</p>
-                  <p className="text-sm text-gray-500">{member.email}</p>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-600 capitalize">{member.role.replace('_', ' ')}</span>
+                  {member.isPrimaryContact && (
+                    <span className="badge bg-primary-100 text-primary-700 text-xs">Primary</span>
+                  )}
                 </div>
               </div>
-              <span className="text-sm text-gray-600">{member.role}</span>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
     </div>

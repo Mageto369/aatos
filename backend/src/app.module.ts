@@ -9,6 +9,9 @@ import { DealsModule } from './deals/deals.module';
 import { MessagesModule } from './messages/messages.module';
 import { ComplianceModule } from './compliance/compliance.module';
 import { DocumentsModule } from './documents/documents.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { InspectionsModule } from './inspections/inspections.module';
+import { UploadModule } from './upload/upload.module';
 import { CommonModule } from './common/common.module';
 import * as Joi from 'joi';
 
@@ -27,6 +30,8 @@ import * as Joi from 'joi';
         JWT_REFRESH_SECRET: Joi.string().required(),
         AWS_S3_BUCKET: Joi.string().default('aatos-documents'),
         AWS_REGION: Joi.string().default('us-east-1'),
+        AWS_ACCESS_KEY_ID: Joi.string().optional(),
+        AWS_SECRET_ACCESS_KEY: Joi.string().optional(),
       }),
     }),
     DatabaseModule,
@@ -39,6 +44,9 @@ import * as Joi from 'joi';
     MessagesModule,
     ComplianceModule,
     DocumentsModule,
+    NotificationsModule,
+    InspectionsModule,
+    UploadModule,
   ],
 })
 export class AppModule {}
