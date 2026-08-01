@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
+import { io, Socket } from 'socket.io-client'
 import { ArrowLeft, Send, Paperclip, CheckCircle, Clock, Circle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores/authStore'
@@ -41,7 +42,7 @@ export function DealRoomPage() {
   const [inputValue, setInputValue] = useState('')
   const [isConnected, setIsConnected] = useState(false)
   const [typingUsers, setTypingUsers] = useState<string[]>([])
-  const socketRef = useRef<WebSocket | null>(null)
+  const socketRef = useRef<Socket | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout>>()
 
@@ -57,50 +58,42 @@ export function DealRoomPage() {
   useEffect(() => {
     if (!id || !token) return
 
-    const wsUrl = `${import.meta.env.VITE_WS_URL || 'ws://localhost:4000'}/messages`
-    const socket = new WebSocket(wsUrl)
+    const wsUrl = import.meta.env.VITE_WS_URL || 'http://localhost:4000'
+    const socket = io(`${wsUrl}/messages`, {
+      auth: { token },
+      transports: ['websocket'],
+    })
     socketRef.current = socket
 
-    socket.onopen = () => {
+    socket.on('connect', () => {
       setIsConnected(true)
-      socket.send(JSON.stringify({
-        event: 'authenticate',
-        data: { token, userId: user?.id, orgId: user?.orgId },
-      }))
-      socket.send(JSON.stringify({
-        event: 'join_deal_room',
-        data: { dealId: id },
-      }))
-    }
+      socket.emit('authenticate', { token, userId: user?.id, orgId: user?.orgId })
+      socket.emit('join_deal_room', { dealId: id })
+    })
 
-    socket.onmessage = (event) => {
-      const { event: evt, data } = JSON.parse(event.data)
-      switch (evt) {
-        case 'message_history':
-          setMessages(data.messages)
-          break
-        case 'new_message':
-          setMessages((prev) => [...prev, data])
-          break
-        case 'user_typing':
-          if (data.isTyping) {
-            setTypingUsers((prev) => [...new Set([...prev, data.userId])])
-          } else {
-            setTypingUsers((prev) => prev.filter((u) => u !== data.userId))
-          }
-          break
-      }
-    }
-
-    socket.onclose = () => {
+    socket.on('disconnect', () => {
       setIsConnected(false)
-    }
+    })
+
+    socket.on('message_history', (data: { dealId: string; messages: Message[] }) => {
+      setMessages(data.messages)
+    })
+
+    socket.on('new_message', (msg: Message) => {
+      setMessages((prev) => [...prev, msg])
+    })
+
+    socket.on('user_typing', (data: { userId: string; isTyping: boolean }) => {
+      if (data.isTyping) {
+        setTypingUsers((prev) => [...new Set([...prev, data.userId])])
+      } else {
+        setTypingUsers((prev) => prev.filter((u) => u !== data.userId))
+      }
+    })
 
     return () => {
-      if (socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify({ event: 'leave_deal_room', data: { dealId: id } }))
-      }
-      socket.close()
+      socket.emit('leave_deal_room', { dealId: id })
+      socket.disconnect()
     }
   }, [id, token, user])
 
@@ -110,25 +103,16 @@ export function DealRoomPage() {
 
   const handleSend = () => {
     if (!inputValue.trim() || !socketRef.current) return
-    socketRef.current.send(JSON.stringify({
-      event: 'send_message',
-      data: { dealId: id, content: inputValue.trim() },
-    }))
+    socketRef.current.emit('send_message', { dealId: id, content: inputValue.trim() })
     setInputValue('')
   }
 
   const handleTyping = () => {
     if (!socketRef.current) return
-    socketRef.current.send(JSON.stringify({
-      event: 'typing',
-      data: { dealId: id, isTyping: true },
-    }))
+    socketRef.current.emit('typing', { dealId: id, isTyping: true })
     clearTimeout(typingTimeoutRef.current)
     typingTimeoutRef.current = setTimeout(() => {
-      socketRef.current?.send(JSON.stringify({
-        event: 'typing',
-        data: { dealId: id, isTyping: false },
-      }))
+      socketRef.current?.emit('typing', { dealId: id, isTyping: false })
     }, 2000)
   }
 

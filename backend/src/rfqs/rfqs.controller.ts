@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Query, UseGuards, Request, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query, UseGuards, Request, Patch, ForbiddenException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { RfqsService } from './rfqs.service';
@@ -13,22 +13,22 @@ export class RfqsController {
   @Post()
   @ApiOperation({ summary: 'Create a new RFQ' })
   create(@Body() data: any, @Request() req) {
-    const orgId = req.headers['x-organization-id'];
-    return this.rfqsService.create(req.user.userId, orgId, data);
+    if (!req.user.orgId) {
+      throw new ForbiddenException('User must belong to an organization');
+    }
+    return this.rfqsService.create(req.user.userId, req.user.orgId, data);
   }
 
   @Post(':id/publish')
   @ApiOperation({ summary: 'Publish an RFQ' })
   publish(@Param('id') id: string, @Request() req) {
-    const orgId = req.headers['x-organization-id'];
-    return this.rfqsService.publish(id, orgId);
+    return this.rfqsService.publish(id, req.user.orgId);
   }
 
   @Get()
   @ApiOperation({ summary: 'List RFQs' })
   findAll(@Query() filters, @Request() req) {
-    const orgId = req.headers['x-organization-id'];
-    return this.rfqsService.findAll({ ...filters, orgId });
+    return this.rfqsService.findAll({ ...filters, orgId: req.user.orgId });
   }
 
   @Get(':id')
@@ -40,8 +40,10 @@ export class RfqsController {
   @Post(':id/quotes')
   @ApiOperation({ summary: 'Submit a quotation' })
   createQuotation(@Param('id') id: string, @Body() data: any, @Request() req) {
-    const orgId = req.headers['x-organization-id'];
-    return this.rfqsService.createQuotation(id, orgId, req.user.userId, data);
+    if (!req.user.orgId) {
+      throw new ForbiddenException('User must belong to an organization');
+    }
+    return this.rfqsService.createQuotation(id, req.user.orgId, req.user.userId, data);
   }
 
   @Get(':id/quotes')

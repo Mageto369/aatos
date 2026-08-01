@@ -6,26 +6,41 @@
 ## What's Been Built
 
 ### Backend (NestJS)
-| Module | Status | Files |
-|---|---|---|
-| Auth | ✅ Complete | JWT strategy, login/register, guards |
-| Organizations | ✅ Complete | CRUD, members, verification |
-| Products | ✅ Complete | CRUD, search, filtering |
-| RFQs | ✅ Complete | Create, publish, quotes |
-| Deals | ✅ Complete | Deal rooms, milestones |
-| Messages | ✅ Complete | Real-time messaging |
-| Compliance | ✅ Complete | Rules engine, checklists |
-| Database | ✅ Complete | TypeORM, PostgreSQL |
-| Common | ✅ Complete | Interceptors, filters, guards |
+| Module | Status | Files | Key Features |
+|---|---|---|---|
+| Auth | ✅ Complete | JWT strategy, login/register, guards, /me endpoint | bcrypt, login lockout (5 attempts), refresh tokens, orgId extraction from membership |
+| Organizations | ✅ Complete | CRUD, members, verification | Cursor pagination, full-text search, slug generation |
+| Products | ✅ Complete | CRUD, search, filtering | JSONB attributes, soft deletes, categories |
+| RFQs | ✅ Complete | Create, publish, quotes | org-scoped queries, quote counting |
+| Deals | ✅ Complete | Deal rooms, milestones | 1% platform fee calc, milestone pipeline, org auth |
+| Messages | ✅ Complete | Entity + REST + **WebSocket Gateway** | Real-time deal rooms, typing indicators, presence, message history |
+| Compliance | ✅ Complete | Rules engine, checklists | Rule-based checklist generation |
+| Documents | ✅ Complete | Entity + service + controller | S3-ready, versioning, type classification, AI fields |
+| Database | ✅ Complete | TypeORM, PostgreSQL | 22 tables, 60+ indexes |
+| Common | ✅ Complete | Interceptors, filters, guards | Transform interceptor, HTTP exception filter |
 
 ### Frontend (React + Vite + Tailwind)
-| Page | Status |
+| Page | Status | Features |
+|---|---|---|
+| Login | ✅ Complete | Branding panel, form validation, auth store integration |
+| Register | ✅ Complete | Full registration form, validation, password confirmation |
+| Dashboard | ✅ Complete | Stats cards, activity feed layout |
+| Products | ✅ Complete | Product grid, search, filters |
+| RFQs | ✅ Complete | List view, search/filter by status, pagination |
+| RFQ Create | ✅ Complete | Full form: category, quantity, pricing, delivery, payment terms |
+| Deals | ✅ Complete | Real API data, status filtering, progress bars, milestone badges, links to deal rooms |
+| Deal Room | ✅ Complete | **Real-time WebSocket chat** via Socket.IO, typing indicators, deal info sidebar, milestones |
+| Organization | ✅ Complete | Profile, members, verification |
+| Documents | ✅ Complete | Table view, type/status filters, search, download links |
+
+### Auth System
+| Component | Status |
 |---|---|
-| Login | ✅ Complete |
-| Dashboard | ✅ Complete |
-| Products | ✅ Complete |
-| Deals | ✅ Complete |
-| Organization | ✅ Complete |
+| Zustand auth store | ✅ With localStorage persist |
+| ProtectedRoute guard | ✅ Redirects unauthenticated to /login |
+| JWT token refresh | ✅ API interceptors with auto-logout on 401 |
+| User profile in TopBar | ✅ Display name, email, logout button |
+| orgId in JWT payload | ✅ Extracted from organization_members table |
 
 ### Infrastructure
 | Component | Status |
@@ -34,21 +49,22 @@
 | Seed Data | ✅ 8 products, 9 orgs, 8 rules |
 | Docker Compose | ✅ Dev + Production |
 | CI/CD (GitHub Actions) | ✅ Backend, Frontend, DB tests |
-| API Documentation | ✅ Swagger/OpenAPI |
+| API Documentation | ✅ Swagger/OpenAPI at /api/docs |
+| WebSocket Gateway | ✅ Socket.IO namespace /messages |
 
-## File Count
-- **Backend:** 35+ TypeScript files
-- **Frontend:** 15+ React components
+### File Count
+- **Backend:** 40+ TypeScript files
+- **Frontend:** 20+ React components/pages
 - **Database:** 2 SQL files (schema + seed)
 - **Documentation:** 6 markdown files
-- **Total Lines:** ~10,000+
+- **Total Lines:** ~12,000+
 
 ## Next Development Priorities
-1. WebSocket gateway for real-time deal rooms
-2. Document upload with S3 integration
-3. AI document processing microservice (Python)
-4. Inspection booking workflow
-5. Payment/escrow integration
-6. Advanced search with Elasticsearch
-7. Mobile responsive optimization
-8. Testing suite (unit + e2e)
+1. **S3 Document Upload** — Connect Documents module to actual S3 storage
+2. **AI Document Processing** — Python FastAPI microservice for OCR/classification
+3. **Inspection Booking Workflow** — Schedule inspections, track results
+4. **Payment/Escrow Integration** — Milestone-based payment release
+5. **Advanced Search** — Elasticsearch for products and deals
+6. **Mobile Responsive** — Optimize all pages for mobile
+7. **Testing Suite** — Unit + e2e tests
+8. **Notifications** — Email, SMS, in-app notification system

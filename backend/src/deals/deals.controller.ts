@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Param, Query, UseGuards, Request, ForbiddenException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { DealsService } from './deals.service';
@@ -14,21 +14,28 @@ export class DealsController {
   @Post()
   @ApiOperation({ summary: 'Create a new deal' })
   @ApiResponse({ status: 201, description: 'Deal created' })
-  create(@Body() dto: CreateDealDto) {
+  create(@Body() dto: CreateDealDto, @Request() req) {
+    if (!req.user.orgId) {
+      throw new ForbiddenException('User must belong to an organization');
+    }
     return this.dealsService.create(dto);
   }
 
   @Get()
   @ApiOperation({ summary: 'List deals for organization' })
   findAll(@Query() filters, @Request() req) {
-    const orgId = req.headers['x-organization-id'];
-    return this.dealsService.findAll({ ...filters, orgId });
+    return this.dealsService.findAll({ ...filters, orgId: req.user.orgId });
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get deal details' })
-  findOne(@Param('id') id: string) {
-    return this.dealsService.findOne(id);
+  async findOne(@Param('id') id: string, @Request() req) {
+    const deal = await this.dealsService.findOne(id);
+    // Authorization check
+    if (deal.buyerOrgId !== req.user.orgId && deal.supplierOrgId !== req.user.orgId) {
+      throw new ForbiddenException('Not authorized to view this deal');
+    }
+    return deal;
   }
 
   @Patch(':id/milestones/:milestoneId')
@@ -39,7 +46,6 @@ export class DealsController {
     @Body() dto: UpdateMilestoneDto,
     @Request() req,
   ) {
-    const orgId = req.headers['x-organization-id'];
-    return this.dealsService.updateMilestone(dealId, milestoneId, orgId, dto);
+    return this.dealsService.updateMilestone(dealId, milestoneId, req.user.orgId, dto);
   }
 }
