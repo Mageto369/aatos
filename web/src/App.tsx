@@ -11,6 +11,7 @@ import { RfqsPage } from '@/pages/RfqsPage'
 import { RfqCreatePage } from '@/pages/RfqCreatePage'
 import { DealRoomPage } from '@/pages/DealRoomPage'
 import { DocumentsPage } from '@/pages/DocumentsPage'
+import { InspectionsPage } from '@/pages/InspectionsPage'
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
                 <Route path="/deals/:id" element={<DealRoomPage />} />
                 <Route path="/organization" element={<OrganizationPage />} />
                 <Route path="/documents" element={<DocumentsPage />} />
+                <Route path="/inspections" element={<InspectionsPage />} />
               </Routes>
             </AppShell>
           </ProtectedRoute>

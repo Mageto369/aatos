@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Upload, FileText, Search, Download, Trash2, Shield, CheckCircle, Clock } from 'lucide-react'
+import { Upload, FileText, Search, Download, Trash2, X, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import api from '@/lib/api'
 
@@ -47,6 +47,12 @@ export function DocumentsPage() {
   const [search, setSearch] = useState('')
   const [typeFilter, setTypeFilter] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
+  const [showUploadModal, setShowUploadModal] = useState(false)
+  const [uploadFile, setUploadFile] = useState<File | null>(null)
+  const [uploadTitle, setUploadTitle] = useState('')
+  const [uploadType, setUploadType] = useState('other')
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const queryClient = useQueryClient()
 
   const { data, isLoading } = useQuery({
@@ -68,6 +74,48 @@ export function DocumentsPage() {
     },
   })
 
+  const uploadMutation = useMutation({
+    mutationFn: async () => {
+      if (!uploadFile) return
+
+      // 1. Get presigned URL
+      const presignedRes = await api.post('/upload/presigned-url', {
+        fileName: uploadFile.name,
+        mimeType: uploadFile.type,
+      })
+      const { uploadUrl, fileUrl, key } = presignedRes.data
+
+      // 2. Upload to S3 (or mock endpoint)
+      setUploadProgress(50)
+      await fetch(uploadUrl, {
+        method: 'PUT',
+        body: uploadFile,
+        headers: { 'Content-Type': uploadFile.type },
+      })
+      setUploadProgress(100)
+
+      // 3. Create document record
+      await api.post('/documents', {
+        title: uploadTitle || uploadFile.name,
+        documentType: uploadType,
+        originalFilename: uploadFile.name,
+        mimeType: uploadFile.type,
+        fileSizeBytes: uploadFile.size,
+        s3Key: key,
+        s3Url: fileUrl,
+        status: 'draft',
+      })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['documents'] })
+      setShowUploadModal(false)
+      setUploadFile(null)
+      setUploadTitle('')
+      setUploadType('other')
+      setUploadProgress(0)
+    },
+  })
+
   const docs: DocumentItem[] = data?.items || []
 
   const filtered = docs.filter((d) =>
@@ -82,11 +130,13 @@ export function DocumentsPage() {
           <h1 className="text-2xl font-bold text-gray-900">Document Vault</h1>
           <p className="text-gray-600 mt-1">Securely store and manage your trade documents</p>
         </div>
-        <label className="btn-primary flex items-center gap-2 cursor-pointer">
+        <button
+          onClick={() => setShowUploadModal(true)}
+          className="btn-primary flex items-center gap-2"
+        >
           <Upload className="w-4 h-4" />
           Upload Document
-          <input type="file" className="hidden" />
-        </label>
+        </button>
       </div>
 
       <div className="flex gap-4">
@@ -204,6 +254,118 @@ export function DocumentsPage() {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Upload Modal */}
+      {showUploadModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl w-full max-w-lg mx-4 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Upload Document</h2>
+              <button
+                onClick={() => setShowUploadModal(false)}
+                className="p-1 text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {!uploadFile ? (
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:border-primary-500 hover:bg-primary-50 transition-colors"
+              >
+                <Upload className="w-10 h-10 text-gray-400 mx-auto mb-3" />
+                <p className="text-sm font-medium text-gray-700">Click to select a file</p>
+                <p className="text-xs text-gray-500 mt-1">PDF, DOC, XLS, JPG up to 50MB</p>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  className="hidden"
+                  onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
+                />
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                  <FileText className="w-8 h-8 text-primary-600" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">{uploadFile.name}</p>
+                    <p className="text-xs text-gray-500">{formatBytes(uploadFile.size)}</p>
+                  </div>
+                  <button
+                    onClick={() => setUploadFile(null)}
+                    className="p-1 text-gray-400 hover:text-red-600"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Title</label>
+                  <input
+                    type="text"
+                    value={uploadTitle}
+                    onChange={(e) => setUploadTitle(e.target.value)}
+                    placeholder={uploadFile.name}
+                    className="input w-full"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Document Type</label>
+                  <select
+                    value={uploadType}
+                    onChange={(e) => setUploadType(e.target.value)}
+                    className="input w-full"
+                  >
+                    {Object.entries(typeLabels).map(([key, label]) => (
+                      <option key={key} value={key}>{label}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {uploadProgress > 0 && uploadProgress < 100 && (
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className="bg-primary-500 h-2 rounded-full transition-all"
+                      style={{ width: `${uploadProgress}%` }}
+                    />
+                  </div>
+                )}
+
+                <div className="flex gap-4 pt-2">
+                  <button
+                    onClick={() => {
+                      setUploadFile(null)
+                      setShowUploadModal(false)
+                    }}
+                    className="btn-secondary flex-1"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => uploadMutation.mutate()}
+                    disabled={uploadMutation.isPending}
+                    className="btn-primary flex-1 flex items-center justify-center gap-2"
+                  >
+                    {uploadMutation.isPending ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Uploading...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-4 h-4" />
+                        Upload
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

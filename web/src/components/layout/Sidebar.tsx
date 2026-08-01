@@ -6,6 +6,7 @@ import {
   Handshake,
   Building2,
   FileText,
+  ClipboardCheck,
   Settings,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -15,6 +16,7 @@ const navigation = [
   { name: 'Products', href: '/products', icon: Package },
   { name: 'RFQs', href: '/rfqs', icon: FileQuestion },
   { name: 'Deals', href: '/deals', icon: Handshake },
+  { name: 'Inspections', href: '/inspections', icon: ClipboardCheck },
   { name: 'Organization', href: '/organization', icon: Building2 },
   { name: 'Documents', href: '/documents', icon: FileText },
   { name: 'Settings', href: '/settings', icon: Settings },
