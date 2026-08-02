@@ -1,0 +1,29 @@
+{
+  "version": 2,
+  "github": {
+    "enabled": true,
+    "autoAlias": true
+  },
+  "builds": [
+    {
+      "src": "web/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "web/dist/index.html"
+    }
+  ],
+  "env": {
+    "VITE_API_URL": "@aatos_api_url",
+    "VITE_WS_URL": "@aatos_ws_url"
+  }
+}
