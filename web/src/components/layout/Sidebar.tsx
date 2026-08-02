@@ -7,6 +7,7 @@ import {
   Building2,
   FileText,
   ClipboardCheck,
+  CreditCard,
   Settings,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -17,6 +18,7 @@ const navigation = [
   { name: 'RFQs', href: '/rfqs', icon: FileQuestion },
   { name: 'Deals', href: '/deals', icon: Handshake },
   { name: 'Inspections', href: '/inspections', icon: ClipboardCheck },
+  { name: 'Payments', href: '/payments', icon: CreditCard },
   { name: 'Organization', href: '/organization', icon: Building2 },
   { name: 'Documents', href: '/documents', icon: FileText },
   { name: 'Settings', href: '/settings', icon: Settings },
