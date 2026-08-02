@@ -32,11 +32,11 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Idempotency-Key'],
   });
 
-  // API Versioning
-  app.enableVersioning({
-    type: VersioningType.URI,
-    defaultVersion: '1',
-  });
+  // API Versioning (disabled - all routes are unversioned for v1)
+  // app.enableVersioning({
+  //   type: VersioningType.URI,
+  //   defaultVersion: '1',
+  // });
 
   // Global validation
   app.useGlobalPipe(new ValidationPipe({

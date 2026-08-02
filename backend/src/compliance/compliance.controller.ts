@@ -1,9 +1,12 @@
-import { Controller, Get, Post, Body, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { Controller, Get, Post, Body, Query, UseGuards, Request } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 import { ComplianceService } from './compliance.service';
 
 @ApiTags('Compliance')
 @Controller('compliance')
+@UseGuards(AuthGuard('jwt'))
+@ApiBearerAuth('access-token')
 export class ComplianceController {
   constructor(private readonly complianceService: ComplianceService) {}
 

@@ -1,18 +1,19 @@
 import { Controller, Get, Post, Patch, Delete, Body, Param, Query, Req, UseGuards, ParseIntPipe, DefaultValuePipe } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 import { DocumentsService } from './documents.service';
-import { JwtAuthGuard } from '../auth/jwt.strategy';
+import { CreateDocumentDto, UpdateDocumentDto } from './dto';
 
 @ApiTags('Documents')
 @ApiBearerAuth('access-token')
-@UseGuards(JwtAuthGuard)
+@UseGuards(AuthGuard('jwt'))
 @Controller('documents')
 export class DocumentsController {
   constructor(private readonly documentsService: DocumentsService) {}
 
   @Post()
   @ApiOperation({ summary: 'Create a document record' })
-  async create(@Body() data: any, @Req() req) {
+  async create(@Body() data: CreateDocumentDto, @Req() req) {
     return this.documentsService.create(req.user.orgId, req.user.userId, data);
   }
 
@@ -49,7 +50,7 @@ export class DocumentsController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update document metadata' })
-  async update(@Param('id') id: string, @Body() data: any, @Req() req) {
+  async update(@Param('id') id: string, @Body() data: UpdateDocumentDto, @Req() req) {
     return this.documentsService.update(id, req.user.orgId, data);
   }
 

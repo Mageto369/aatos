@@ -2,6 +2,7 @@ import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards, Re
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { InspectionsService } from './inspections.service';
+import { CreateInspectionDto, UpdateInspectionDto } from './dto';
 
 @ApiTags('Inspections')
 @Controller('inspections')
@@ -12,7 +13,7 @@ export class InspectionsController {
 
   @Post()
   @ApiOperation({ summary: 'Request a new inspection' })
-  async create(@Body() data: any, @Request() req) {
+  async create(@Body() data: CreateInspectionDto, @Request() req) {
     return this.inspectionsService.create(req.user.orgId, req.user.userId, data);
   }
 
@@ -46,11 +47,10 @@ export class InspectionsController {
   @ApiOperation({ summary: 'Update inspection status' })
   async updateStatus(
     @Param('id') id: string,
-    @Body('status') status: string,
-    @Body() data: any,
+    @Body() data: UpdateInspectionDto,
     @Request() req,
   ) {
-    return this.inspectionsService.updateStatus(id, req.user.orgId, status, data);
+    return this.inspectionsService.updateStatus(id, req.user.orgId, data.status || '', data);
   }
 
   @Delete(':id')

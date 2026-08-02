@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query, UseGuards, Request, Patch, Delete, ParseIntPipe, DefaultValuePipe } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { MessagesService } from './messages.service';
@@ -16,8 +16,7 @@ export class MessagesController {
     @Body() data: { dealId?: string; rfqId?: string; content: string; messageType?: string },
     @Request() req,
   ) {
-    const orgId = req.headers['x-organization-id'];
-    return this.messagesService.createMessage(orgId, req.user.userId, data);
+    return this.messagesService.createMessage(req.user.orgId, req.user.userId, data);
   }
 
   @Get('deal/:dealId')
@@ -25,7 +24,7 @@ export class MessagesController {
   async getDealMessages(
     @Param('dealId') dealId: string,
     @Query('cursor') cursor?: string,
-    @Query('limit') limit?: number,
+    @Query('limit', new DefaultValuePipe(50), ParseIntPipe) limit?: number,
   ) {
     return this.messagesService.getDealMessages(dealId, cursor, limit);
   }
