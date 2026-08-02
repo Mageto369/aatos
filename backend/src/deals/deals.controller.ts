@@ -2,6 +2,7 @@ import { Controller, Get, Post, Patch, Body, Param, Query, UseGuards, Request, F
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { DealsService } from './deals.service';
+import { WorkflowService } from '../workflows/workflows.service';
 import { CreateDealDto, UpdateMilestoneDto } from './dto';
 
 @ApiTags('Deals')
@@ -9,7 +10,10 @@ import { CreateDealDto, UpdateMilestoneDto } from './dto';
 @UseGuards(AuthGuard('jwt'))
 @ApiBearerAuth('access-token')
 export class DealsController {
-  constructor(private readonly dealsService: DealsService) {}
+  constructor(
+    private readonly dealsService: DealsService,
+    private readonly workflowService: WorkflowService,
+  ) {}
 
   @Post()
   @ApiOperation({ summary: 'Create a new deal' })
@@ -40,12 +44,17 @@ export class DealsController {
 
   @Patch(':id/milestones/:milestoneId')
   @ApiOperation({ summary: 'Update milestone status' })
-  updateMilestone(
+  async updateMilestone(
     @Param('id') dealId: string,
     @Param('milestoneId') milestoneId: string,
     @Body() dto: UpdateMilestoneDto,
     @Request() req,
   ) {
-    return this.dealsService.updateMilestone(dealId, milestoneId, req.user.orgId, dto);
+    const milestone = await this.dealsService.updateMilestone(dealId, milestoneId, req.user.orgId, dto);
+    // Trigger workflow for completed milestones (payment releases, status transitions)
+    if (dto.status === 'completed') {
+      this.workflowService.onMilestoneCompleted(milestoneId).catch(console.error);
+    }
+    return milestone;
   }
 }

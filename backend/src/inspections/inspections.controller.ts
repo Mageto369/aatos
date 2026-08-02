@@ -2,6 +2,7 @@ import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards, Re
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { InspectionsService } from './inspections.service';
+import { WorkflowService } from '../workflows/workflows.service';
 import { CreateInspectionDto, UpdateInspectionDto } from './dto';
 
 @ApiTags('Inspections')
@@ -9,7 +10,10 @@ import { CreateInspectionDto, UpdateInspectionDto } from './dto';
 @UseGuards(AuthGuard('jwt'))
 @ApiBearerAuth('access-token')
 export class InspectionsController {
-  constructor(private readonly inspectionsService: InspectionsService) {}
+  constructor(
+    private readonly inspectionsService: InspectionsService,
+    private readonly workflowService: WorkflowService,
+  ) {}
 
   @Post()
   @ApiOperation({ summary: 'Request a new inspection' })
@@ -50,7 +54,12 @@ export class InspectionsController {
     @Body() data: UpdateInspectionDto,
     @Request() req,
   ) {
-    return this.inspectionsService.updateStatus(id, req.user.orgId, data.status || '', data);
+    const result = await this.inspectionsService.updateStatus(id, req.user.orgId, data.status || '', data);
+    // Trigger workflow if inspection passed — auto-advances deal milestone
+    if (data.status === 'pass' || data.status === 'fail') {
+      this.workflowService.onInspectionCompleted(id, data.status).catch(console.error);
+    }
+    return result;
   }
 
   @Delete(':id')

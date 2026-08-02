@@ -2,13 +2,17 @@ import { Controller, Get, Post, Body, Param, Query, UseGuards, Request, Patch, F
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { RfqsService } from './rfqs.service';
+import { WorkflowService } from '../workflows/workflows.service';
 
 @ApiTags('RFQs')
 @Controller('rfqs')
 @UseGuards(AuthGuard('jwt'))
 @ApiBearerAuth('access-token')
 export class RfqsController {
-  constructor(private readonly rfqsService: RfqsService) {}
+  constructor(
+    private readonly rfqsService: RfqsService,
+    private readonly workflowService: WorkflowService,
+  ) {}
 
   @Post()
   @ApiOperation({ summary: 'Create a new RFQ' })
@@ -21,8 +25,11 @@ export class RfqsController {
 
   @Post(':id/publish')
   @ApiOperation({ summary: 'Publish an RFQ' })
-  publish(@Param('id') id: string, @Request() req) {
-    return this.rfqsService.publish(id, req.user.orgId);
+  async publish(@Param('id') id: string, @Request() req) {
+    const result = await this.rfqsService.publish(id, req.user.orgId);
+    // Trigger workflow: find matching suppliers and send notifications
+    this.workflowService.onRfqPublished(id).catch(console.error);
+    return result;
   }
 
   @Get()
@@ -44,6 +51,21 @@ export class RfqsController {
       throw new ForbiddenException('User must belong to an organization');
     }
     return this.rfqsService.createQuotation(id, req.user.orgId, req.user.userId, data);
+  }
+
+  @Post(':id/quotes/:quoteId/accept')
+  @ApiOperation({ summary: 'Accept a quotation and create a deal' })
+  async acceptQuote(
+    @Param('id') rfqId: string,
+    @Param('quoteId') quoteId: string,
+    @Request() req,
+  ) {
+    if (!req.user.orgId) {
+      throw new ForbiddenException('User must belong to an organization');
+    }
+    // Trigger the full deal creation workflow
+    const deal = await this.workflowService.onQuoteAccepted(quoteId);
+    return { success: true, dealId: deal.id, message: 'Quotation accepted. Deal created.' };
   }
 
   @Get(':id/quotes')

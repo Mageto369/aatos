@@ -122,7 +122,8 @@ cf6f371 feat: Auth system, WebSocket deal rooms, Document Vault, RFQ pages
 
 ## Total File Count
 - **Backend:** 66 TypeScript files
-- **Frontend:** 23 React/TS files  
+- **Frontend:** 23 React/TS files
+- **Workflows:** Trade lifecycle engine (RFQ→Deal→Milestone→Payment)
 - **Database:** 2 SQL files (schema + seed)
 - **Documentation:** 6 markdown files
 - **Config:** Docker, CI/CD, package configs

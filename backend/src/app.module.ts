@@ -13,6 +13,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { InspectionsModule } from './inspections/inspections.module';
 import { UploadModule } from './upload/upload.module';
 import { PaymentsModule } from './payments/payments.module';
+import { WorkflowsModule } from './workflows/workflows.module';
 import { CommonModule } from './common/common.module';
 import * as Joi from 'joi';
 
@@ -49,6 +50,7 @@ import * as Joi from 'joi';
     InspectionsModule,
     UploadModule,
     PaymentsModule,
+    WorkflowsModule,
   ],
 })
 export class AppModule {}
