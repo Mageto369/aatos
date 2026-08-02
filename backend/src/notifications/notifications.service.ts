@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, LessThan } from 'typeorm';
 import { Notification } from './entities/notification.entity';
@@ -18,11 +18,10 @@ export class NotificationsService {
   async findAll(userId: string, options: { unreadOnly?: boolean; limit?: number; offset?: number }) {
     const qb = this.notifRepo.createQueryBuilder('n')
       .where('n.recipientUserId = :userId', { userId })
-      .andWhere('n.deletedAt IS NULL')
-      .andWhere('n.dismissedAt IS NULL');
+      .andWhere('n.isArchived = false');
 
     if (options.unreadOnly) {
-      qb.andWhere('n.readAt IS NULL');
+      qb.andWhere('n.isRead = false');
     }
 
     qb.orderBy('n.createdAt', 'DESC');
@@ -31,7 +30,7 @@ export class NotificationsService {
 
     const [items, total] = await qb.getManyAndCount();
     const unreadCount = await this.notifRepo.count({
-      where: { recipientUserId: userId, readAt: null, deletedAt: null },
+      where: { recipientUserId: userId, isRead: false, isArchived: false },
     });
 
     return { items, total, unreadCount };
@@ -39,26 +38,27 @@ export class NotificationsService {
 
   async markRead(id: string, userId: string): Promise<Notification> {
     const notif = await this.notifRepo.findOne({
-      where: { id, recipientUserId: userId, deletedAt: null },
+      where: { id, recipientUserId: userId },
     });
     if (!notif) {
-      throw new Error('Notification not found');
+      throw new NotFoundException('Notification not found');
     }
+    notif.isRead = true;
     notif.readAt = new Date();
     return this.notifRepo.save(notif);
   }
 
   async markAllRead(userId: string): Promise<void> {
     await this.notifRepo.update(
-      { recipientUserId: userId, readAt: null, deletedAt: null },
-      { readAt: new Date() },
+      { recipientUserId: userId, isRead: false },
+      { isRead: true, readAt: new Date() },
     );
   }
 
   async dismiss(id: string, userId: string): Promise<void> {
     await this.notifRepo.update(
       { id, recipientUserId: userId },
-      { dismissedAt: new Date() },
+      { isArchived: true },
     );
   }
 

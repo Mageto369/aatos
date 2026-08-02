@@ -15,8 +15,7 @@ export class DocumentsService {
       ...data,
       organizationId: orgId,
       uploadedByUserId: userId,
-      status: 'draft',
-      versionNumber: 1,
+      status: 'uploaded',
     });
     return this.docRepo.save(doc);
   }
@@ -27,10 +26,13 @@ export class DocumentsService {
       .andWhere('d.deletedAt IS NULL');
 
     if (filters.dealId) {
-      qb.andWhere('d.dealId = :dealId', { dealId: filters.dealId });
+      qb.andWhere('d.relatedEntityId = :dealId AND d.relatedEntityType = :relType', {
+        dealId: filters.dealId,
+        relType: 'deal',
+      });
     }
     if (filters.documentType) {
-      qb.andWhere('d.documentType = :type', { type: filters.documentType });
+      qb.andWhere('d.type = :type', { type: filters.documentType });
     }
     if (filters.status) {
       qb.andWhere('d.status = :status', { status: filters.status });
@@ -60,21 +62,11 @@ export class DocumentsService {
   async update(id: string, orgId: string, data: Partial<Document>): Promise<Document> {
     const doc = await this.findOne(id, orgId);
     Object.assign(doc, data);
-    doc.updatedAt = new Date();
     return this.docRepo.save(doc);
   }
 
   async remove(id: string, orgId: string): Promise<void> {
     const doc = await this.findOne(id, orgId);
     await this.docRepo.softRemove(doc);
-  }
-
-  async updateS3Url(id: string, orgId: string, s3Url: string, s3Key: string, fileSize: number, checksum: string): Promise<Document> {
-    const doc = await this.findOne(id, orgId);
-    doc.s3Url = s3Url;
-    doc.s3Key = s3Key;
-    doc.fileSizeBytes = fileSize;
-    doc.checksumSha256 = checksum;
-    return this.docRepo.save(doc);
   }
 }

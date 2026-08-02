@@ -1,68 +1,110 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, Index } from 'typeorm';
 
-export type InspectionType = 'pre_shipment' | 'loading' | 'discharge' | 'destination' | 'quality' | 'quantity' | 'packaging';
-export type InspectionStatus = 'requested' | 'scheduled' | 'in_progress' | 'completed' | 'failed' | 'cancelled';
+export type InspectionType = 'farm' | 'facility' | 'warehouse' | 'packing' | 'port' | 'pre_shipment' | 'destination';
+export type InspectionResult = 'pending' | 'pass' | 'fail' | 'conditional' | 'waiver';
 
 @Entity('inspections')
-@Index(['dealId', 'deletedAt'])
-@Index(['organizationId', 'deletedAt'])
-@Index(['inspectionType', 'deletedAt'])
-@Index(['status', 'deletedAt'])
+@Index(['dealId'])
+@Index(['organizationId'])
+@Index(['inspectionType'])
+@Index(['result'])
 export class Inspection {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'uuid' })
+  @Column({ type: 'uuid', nullable: true, name: 'deal_id' })
   dealId: string;
 
-  @Column({ type: 'uuid' })
+  @Column({ type: 'uuid', nullable: true, name: 'product_id' })
+  productId: string;
+
+  @Column({ type: 'uuid', name: 'organization_id' })
   organizationId: string;
 
-  @Column({ type: 'uuid', nullable: true })
-  requestedByUserId: string;
+  @Column({ type: 'uuid', nullable: true, name: 'inspector_org_id' })
+  inspectorOrgId: string;
 
-  @Column({ type: 'enum', enum: ['pre_shipment', 'loading', 'discharge', 'destination', 'quality', 'quantity', 'packaging'] })
+  @Column({ type: 'uuid', nullable: true, name: 'inspector_user_id' })
+  inspectorUserId: string;
+
+  @Column({
+    type: 'enum',
+    enum: ['farm', 'facility', 'warehouse', 'packing', 'port', 'pre_shipment', 'destination'],
+    name: 'inspection_type',
+  })
   inspectionType: InspectionType;
 
-  @Column({ type: 'enum', enum: ['requested', 'scheduled', 'in_progress', 'completed', 'failed', 'cancelled'], default: 'requested' })
-  status: InspectionStatus;
-
-  @Column({ type: 'varchar', length: 100, nullable: true })
-  inspectorName: string;
-
-  @Column({ type: 'uuid', nullable: true })
-  inspectorOrganizationId: string;
-
-  @Column({ type: 'varchar', length: 200, nullable: true })
-  inspectionLocation: string;
-
-  @Column({ type: 'timestamptz', nullable: true })
+  @Column({ type: 'date', nullable: true, name: 'scheduled_date' })
   scheduledDate: Date;
 
-  @Column({ type: 'timestamptz', nullable: true })
-  completedAt: Date;
+  @Column({ type: 'date', nullable: true, name: 'completed_date' })
+  completedDate: Date;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true, name: 'location' })
+  location: string;
+
+  @Column({
+    type: 'enum',
+    enum: ['pending', 'pass', 'fail', 'conditional', 'waiver'],
+    default: 'pending',
+    name: 'result',
+  })
+  result: InspectionResult;
+
+  @Column({ type: 'text', nullable: true, name: 'findings' })
   findings: string;
 
-  @Column({ type: 'text', nullable: true })
-  notes: string;
+  @Column({ type: 'text', nullable: true, name: 'corrective_actions' })
+  correctiveActions: string;
 
-  @Column({ type: 'jsonb', nullable: true })
-  testResults: Record<string, any>;
+  @Column({ type: 'decimal', precision: 18, scale: 4, nullable: true, name: 'quantity_verified' })
+  quantityVerified: number;
 
-  @Column({ type: 'varchar', length: 50, nullable: true })
-  passFailStatus: string;
+  @Column({ type: 'varchar', length: 50, nullable: true, name: 'quality_grade' })
+  qualityGrade: string;
 
-  @Column({ type: 'uuid', nullable: true })
+  @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true, name: 'moisture_content' })
+  moistureContent: number;
+
+  @Column({ type: 'int', nullable: true, name: 'defect_count' })
+  defectCount: number;
+
+  @Column({ type: 'boolean', default: false, name: 'contamination_found' })
+  contaminationFound: boolean;
+
+  @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true, name: 'temperature_celsius' })
+  temperatureCelsius: number;
+
+  @Column({ type: 'simple-array', nullable: true, name: 'photos' })
+  photos: string[];
+
+  @Column({ type: 'simple-array', nullable: true, name: 'videos' })
+  videos: string[];
+
+  @Column({ type: 'uuid', nullable: true, name: 'report_document_id' })
   reportDocumentId: string;
 
-  @CreateDateColumn({ type: 'timestamptz' })
+  @Column({ type: 'boolean', nullable: true, name: 'buyer_accepted' })
+  buyerAccepted: boolean;
+
+  @Column({ type: 'timestamptz', nullable: true, name: 'buyer_accepted_at' })
+  buyerAcceptedAt: Date;
+
+  @Column({ type: 'text', nullable: true, name: 'buyer_notes' })
+  buyerNotes: string;
+
+  @Column({ type: 'decimal', precision: 12, scale: 2, nullable: true, name: 'cost_usd' })
+  costUsd: number;
+
+  @Column({ type: 'varchar', length: 50, nullable: true, name: 'paid_by' })
+  paidBy: string;
+
+  @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn({ type: 'timestamptz' })
+  @UpdateDateColumn({ type: 'timestamptz', name: 'updated_at' })
   updatedAt: Date;
 
-  @DeleteDateColumn({ type: 'timestamptz', nullable: true })
+  @DeleteDateColumn({ type: 'timestamptz', nullable: true, name: 'deleted_at' })
   deletedAt: Date;
 }

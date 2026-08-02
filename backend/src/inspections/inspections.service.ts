@@ -14,8 +14,8 @@ export class InspectionsService {
     const inspection = this.inspectionRepo.create({
       ...data,
       organizationId: orgId,
-      requestedByUserId: userId,
-      status: 'requested',
+      inspectorUserId: userId,
+      result: 'pending',
     });
     return this.inspectionRepo.save(inspection);
   }
@@ -29,7 +29,7 @@ export class InspectionsService {
       qb.andWhere('i.dealId = :dealId', { dealId: filters.dealId });
     }
     if (filters.status) {
-      qb.andWhere('i.status = :status', { status: filters.status });
+      qb.andWhere('i.result = :status', { status: filters.status });
     }
     if (filters.type) {
       qb.andWhere('i.inspectionType = :type', { type: filters.type });
@@ -53,11 +53,11 @@ export class InspectionsService {
     return inspection;
   }
 
-  async updateStatus(id: string, orgId: string, status: string, data?: Partial<Inspection>): Promise<Inspection> {
+  async updateStatus(id: string, orgId: string, result: string, data?: Partial<Inspection>): Promise<Inspection> {
     const inspection = await this.findOne(id, orgId);
-    inspection.status = status as any;
-    if (status === 'completed') {
-      inspection.completedAt = new Date();
+    inspection.result = result as any;
+    if (result === 'pass' || result === 'fail' || result === 'conditional') {
+      inspection.completedDate = new Date();
     }
     if (data) {
       Object.assign(inspection, data);

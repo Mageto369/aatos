@@ -1,51 +1,54 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, Index } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, Index } from 'typeorm';
 
-export type NotificationType = 'deal_update' | 'rfq_match' | 'message_received' | 'milestone_completed' | 'document_reviewed' | 'inspection_scheduled' | 'compliance_alert' | 'system';
-export type NotificationPriority = 'low' | 'normal' | 'high' | 'urgent';
+export type NotificationType = 'rfq_match' | 'quote_received' | 'milestone_due' | 'inspection_complete' | 'message_received' | 'deal_update' | 'compliance_alert' | 'system';
 
 @Entity('notifications')
-@Index(['recipientUserId', 'readAt'])
 @Index(['recipientUserId', 'createdAt'])
+@Index(['recipientUserId', 'isRead'])
+@Index(['entityType', 'entityId'])
 export class Notification {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'uuid' })
+  @Column({ type: 'uuid', name: 'recipient_user_id' })
   recipientUserId: string;
 
-  @Column({ type: 'uuid', nullable: true })
+  @Column({ type: 'uuid', nullable: true, name: 'recipient_org_id' })
   recipientOrgId: string;
 
-  @Column({ type: 'enum', enum: ['deal_update', 'rfq_match', 'message_received', 'milestone_completed', 'document_reviewed', 'inspection_scheduled', 'compliance_alert', 'system'] })
+  @Column({ type: 'varchar', length: 50, name: 'type' })
   type: NotificationType;
 
-  @Column({ type: 'varchar', length: 200 })
+  @Column({ type: 'varchar', length: 255, name: 'title' })
   title: string;
 
-  @Column({ type: 'text' })
-  message: string;
+  @Column({ type: 'text', nullable: true, name: 'body' })
+  body: string;
 
-  @Column({ type: 'enum', enum: ['low', 'normal', 'high', 'urgent'], default: 'normal' })
-  priority: NotificationPriority;
-
-  @Column({ type: 'jsonb', nullable: true })
-  metadata: Record<string, any>;
-
-  @Column({ type: 'varchar', length: 100, nullable: true })
+  @Column({ type: 'varchar', length: 500, nullable: true, name: 'action_url' })
   actionUrl: string;
 
-  @Column({ type: 'timestamptz', nullable: true })
+  @Column({ type: 'varchar', length: 50, nullable: true, name: 'action_type' })
+  actionType: string;
+
+  @Column({ type: 'varchar', length: 50, nullable: true, name: 'entity_type' })
+  entityType: string;
+
+  @Column({ type: 'uuid', nullable: true, name: 'entity_id' })
+  entityId: string;
+
+  @Column({ type: 'simple-array', nullable: true, name: 'channels' })
+  channels: string[];
+
+  @Column({ type: 'boolean', default: false, name: 'is_read' })
+  isRead: boolean;
+
+  @Column({ type: 'timestamptz', nullable: true, name: 'read_at' })
   readAt: Date;
 
-  @Column({ type: 'timestamptz', nullable: true })
-  dismissedAt: Date;
+  @Column({ type: 'boolean', default: false, name: 'is_archived' })
+  isArchived: boolean;
 
-  @CreateDateColumn({ type: 'timestamptz' })
+  @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
   createdAt: Date;
-
-  @UpdateDateColumn({ type: 'timestamptz' })
-  updatedAt: Date;
-
-  @DeleteDateColumn({ type: 'timestamptz', nullable: true })
-  deletedAt: Date;
 }
