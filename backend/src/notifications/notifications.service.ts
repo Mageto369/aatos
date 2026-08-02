@@ -1,18 +1,46 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, LessThan } from 'typeorm';
 import { Notification } from './entities/notification.entity';
+import { NotificationsGateway } from './notifications.gateway';
+import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class NotificationsService {
+  private readonly logger = new Logger(NotificationsService.name);
+
   constructor(
     @InjectRepository(Notification)
     private readonly notifRepo: Repository<Notification>,
+    private readonly gateway: NotificationsGateway,
+    private readonly emailService: EmailService,
   ) {}
 
   async create(data: Partial<Notification>): Promise<Notification> {
     const notif = this.notifRepo.create(data);
-    return this.notifRepo.save(notif);
+    const saved = await this.notifRepo.save(notif);
+
+    // Push real-time notification
+    if (saved.recipientUserId) {
+      this.gateway.pushNotification(saved.recipientUserId, saved).catch(err =>
+        this.logger.error(`Failed to push notification: ${err.message}`),
+      );
+
+      // Update unread count
+      const unreadCount = await this.getUnreadCount(saved.recipientUserId);
+      this.gateway.pushUnreadCount(saved.recipientUserId, unreadCount).catch(err =>
+        this.logger.error(`Failed to push unread count: ${err.message}`),
+      );
+
+      // Send email if channel includes email
+      if (saved.channels?.includes('email')) {
+        this.sendEmailNotification(saved).catch(err =>
+          this.logger.error(`Failed to send email: ${err.message}`),
+        );
+      }
+    }
+
+    return saved;
   }
 
   async findAll(userId: string, options: { unreadOnly?: boolean; limit?: number; offset?: number }) {
@@ -29,23 +57,31 @@ export class NotificationsService {
     qb.skip(options.offset || 0);
 
     const [items, total] = await qb.getManyAndCount();
-    const unreadCount = await this.notifRepo.count({
-      where: { recipientUserId: userId, isRead: false, isArchived: false },
-    });
+    const unreadCount = await this.getUnreadCount(userId);
 
     return { items, total, unreadCount };
+  }
+
+  async getUnreadCount(userId: string): Promise<number> {
+    return this.notifRepo.count({
+      where: { recipientUserId: userId, isRead: false, isArchived: false },
+    });
   }
 
   async markRead(id: string, userId: string): Promise<Notification> {
     const notif = await this.notifRepo.findOne({
       where: { id, recipientUserId: userId },
     });
-    if (!notif) {
-      throw new NotFoundException('Notification not found');
-    }
+    if (!notif) throw new NotFoundException('Notification not found');
+
     notif.isRead = true;
     notif.readAt = new Date();
-    return this.notifRepo.save(notif);
+    const saved = await this.notifRepo.save(notif);
+
+    const unreadCount = await this.getUnreadCount(userId);
+    this.gateway.pushUnreadCount(userId, unreadCount).catch(() => {});
+
+    return saved;
   }
 
   async markAllRead(userId: string): Promise<void> {
@@ -53,6 +89,7 @@ export class NotificationsService {
       { recipientUserId: userId, isRead: false },
       { isRead: true, readAt: new Date() },
     );
+    this.gateway.pushUnreadCount(userId, 0).catch(() => {});
   }
 
   async dismiss(id: string, userId: string): Promise<void> {
@@ -69,5 +106,25 @@ export class NotificationsService {
       createdAt: LessThan(cutoff),
     });
     return result.affected || 0;
+  }
+
+  private async sendEmailNotification(notif: Notification): Promise<void> {
+    // In production, lookup user's email from users table
+    const recipientEmail = 'user@example.com'; // Placeholder - would query users table
+
+    await this.emailService.send({
+      to: recipientEmail,
+      subject: notif.title,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #1a1a1a;">${notif.title}</h2>
+          <p style="color: #4a4a4a; font-size: 16px; line-height: 1.5;">${notif.body}</p>
+          ${notif.actionUrl ? `<a href="https://aatos.trade${notif.actionUrl}" style="display: inline-block; margin-top: 20px; padding: 12px 24px; background: #2563eb; color: white; text-decoration: none; border-radius: 6px;">View in AATOS</a>` : ''}
+          <hr style="margin-top: 40px; border: none; border-top: 1px solid #e5e5e5;" />
+          <p style="color: #9a9a9a; font-size: 12px;">AATOS - African Agricultural Trade Operating System</p>
+        </div>
+      `,
+      text: `${notif.title}\n\n${notif.body}\n\n${notif.actionUrl ? `View: https://aatos.trade${notif.actionUrl}` : ''}`,
+    });
   }
 }
