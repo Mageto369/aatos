@@ -18,6 +18,7 @@ import { GovernmentTradeService } from './government-trade.service';
 import { MatchingEngineService } from './matching-engine.service';
 import { SearchController } from './search.controller';
 import { PlatformController } from './platform.controller';
+import { EnterpriseController } from './enterprise.controller';
 
 @Global()
 @Module({
@@ -44,7 +45,7 @@ import { PlatformController } from './platform.controller';
     GovernmentTradeService,
     MatchingEngineService,
   ],
-  controllers: [SearchController, PlatformController],
+  controllers: [SearchController, PlatformController, EnterpriseController],
   exports: [AuditLogger, RateLimitStore, NotificationService, CurrencyConversionService, FeatureFlagService, MonitoringService, AdvancedSearchService, EnterprisePricingService, ESGReportingService, WhiteLabelService, PartnerApiService, GovernmentTradeService, MatchingEngineService],
 })
 export class CommonModule {}
