@@ -183,14 +183,16 @@ export class FlutterwaveService {
   }
 
   /**
-   * Initiate an escrow transfer
-   * Flutterwave supports escrow via subaccounts or split payments
+   * Initiate a split payment for milestone tracking
+   * NOTE: This is NOT escrow. AATOS does not custody customer funds.
+   * Split payments are processed by the licensed payment provider.
+   * AATOS tracks payment milestones, statuses, and release conditions only.
    */
-  async initiateEscrow(payload: FlutterwaveInitiatePayload & {
+  async initiateSplitPayment(payload: FlutterwaveInitiatePayload & {
     subaccounts?: Array<{ id: string; transaction_split_ratio: number }>;
   }): Promise<{ link: string | null; error?: string }> {
-    // Escrow is simulated via subaccount splits in Flutterwave
-    // In production, you'd use Flutterwave's subaccounts or a third-party escrow
+    // Payment split is handled by the licensed provider (Flutterwave subaccounts).
+    // AATOS does not hold funds. We track milestone status only.
     return this.initiatePayment(payload);
   }
 
