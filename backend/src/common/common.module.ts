@@ -10,6 +10,10 @@ import { CurrencyConversionService } from './currency-conversion.service';
 import { FeatureFlagService } from './feature-flag.service';
 import { MonitoringService } from './monitoring.service';
 import { AdvancedSearchService } from './advanced-search.service';
+import { EnterprisePricingService } from './enterprise-pricing.service';
+import { ESGReportingService } from './esg-reporting.service';
+import { WhiteLabelService } from './white-label.service';
+import { PartnerApiService } from './partner-api.service';
 import { SearchController } from './search.controller';
 import { PlatformController } from './platform.controller';
 
@@ -31,8 +35,12 @@ import { PlatformController } from './platform.controller';
     FeatureFlagService,
     MonitoringService,
     AdvancedSearchService,
+    EnterprisePricingService,
+    ESGReportingService,
+    WhiteLabelService,
+    PartnerApiService,
   ],
   controllers: [SearchController, PlatformController],
-  exports: [AuditLogger, RateLimitStore, NotificationService, CurrencyConversionService, FeatureFlagService, MonitoringService, AdvancedSearchService],
+  exports: [AuditLogger, RateLimitStore, NotificationService, CurrencyConversionService, FeatureFlagService, MonitoringService, AdvancedSearchService, EnterprisePricingService, ESGReportingService, WhiteLabelService, PartnerApiService],
 })
 export class CommonModule {}
