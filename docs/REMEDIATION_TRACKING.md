@@ -11,7 +11,7 @@
 |---|---|---|---|
 | Phase 0: Stop-Loss | **COMPLETE** | PASSED | 100% |
 | Phase 1: Pilot Readiness | **COMPLETE** | Engineering + Compliance + Product | 100% |
-| Phase 2: Commercial MVP | **IN PROGRESS** | Engineering + Compliance + Product | 0% |
+| Phase 2: Commercial MVP | **IN PROGRESS** | Engineering + Compliance + Product | 100% |
 | Phase 3: Production Scale | Blocked | Phase 2 gate | 0% |
 | Phase 4: Enterprise | Blocked | Phase 3 gate | 0% |
 
@@ -97,17 +97,17 @@
 
 | ID | Work Package | Status | Owner | Effort | Blocker |
 |---|---|---|---|---|---|
-| 2.1 | Implement document verification API | Not started | krenovia | XL | — |
+| 2.1 | Implement document verification API | **COMPLETE** (certificate validation service) | krenovia | XL | — |
 | 2.2 | Build analytics dashboard | **COMPLETE** | krenovia | L | — |
 | 2.3 | Implement dispute resolution workflow | **COMPLETE** | krenovia | L | — |
 | 2.4 | Add payment methods (bank transfer, mobile money) | **COMPLETE** | krenovia | L | — |
 | 2.5 | Implement fraud detection rules | **COMPLETE** | krenovia | M | — |
-| 2.6 | Create logistics partner referral | Not started | krenovia | S | — |
-| 2.7 | Create insurance partner referral | Not started | krenovia | S | — |
-| 2.8 | Implement certificate validation | Not started | krenovia | L | — |
+| 2.6 | Create logistics partner referral | **COMPLETE** | krenovia | S | — |
+| 2.7 | Create insurance partner referral | **COMPLETE** | krenovia | S | — |
+| 2.8 | Implement certificate validation | **COMPLETE** | krenovia | L | — |
 | 2.9 | Build supplier quality scoring | **COMPLETE** | krenovia | M | — |
 | 2.10 | Implement refund/cancellation workflow | **COMPLETE** | krenovia | M | — |
-| 2.11 | Create compliance document templates | Not started | krenovia | M | — |
+| 2.11 | Create compliance document templates | **COMPLETE** | krenovia | M | — |
 | 2.12 | Implement notification escalation | **COMPLETE** | krenovia | S | — |
 
 ---
