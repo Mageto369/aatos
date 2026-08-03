@@ -9,6 +9,7 @@ import { NotificationService } from './notification.service';
 import { CurrencyConversionService } from './currency-conversion.service';
 import { FeatureFlagService } from './feature-flag.service';
 import { MonitoringService } from './monitoring.service';
+import { AdvancedSearchService } from './advanced-search.service';
 
 @Global()
 @Module({
@@ -27,7 +28,8 @@ import { MonitoringService } from './monitoring.service';
     CurrencyConversionService,
     FeatureFlagService,
     MonitoringService,
+    AdvancedSearchService,
   ],
-  exports: [AuditLogger, RateLimitStore, NotificationService, CurrencyConversionService, FeatureFlagService, MonitoringService],
+  exports: [AuditLogger, RateLimitStore, NotificationService, CurrencyConversionService, FeatureFlagService, MonitoringService, AdvancedSearchService],
 })
 export class CommonModule {}
