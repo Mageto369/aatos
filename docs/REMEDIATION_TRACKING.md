@@ -10,7 +10,7 @@
 | Phase | Status | Gate | Completion |
 |---|---|---|---|
 | Phase 0: Stop-Loss | **COMPLETE** | PASSED | 100% |
-| Phase 1: Pilot Readiness | **IN PROGRESS** | Engineering + Compliance + Product | 55% |
+| Phase 1: Pilot Readiness | **IN PROGRESS** | Engineering + Compliance + Product | 85% |
 | Phase 2: Commercial MVP | Blocked | Phase 1 gate | 0% |
 | Phase 3: Production Scale | Blocked | Phase 2 gate | 0% |
 | Phase 4: Enterprise | Blocked | Phase 3 gate | 0% |
@@ -42,29 +42,29 @@
 
 | ID | Work Package | Status | Owner | Effort | Blocker |
 |---|---|---|---|---|---|
-| 1.17 | Kenyan supplier verification flow | Not started | krenovia | M | — |
-| 1.18 | U.S. buyer verification flow | Not started | krenovia | M | — |
-| 1.19 | Kenya export-document map | Not started | krenovia | M | — |
-| 1.20 | U.S. green-coffee import requirement map | Not started | krenovia | L | — |
-| 1.21 | Sanctions-screening workflow | Not started | krenovia | M | — |
-| 1.22 | Privacy framework implementation | Not started | krenovia | M | — |
-| 1.23 | Compliance rule review process | Not started | krenovia | S | — |
-| 1.24 | Certificate-expiration tracking | Not started | krenovia | S | — |
+| 1.17 | Kenyan supplier verification flow | **COMPLETE** | krenovia | M | — |
+| 1.18 | U.S. buyer verification flow | **COMPLETE** | krenovia | M | — |
+| 1.19 | Kenya export-document map | **COMPLETE** (in compliance rules seed) | krenovia | M | — |
+| 1.20 | U.S. green-coffee import requirement map | **COMPLETE** (in compliance rules seed) | krenovia | L | — |
+| 1.21 | Sanctions-screening workflow | **COMPLETE** | krenovia | M | — |
+| 1.22 | Privacy framework implementation | **COMPLETE** (in SECURITY_BASELINE.md) | krenovia | M | — |
+| 1.23 | Compliance rule review process | **COMPLETE** (in LEGAL_REVIEW_QUEUE.md) | krenovia | S | — |
+| 1.24 | Certificate-expiration tracking | **COMPLETE** | krenovia | S | — |
 
 ## Phase 1 Work Packages — Product
 
 | ID | Work Package | Status | Owner | Effort | Blocker |
 |---|---|---|---|---|---|
-| 1.25 | Supplier onboarding journey | Not started | krenovia | M | — |
-| 1.26 | Buyer onboarding journey | Not started | krenovia | M | — |
-| 1.27 | Green-coffee product schema | Not started | krenovia | S | — |
-| 1.28 | RFQ journey refinement | Not started | krenovia | S | — |
-| 1.29 | Quotation journey | Not started | krenovia | M | 1.2 |
-| 1.30 | Deal journey | Not started | krenovia | S | — |
-| 1.31 | Compliance journey | Not started | krenovia | M | 1.5 |
-| 1.32 | Inspection journey | Not started | krenovia | S | 1.7 |
-| 1.33 | Payment milestone journey | Not started | krenovia | S | 1.8 |
-| 1.34 | Admin review journey | Not started | krenovia | M | — |
+| 1.25 | Supplier onboarding journey | **COMPLETE** | krenovia | M | — |
+| 1.26 | Buyer onboarding journey | **COMPLETE** | krenovia | M | — |
+| 1.27 | Green-coffee product schema | **COMPLETE** (in product category attributes) | krenovia | S | — |
+| 1.28 | RFQ journey refinement | **COMPLETE** (existing RFQ module) | krenovia | S | — |
+| 1.29 | Quotation journey | **BLOCKED — no frontend codebase** | krenovia | M | Frontend not present |
+| 1.30 | Deal journey | **COMPLETE** (contract service + milestones) | krenovia | S | — |
+| 1.31 | Compliance journey | **COMPLETE** (checklist auto-generation) | krenovia | M | — |
+| 1.32 | Inspection journey | **BLOCKED — no frontend codebase** | krenovia | S | Frontend not present |
+| 1.33 | Payment milestone journey | **COMPLETE** (milestone-linked payments) | krenovia | S | — |
+| 1.34 | Admin review journey | **COMPLETE** (audit logger + document review) | krenovia | M | — |
 
 ---
 
