@@ -1,23 +1,24 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { request as httpsRequest } from 'node:https';
+import {
+  PaymentProvider,
+  InitiatePaymentParams,
+  PaymentInitiationResult,
+  PaymentVerificationResult,
+  PayoutParams,
+  PayoutResult,
+  WebhookResult,
+} from './payment-provider.interface';
 
 export interface FlutterwaveInitiatePayload {
   tx_ref: string;
   amount: string;
   currency: string;
   redirect_url: string;
-  customer: {
-    email: string;
-    name: string;
-    phonenumber?: string;
-  };
+  customer: { email: string; name: string; phonenumber?: string };
   meta?: Record<string, string>;
-  customizations?: {
-    title?: string;
-    description?: string;
-    logo?: string;
-  };
+  customizations?: { title?: string; description?: string; logo?: string };
 }
 
 export interface FlutterwaveVerifyResponse {
@@ -41,27 +42,17 @@ export interface FlutterwaveVerifyResponse {
     created_at: string;
     account_id: number;
     meta?: Record<string, any>;
-    customer: {
-      id: number;
-      name: string;
-      phone_number: string | null;
-      email: string;
-      created_at: string;
-    };
-    card?: {
-      first_6digits: string;
-      last_4digits: string;
-      issuer: string;
-      country: string;
-      type: string;
-      token: string;
-      expiry: string;
-    };
+    customer: { id: number; name: string; phone_number: string | null; email: string; created_at: string };
+    card?: { first_6digits: string; last_4digits: string; issuer: string; country: string; type: string; token: string; expiry: string };
   };
 }
 
 @Injectable()
-export class FlutterwaveService {
+export class FlutterwaveService implements PaymentProvider {
+  readonly name = 'flutterwave';
+  readonly supportedCurrencies = ['NGN', 'USD', 'EUR', 'GBP', 'KES', 'GHS', 'ZAR', 'TZS', 'UGX', 'XOF', 'XAF'];
+  readonly supportsEscrow = false; // AATOS does not custody funds
+
   private readonly logger = new Logger(FlutterwaveService.name);
   private readonly baseUrl = 'https://api.flutterwave.com/v3';
   private readonly secretKey: string;
@@ -82,143 +73,133 @@ export class FlutterwaveService {
     return !!this.secretKey;
   }
 
-  /**
-   * Initiate a standard payment via Flutterwave hosted checkout
-   */
-  async initiatePayment(payload: FlutterwaveInitiatePayload): Promise<{ link: string | null; error?: string }> {
+  async initiatePayment(params: InitiatePaymentParams): Promise<PaymentInitiationResult> {
     if (!this.isConfigured) {
-      this.logger.log(`[SIMULATED] Flutterwave payment initiated: ${payload.tx_ref} for ${payload.amount} ${payload.currency}`);
-      return {
-        link: `https://sandbox.flutterwave.com/pay/${payload.tx_ref}`,
-      };
+      this.logger.log(`[SIMULATED] Flutterwave payment: ${params.txRef}`);
+      return { link: `https://sandbox.flutterwave.com/pay/${params.txRef}`, txRef: params.txRef };
     }
+
+    const payload: FlutterwaveInitiatePayload = {
+      tx_ref: params.txRef,
+      amount: params.amount,
+      currency: params.currency,
+      redirect_url: params.redirectUrl,
+      customer: { email: params.customerEmail, name: params.customerName },
+      meta: params.meta,
+      customizations: params.customizations,
+    };
 
     try {
       const body = JSON.stringify(payload);
       const response = await this.httpPost(`${this.baseUrl}/payments`, body);
 
       if (response.status === 'success' && response.data?.link) {
-        return { link: response.data.link };
+        return { link: response.data.link, txRef: params.txRef, providerReference: response.data.link };
       }
 
-      return {
-        link: null,
-        error: response.message || 'Failed to initiate payment',
-      };
-    } catch (err) {
+      return { link: null, txRef: params.txRef, error: response.message || 'Failed to initiate payment' };
+    } catch (err: any) {
       this.logger.error(`Flutterwave initiate failed: ${err.message}`);
-      return { link: null, error: err.message };
+      return { link: null, txRef: params.txRef, error: err.message };
     }
   }
 
-  /**
-   * Verify a transaction by its Flutterwave transaction ID
-   */
-  async verifyTransaction(transactionId: string): Promise<FlutterwaveVerifyResponse | null> {
+  async verifyPayment(txRef: string): Promise<PaymentVerificationResult> {
     if (!this.isConfigured) {
-      this.logger.log(`[SIMULATED] Flutterwave verify transaction: ${transactionId}`);
-      return {
-        status: 'success',
-        message: 'Transaction fetched successfully',
-        data: {
-          id: parseInt(transactionId) || 123456,
-          tx_ref: 'simulated-ref',
-          flw_ref: 'FLW-MOCK-123456',
-          amount: 1000,
-          currency: 'USD',
-          charged_amount: 1000,
-          app_fee: 10,
-          merchant_fee: 0,
-          processor_response: 'successful',
-          auth_model: 'PIN',
-          ip: '127.0.0.1',
-          narration: 'AATOS Trade Payment',
-          status: 'successful',
-          payment_type: 'card',
-          created_at: new Date().toISOString(),
-          account_id: 12345,
-          customer: {
-            id: 1,
-            name: 'Test Buyer',
-            phone_number: null,
-            email: 'buyer@example.com',
-            created_at: new Date().toISOString(),
-          },
-        },
-      };
+      return { success: true, status: 'successful', amount: 1000, currency: 'USD' };
     }
 
     try {
-      const response = await this.httpGet(`${this.baseUrl}/transactions/${transactionId}/verify`);
-      return response as FlutterwaveVerifyResponse;
-    } catch (err) {
-      this.logger.error(`Flutterwave verify failed: ${err.message}`);
-      return null;
-    }
-  }
-
-  /**
-   * Verify a transaction by tx_ref (our internal reference)
-   */
-  async verifyByTxRef(txRef: string): Promise<FlutterwaveVerifyResponse | null> {
-    if (!this.isConfigured) {
-      this.logger.log(`[SIMULATED] Flutterwave verify by tx_ref: ${txRef}`);
-      return this.verifyTransaction('123456');
-    }
-
-    try {
-      // Query transactions by tx_ref
-      const response = await this.httpGet(
-        `${this.baseUrl}/transactions?tx_ref=${encodeURIComponent(txRef)}`,
-      );
+      const response = await this.httpGet(`${this.baseUrl}/transactions?tx_ref=${encodeURIComponent(txRef)}`);
       if (response.status === 'success' && response.data?.length > 0) {
         const tx = response.data[0];
-        return this.verifyTransaction(tx.id.toString());
+        const verify = await this.httpGet(`${this.baseUrl}/transactions/${tx.id}/verify`);
+        const d = verify.data;
+        return {
+          success: d.status === 'successful',
+          status: d.status === 'successful' ? 'successful' : d.status === 'pending' ? 'pending' : 'failed',
+          amount: d.amount,
+          currency: d.currency,
+          chargedAmount: d.charged_amount,
+          appFee: d.app_fee,
+          processorResponse: d.processor_response,
+          customerEmail: d.customer?.email,
+          customerName: d.customer?.name,
+          paidAt: d.created_at,
+          metadata: d.meta,
+        };
       }
-      return null;
-    } catch (err) {
-      this.logger.error(`Flutterwave verify by tx_ref failed: ${err.message}`);
-      return null;
+      return { success: false, status: 'unknown', error: 'Transaction not found' };
+    } catch (err: any) {
+      this.logger.error(`Flutterwave verify failed: ${err.message}`);
+      return { success: false, status: 'unknown', error: err.message };
     }
   }
 
-  /**
-   * Initiate a split payment for milestone tracking
-   * NOTE: This is NOT escrow. AATOS does not custody customer funds.
-   * Split payments are processed by the licensed payment provider.
-   * AATOS tracks payment milestones, statuses, and release conditions only.
-   */
-  async initiateSplitPayment(payload: FlutterwaveInitiatePayload & {
-    subaccounts?: Array<{ id: string; transaction_split_ratio: number }>;
-  }): Promise<{ link: string | null; error?: string }> {
-    // Payment split is handled by the licensed provider (Flutterwave subaccounts).
-    // AATOS does not hold funds. We track milestone status only.
-    return this.initiatePayment(payload);
-  }
-
-  /**
-   * Initiate a refund
-   */
-  async refundTransaction(transactionId: string, amount?: number): Promise<boolean> {
+  async initiatePayout(params: PayoutParams): Promise<PayoutResult> {
     if (!this.isConfigured) {
-      this.logger.log(`[SIMULATED] Flutterwave refund: ${transactionId}`);
-      return true;
+      this.logger.log(`[SIMULATED] Flutterwave payout: ${params.reference}`);
+      return { success: true, transferId: `SIM-${params.reference}` };
     }
 
     try {
-      const body = JSON.stringify({ amount: amount ? amount.toString() : undefined });
-      const response = await this.httpPost(`${this.baseUrl}/transactions/${transactionId}/refund`, body);
-      return response.status === 'success';
-    } catch (err) {
-      this.logger.error(`Flutterwave refund failed: ${err.message}`);
-      return false;
+      const body = JSON.stringify({
+        account_bank: params.recipientBankCode,
+        account_number: params.recipientAccount,
+        amount: params.amount,
+        currency: params.currency,
+        reference: params.reference,
+        narration: params.narration || 'AATOS Payout',
+      });
+      const response = await this.httpPost(`${this.baseUrl}/transfers`, body);
+      return {
+        success: response.status === 'success',
+        transferId: response.data?.id?.toString(),
+        status: response.data?.status,
+        error: response.status !== 'success' ? response.message : undefined,
+      };
+    } catch (err: any) {
+      this.logger.error(`Flutterwave payout failed: ${err.message}`);
+      return { success: false, error: err.message };
     }
+  }
+
+  async handleWebhook(payload: unknown, signature?: string): Promise<WebhookResult> {
+    // Verify webhook signature if provided
+    if (signature && this.secretKey) {
+      const crypto = await import('node:crypto');
+      const expected = crypto.createHmac('sha256', this.secretKey)
+        .update(JSON.stringify(payload))
+        .digest('hex');
+      if (expected !== signature) {
+        return { event: 'unknown', txRef: '', data: {}, verified: false };
+      }
+    }
+
+    const p = payload as Record<string, any>;
+    const event = p.event || p['event.type'] || '';
+    const txRef = p.data?.tx_ref || p.data?.reference || '';
+
+    if (event.includes('charge.completed') && p.data?.status === 'successful') {
+      return { event: 'payment.success', txRef, data: p.data, verified: true };
+    }
+    if (event.includes('charge.completed') && p.data?.status !== 'successful') {
+      return { event: 'payment.failure', txRef, data: p.data, verified: true };
+    }
+    if (event.includes('transfer.completed')) {
+      return { event: 'transfer.completed', txRef, data: p.data, verified: true };
+    }
+    if (event.includes('transfer.failed')) {
+      return { event: 'transfer.failed', txRef, data: p.data, verified: true };
+    }
+
+    return { event: 'unknown', txRef, data: p.data || {}, verified: true };
   }
 
   private httpPost(url: string, body: string): Promise<any> {
     return new Promise((resolve, reject) => {
       const parsed = new URL(url);
-      const options = {
+      const req = httpsRequest({
         hostname: parsed.hostname,
         path: parsed.pathname + parsed.search,
         method: 'POST',
@@ -227,21 +208,12 @@ export class FlutterwaveService {
           'Content-Type': 'application/json',
           'Content-Length': Buffer.byteLength(body),
         },
-      };
-
-      const req = httpsRequest(options, (res) => {
+      }, (res) => {
         let data = '';
         res.on('data', (chunk) => (data += chunk));
-        res.on('end', () => {
-          try {
-            resolve(JSON.parse(data));
-          } catch {
-            resolve({ status: 'error', message: data });
-          }
-        });
+        res.on('end', () => { try { resolve(JSON.parse(data)); } catch { resolve({ status: 'error', message: data }); } });
       });
-
-      req.on('error', (err) => reject(err));
+      req.on('error', reject);
       req.write(body);
       req.end();
     });
@@ -250,29 +222,17 @@ export class FlutterwaveService {
   private httpGet(url: string): Promise<any> {
     return new Promise((resolve, reject) => {
       const parsed = new URL(url);
-      const options = {
+      const req = httpsRequest({
         hostname: parsed.hostname,
         path: parsed.pathname + parsed.search,
         method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${this.secretKey}`,
-          'Content-Type': 'application/json',
-        },
-      };
-
-      const req = httpsRequest(options, (res) => {
+        headers: { 'Authorization': `Bearer ${this.secretKey}`, 'Content-Type': 'application/json' },
+      }, (res) => {
         let data = '';
         res.on('data', (chunk) => (data += chunk));
-        res.on('end', () => {
-          try {
-            resolve(JSON.parse(data));
-          } catch {
-            resolve({ status: 'error', message: data });
-          }
-        });
+        res.on('end', () => { try { resolve(JSON.parse(data)); } catch { resolve({ status: 'error', message: data }); } });
       });
-
-      req.on('error', (err) => reject(err));
+      req.on('error', reject);
       req.end();
     });
   }
