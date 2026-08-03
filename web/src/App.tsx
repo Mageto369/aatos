@@ -14,6 +14,7 @@ import { DocumentsPage } from '@/pages/DocumentsPage'
 import { InspectionsPage } from '@/pages/InspectionsPage'
 import { SettingsPage } from '@/pages/SettingsPage'
 import { PaymentsPage } from '@/pages/PaymentsPage'
+import { AdminPage } from '@/pages/AdminPage'
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
                 <Route path="/inspections" element={<InspectionsPage />} />
                 <Route path="/payments" element={<PaymentsPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
+                <Route path="/admin" element={<AdminPage />} />
               </Routes>
             </AppShell>
           </ProtectedRoute>

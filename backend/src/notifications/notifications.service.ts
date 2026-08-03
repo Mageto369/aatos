@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, LessThan } from 'typeorm';
 import { Notification } from './entities/notification.entity';
+import { User } from '../auth/entities/user.entity';
 import { NotificationsGateway } from './notifications.gateway';
 import { EmailService } from '../email/email.service';
 
@@ -12,6 +13,8 @@ export class NotificationsService {
   constructor(
     @InjectRepository(Notification)
     private readonly notifRepo: Repository<Notification>,
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
     private readonly gateway: NotificationsGateway,
     private readonly emailService: EmailService,
   ) {}
@@ -109,8 +112,23 @@ export class NotificationsService {
   }
 
   private async sendEmailNotification(notif: Notification): Promise<void> {
-    // In production, lookup user's email from users table
-    const recipientEmail = 'user@example.com'; // Placeholder - would query users table
+    const user = await this.userRepo.findOne({
+      where: { id: notif.recipientUserId },
+      select: ['id', 'email', 'emailVerified', 'firstName'],
+    });
+
+    if (!user || !user.email) {
+      this.logger.warn(`Cannot send email notification ${notif.id}: user ${notif.recipientUserId} not found or no email`);
+      return;
+    }
+
+    if (!user.emailVerified) {
+      this.logger.debug(`Skipping email to unverified address: ${user.email}`);
+      return;
+    }
+
+    const recipientEmail = user.email;
+    const firstName = user.firstName || 'there';
 
     await this.emailService.send({
       to: recipientEmail,
@@ -118,13 +136,14 @@ export class NotificationsService {
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #1a1a1a;">${notif.title}</h2>
+          <p style="color: #4a4a4a; font-size: 16px; line-height: 1.5;">Hi ${firstName},</p>
           <p style="color: #4a4a4a; font-size: 16px; line-height: 1.5;">${notif.body}</p>
           ${notif.actionUrl ? `<a href="https://aatos.trade${notif.actionUrl}" style="display: inline-block; margin-top: 20px; padding: 12px 24px; background: #2563eb; color: white; text-decoration: none; border-radius: 6px;">View in AATOS</a>` : ''}
           <hr style="margin-top: 40px; border: none; border-top: 1px solid #e5e5e5;" />
           <p style="color: #9a9a9a; font-size: 12px;">AATOS - African Agricultural Trade Operating System</p>
         </div>
       `,
-      text: `${notif.title}\n\n${notif.body}\n\n${notif.actionUrl ? `View: https://aatos.trade${notif.actionUrl}` : ''}`,
+      text: `${notif.title}\n\nHi ${firstName},\n\n${notif.body}\n\n${notif.actionUrl ? `View: https://aatos.trade${notif.actionUrl}` : ''}`,
     });
   }
 }

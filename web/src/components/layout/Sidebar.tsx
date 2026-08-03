@@ -12,6 +12,8 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
+import { Shield } from 'lucide-react'
+
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { name: 'Products', href: '/products', icon: Package },
@@ -22,6 +24,7 @@ const navigation = [
   { name: 'Organization', href: '/organization', icon: Building2 },
   { name: 'Documents', href: '/documents', icon: FileText },
   { name: 'Settings', href: '/settings', icon: Settings },
+  { name: 'Admin', href: '/admin', icon: Shield },
 ]
 
 export function Sidebar() {
