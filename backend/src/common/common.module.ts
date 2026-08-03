@@ -14,6 +14,8 @@ import { EnterprisePricingService } from './enterprise-pricing.service';
 import { ESGReportingService } from './esg-reporting.service';
 import { WhiteLabelService } from './white-label.service';
 import { PartnerApiService } from './partner-api.service';
+import { GovernmentTradeService } from './government-trade.service';
+import { MatchingEngineService } from './matching-engine.service';
 import { SearchController } from './search.controller';
 import { PlatformController } from './platform.controller';
 
@@ -39,8 +41,10 @@ import { PlatformController } from './platform.controller';
     ESGReportingService,
     WhiteLabelService,
     PartnerApiService,
+    GovernmentTradeService,
+    MatchingEngineService,
   ],
   controllers: [SearchController, PlatformController],
-  exports: [AuditLogger, RateLimitStore, NotificationService, CurrencyConversionService, FeatureFlagService, MonitoringService, AdvancedSearchService, EnterprisePricingService, ESGReportingService, WhiteLabelService, PartnerApiService],
+  exports: [AuditLogger, RateLimitStore, NotificationService, CurrencyConversionService, FeatureFlagService, MonitoringService, AdvancedSearchService, EnterprisePricingService, ESGReportingService, WhiteLabelService, PartnerApiService, GovernmentTradeService, MatchingEngineService],
 })
 export class CommonModule {}
