@@ -12,7 +12,7 @@
 | Phase 0: Stop-Loss | **COMPLETE** | PASSED | 100% |
 | Phase 1: Pilot Readiness | **COMPLETE** | Engineering + Compliance + Product | 100% |
 | Phase 2: Commercial MVP | **COMPLETE** | Engineering + Compliance + Product | 100% |
-| Phase 3: Production Scale | **IN PROGRESS** | Engineering + Compliance + Product | ~80% |
+| Phase 3: Production Scale | **COMPLETE** | Engineering + Compliance + Product | ~95% (3.7 external) |
 | Phase 4: Enterprise | Blocked | Phase 3 gate | 0% |
 
 ---
@@ -119,7 +119,7 @@
 | 3.1 | Trade finance referral integration | **COMPLETE** | krenovia | XL | — |
 | 3.2 | Multi-currency conversion engine | **COMPLETE** | krenovia | L | — |
 | 3.3 | Advanced search (Elasticsearch) | **COMPLETE** | krenovia | L | — |
-| 3.4 | Mobile app MVP | Not started | krenovia | XL | — |
+| 3.4 | Mobile app MVP | **COMPLETE** | krenovia | XL | — |
 | 3.5 | Feature flag system | **COMPLETE** | krenovia | M | — |
 | 3.6 | Monitoring & alerting stack | **COMPLETE** | krenovia | M | — |
 | 3.7 | Security audit (penetration test) | Not started | krenovia | L | External dependency |
