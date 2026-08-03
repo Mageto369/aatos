@@ -10,7 +10,7 @@
 ### Core Modules
 | Module | Files | Key Features |
 |---|---|---|
-| **Auth** | 5 files | JWT strategy with orgId extraction, bcrypt, login lockout (5 attempts), /me endpoint |
+| **Auth** | 5 files | JWT strategy with orgId extraction, bcrypt, login lockout (5 attempts), /me endpoint. OAuth 2.0 planned for enterprise. |
 | **Organizations** | 5 files | CRUD, members, verification levels, cursor pagination, full-text search |
 | **Products** | 5 files | CRUD, categories, JSONB attributes, soft deletes, search/filter |
 | **RFQs** | 4 files | Create, publish, quotes, org-scoped queries, quote counting |
@@ -39,12 +39,14 @@
 
 ### Infrastructure
 - PostgreSQL with 22+ tables, 60+ indexes
-- TypeORM with auto-migration in development
+- Docker Compose for dev and production
+- TypeORM migrations configured (scripts present; initial migration to be generated)
 - Helmet security headers, CORS, compression
 - API versioning (URI-based)
 - Swagger/OpenAPI at /api/docs
 - JWT Bearer auth with orgId context
-- GitHub Actions CI/CD (backend, frontend, DB tests)
+- GitHub Actions CI/CD (backend lint/build, frontend lint/build, DB schema test)
+- Test scripts configured; critical-path tests to be written in Phase 1
 - Docker Compose for dev and production
 
 ---
