@@ -5,6 +5,7 @@ import { HttpExceptionFilter } from './filters/http-exception.filter';
 import { ValidationPipe } from '@nestjs/common';
 import { AuditLogger } from './audit-logger.service';
 import { RateLimitStore, RateLimitGuard } from './rate-limit.guard';
+import { NotificationService } from './notification.service';
 
 @Global()
 @Module({
@@ -19,7 +20,8 @@ import { RateLimitStore, RateLimitGuard } from './rate-limit.guard';
     },
     AuditLogger,
     RateLimitStore,
+    NotificationService,
   ],
-  exports: [AuditLogger, RateLimitStore],
+  exports: [AuditLogger, RateLimitStore, NotificationService],
 })
 export class CommonModule {}
