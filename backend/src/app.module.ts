@@ -15,6 +15,7 @@ import { UploadModule } from './upload/upload.module';
 import { PaymentsModule } from './payments/payments.module';
 import { WorkflowsModule } from './workflows/workflows.module';
 import { CommonModule } from './common/common.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 import * as Joi from 'joi';
 
 @Module({
@@ -51,6 +52,7 @@ import * as Joi from 'joi';
     UploadModule,
     PaymentsModule,
     WorkflowsModule,
+    AnalyticsModule,
   ],
 })
 export class AppModule {}
