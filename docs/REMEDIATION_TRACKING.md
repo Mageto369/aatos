@@ -10,7 +10,7 @@
 | Phase | Status | Gate | Completion |
 |---|---|---|---|
 | Phase 0: Stop-Loss | **COMPLETE** | PASSED | 100% |
-| Phase 1: Pilot Readiness | **IN PROGRESS** | Engineering + Compliance + Product | 5% |
+| Phase 1: Pilot Readiness | **IN PROGRESS** | Engineering + Compliance + Product | 10% |
 | Phase 2: Commercial MVP | Blocked | Phase 1 gate | 0% |
 | Phase 3: Production Scale | Blocked | Phase 2 gate | 0% |
 | Phase 4: Enterprise | Blocked | Phase 3 gate | 0% |
@@ -21,7 +21,7 @@
 
 | ID | Work Package | Status | Owner | Effort | Blocker |
 |---|---|---|---|---|---|
-| 1.1 | Generate initial TypeORM migration | Not started | krenovia | M | — |
+| 1.1 | Generate initial TypeORM migration | **COMPLETE** | krenovia | M | — |
 | 1.2 | Implement quotation frontend | Not started | krenovia | M | — |
 | 1.3 | Implement contract generation | Not started | krenovia | L | — |
 | 1.4 | Implement contract acceptance records | Not started | krenovia | M | 1.3 |
