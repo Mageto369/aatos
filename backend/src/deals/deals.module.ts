@@ -7,6 +7,7 @@ import { DisputeResolutionService } from './dispute-resolution.service';
 import { RefundCancellationService } from './refund-cancellation.service';
 import { LogisticsReferralService } from './logistics-referral.service';
 import { InsuranceReferralService } from './insurance-referral.service';
+import { TradeFinanceService } from './trade-finance.service';
 import { Deal } from './entities/deal.entity';
 import { DealMilestone } from './entities/deal-milestone.entity';
 import { PaymentsModule } from '../payments/payments.module';
@@ -20,6 +21,7 @@ import { PaymentsModule } from '../payments/payments.module';
     RefundCancellationService,
     LogisticsReferralService,
     InsuranceReferralService,
+    TradeFinanceService,
   ],
   controllers: [DealsController],
   exports: [
@@ -29,6 +31,7 @@ import { PaymentsModule } from '../payments/payments.module';
     RefundCancellationService,
     LogisticsReferralService,
     InsuranceReferralService,
+    TradeFinanceService,
   ],
 })
 export class DealsModule {}

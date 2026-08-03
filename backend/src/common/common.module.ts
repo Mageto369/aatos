@@ -6,6 +6,9 @@ import { ValidationPipe } from '@nestjs/common';
 import { AuditLogger } from './audit-logger.service';
 import { RateLimitStore, RateLimitGuard } from './rate-limit.guard';
 import { NotificationService } from './notification.service';
+import { CurrencyConversionService } from './currency-conversion.service';
+import { FeatureFlagService } from './feature-flag.service';
+import { MonitoringService } from './monitoring.service';
 
 @Global()
 @Module({
@@ -21,7 +24,10 @@ import { NotificationService } from './notification.service';
     AuditLogger,
     RateLimitStore,
     NotificationService,
+    CurrencyConversionService,
+    FeatureFlagService,
+    MonitoringService,
   ],
-  exports: [AuditLogger, RateLimitStore, NotificationService],
+  exports: [AuditLogger, RateLimitStore, NotificationService, CurrencyConversionService, FeatureFlagService, MonitoringService],
 })
 export class CommonModule {}

@@ -8,6 +8,7 @@ import { CertificateExpirationService } from './certificate-expiration.service';
 import { FraudDetectionService } from './fraud-detection.service';
 import { CertificateValidationService } from './certificate-validation.service';
 import { DocumentTemplatesService } from './document-templates.service';
+import { CustomsTariffService } from './customs-tariff.service';
 import { ComplianceRule } from './entities/compliance-rule.entity';
 import { ComplianceChecklist } from './entities/compliance-checklist.entity';
 import { ComplianceChecklistItem } from './entities/compliance-checklist-item.entity';
@@ -22,6 +23,7 @@ import { ComplianceChecklistItem } from './entities/compliance-checklist-item.en
     FraudDetectionService,
     CertificateValidationService,
     DocumentTemplatesService,
+    CustomsTariffService,
   ],
   controllers: [ComplianceController],
   exports: [
@@ -32,6 +34,7 @@ import { ComplianceChecklistItem } from './entities/compliance-checklist-item.en
     FraudDetectionService,
     CertificateValidationService,
     DocumentTemplatesService,
+    CustomsTariffService,
   ],
 })
 export class ComplianceModule {}
