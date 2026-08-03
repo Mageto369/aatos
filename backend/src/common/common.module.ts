@@ -10,6 +10,8 @@ import { CurrencyConversionService } from './currency-conversion.service';
 import { FeatureFlagService } from './feature-flag.service';
 import { MonitoringService } from './monitoring.service';
 import { AdvancedSearchService } from './advanced-search.service';
+import { SearchController } from './search.controller';
+import { PlatformController } from './platform.controller';
 
 @Global()
 @Module({
@@ -30,6 +32,7 @@ import { AdvancedSearchService } from './advanced-search.service';
     MonitoringService,
     AdvancedSearchService,
   ],
+  controllers: [SearchController, PlatformController],
   exports: [AuditLogger, RateLimitStore, NotificationService, CurrencyConversionService, FeatureFlagService, MonitoringService, AdvancedSearchService],
 })
 export class CommonModule {}

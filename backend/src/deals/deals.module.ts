@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DealsService } from './deals.service';
 import { DealsController } from './deals.controller';
+import { ReferralsController } from './referrals.controller';
 import { ContractService } from './contract.service';
 import { DisputeResolutionService } from './dispute-resolution.service';
 import { RefundCancellationService } from './refund-cancellation.service';
@@ -23,7 +24,7 @@ import { PaymentsModule } from '../payments/payments.module';
     InsuranceReferralService,
     TradeFinanceService,
   ],
-  controllers: [DealsController],
+  controllers: [DealsController, ReferralsController],
   exports: [
     DealsService,
     ContractService,

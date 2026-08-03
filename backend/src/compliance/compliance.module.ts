@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ComplianceService } from './compliance.service';
 import { ComplianceController } from './compliance.controller';
+import { ComplianceToolsController } from './compliance-tools.controller';
 import { VerificationFlowService } from './verification-flow.service';
 import { SanctionsScreeningService } from './sanctions-screening.service';
 import { CertificateExpirationService } from './certificate-expiration.service';
@@ -27,7 +28,7 @@ import { ComplianceChecklistItem } from './entities/compliance-checklist-item.en
     CustomsTariffService,
     ComplianceRuleUpdaterService,
   ],
-  controllers: [ComplianceController],
+  controllers: [ComplianceController, ComplianceToolsController],
   exports: [
     ComplianceService,
     VerificationFlowService,
