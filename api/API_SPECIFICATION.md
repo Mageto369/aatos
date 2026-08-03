@@ -13,7 +13,7 @@ This document defines the REST API surface for the AATOS Trade Operating System.
 | Standard | Implementation |
 |---|---|
 | **Base URL** | `https://api.aatos.trade/v1` |
-| **Authentication** | OAuth 2.0 (Authorization Code + PKCE), Bearer tokens |
+| **Authentication** | JWT Bearer tokens (RS256/HS256), issued via email/password login |
 | **Authorization** | RBAC + ABAC via JWT scopes and resource-level permissions |
 | **Content-Type** | `application/json` (default), `multipart/form-data` for uploads |
 | **Pagination** | Cursor-based (`after`, `before`, `limit`) for high-volume; offset for small collections |
@@ -66,28 +66,26 @@ This document defines the REST API surface for the AATOS Trade Operating System.
 
 ## 4. Authentication & Identity
 
-### POST /auth/token
-Exchange authorization code for tokens.
+AATOS currently implements JWT-based authentication with email/password login. OAuth 2.0 + OIDC are planned for future enterprise integrations but are not implemented in the current release.
+
+### POST /auth/login
+Authenticate with email and password to receive JWT access and refresh tokens.
 
 **Request:**
 ```json
 {
-  "grant_type": "authorization_code",
-  "code": "authcode_xxx",
-  "redirect_uri": "https://app.aatos.trade/auth/callback",
-  "client_id": "aatos-web-client",
-  "code_verifier": "pkce_verifier_xxx"
+  "email": "user@example.com",
+  "password": "securePassword123"
 }
 ```
 
 **Response:**
 ```json
 {
-  "access_token": "eyJhbGciOiJSUzI1NiIs...",
+  "access_token": "eyJhbGciOiJIUzI1NiIs...",
   "refresh_token": "refreshtoken_xxx",
   "token_type": "Bearer",
   "expires_in": 3600,
-  "scope": "read:products write:deals read:messages",
   "user": {
     "id": "usr_abc123",
     "email": "user@example.com",
@@ -105,6 +103,8 @@ Exchange authorization code for tokens.
   }
 }
 ```
+
+> **Note:** The `/auth/token` endpoint described in earlier versions (OAuth 2.0 Authorization Code flow) is not implemented. Use `/auth/login` instead.
 
 ### GET /auth/me
 Get current user profile with active organization context.

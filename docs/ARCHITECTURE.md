@@ -167,7 +167,7 @@ This document defines the enterprise-grade architecture for the platform. It sup
 │  Zero Trust Security Model                                   │
 ├─────────────────────────────────────────────────────────────┤
 │  Perimeter: WAF + DDoS Protection + Bot Detection            │
-│  Authentication: OAuth 2.0 + OIDC + MFA (TOTP/WebAuthn)      │
+│  Authentication: JWT Bearer + MFA (TOTP/WebAuthn planned)      │
 │  Authorization: RBAC + ABAC + Resource-level permissions     │
 │  Data: AES-256 encryption at rest, TLS 1.3 in transit        │
 │  Secrets: HashiCorp Vault / AWS Secrets Manager              │

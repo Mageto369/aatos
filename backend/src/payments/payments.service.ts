@@ -222,7 +222,9 @@ export class PaymentsService {
   }
 
   /**
-   * Release held payment to payee (escrow release)
+   * Release held payment to payee
+   * NOTE: AATOS does not custody customer funds. This records the release
+   * request. Actual fund transfer is handled by the licensed payment provider.
    */
   async releasePayment(paymentId: string, releasedBy: string): Promise<Payment> {
     const payment = await this.findOne(paymentId);
@@ -231,7 +233,9 @@ export class PaymentsService {
       throw new Error(`Cannot release payment in status: ${payment.status}`);
     }
 
-    // In production: trigger Flutterwave transfer to payee
+    // AATOS does not hold or transfer funds.
+    // The licensed payment provider (e.g., Flutterwave) handles actual transfers.
+    // This method records the release milestone for audit purposes.
     payment.status = 'released';
     payment.releasedAt = new Date();
     payment.releasedBy = releasedBy;

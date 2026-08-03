@@ -3,6 +3,8 @@ import { APP_INTERCEPTOR, APP_FILTER, APP_PIPE } from '@nestjs/core';
 import { TransformInterceptor } from './interceptors/transform.interceptor';
 import { HttpExceptionFilter } from './filters/http-exception.filter';
 import { ValidationPipe } from '@nestjs/common';
+import { AuditLogger } from './audit-logger.service';
+import { RateLimitStore, RateLimitGuard } from './rate-limit.guard';
 
 @Global()
 @Module({
@@ -15,7 +17,9 @@ import { ValidationPipe } from '@nestjs/common';
       provide: APP_FILTER,
       useClass: HttpExceptionFilter,
     },
+    AuditLogger,
+    RateLimitStore,
   ],
-  exports: [],
+  exports: [AuditLogger, RateLimitStore],
 })
 export class CommonModule {}
