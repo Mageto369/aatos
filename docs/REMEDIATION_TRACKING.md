@@ -1,6 +1,6 @@
 # AATOS Remediation Tracking
 **Updated:** 2026-08-04
-**Current Phase:** Phase 0 — Stop-Loss
+**Current Phase:** Phase 1 — Pilot Readiness
 **Pilot Decision:** APPROVED — Kenya → United States, Green Specialty Coffee
 
 ---
@@ -9,35 +9,62 @@
 
 | Phase | Status | Gate | Completion |
 |---|---|---|---|
-| Phase 0: Stop-Loss | In Progress | D026 approved | 60% |
-| Phase 1: Pilot Readiness | Blocked | Phase 0 gate | 0% |
+| Phase 0: Stop-Loss | **COMPLETE** | PASSED | 100% |
+| Phase 1: Pilot Readiness | **IN PROGRESS** | Engineering + Compliance + Product | 5% |
 | Phase 2: Commercial MVP | Blocked | Phase 1 gate | 0% |
 | Phase 3: Production Scale | Blocked | Phase 2 gate | 0% |
 | Phase 4: Enterprise | Blocked | Phase 3 gate | 0% |
 
 ---
 
-## Phase 0 Work Packages
+## Phase 1 Work Packages — Engineering
 
-| ID | Work Package | Track | Status | Owner | Effort | Blocker |
-|---|---|---|---|---|---|---|
-| 0.1 | Disable `synchronize: true` | Engineering | **COMPLETE** | krenovia | S | — |
-| 0.2 | Remove false test-coverage claims | Engineering | **COMPLETE** | krenovia | XS | Claims audit documents truth; DEV_STATUS correction pending |
-| 0.3 | Remove or correct escrow claims | Engineering | **COMPLETE** | krenovia | XS | — |
-| 0.4 | Draft Terms of Service framework | Strategic | Not started | Legal | M | WP 0.5 dependency |
-| 0.5 | Draft liability framework | Strategic | Not started | Legal | S | Jurisdiction: Delaware per directive |
-| 0.6 | Record Kenya-to-U.S. pilot corridor | Strategic | **COMPLETE** | Executive | XS | — |
-| 0.7 | Record green specialty coffee as first active commodity | Strategic | **COMPLETE** | Executive | XS | — |
-| 0.8 | Establish decision and risk registers | Strategic | **COMPLETE** | krenovia | XS | — |
-| 0.9 | Create RISK_REGISTER.md | Strategic | **COMPLETE** | krenovia | S | — |
-| 0.10 | Correct OAuth and API specification claims | Engineering | **COMPLETE** | krenovia | XS | — |
-| 0.11 | Initialize or validate Git and CI | Engineering | **COMPLETE** | krenovia | XS | Branch phase-0/stop-loss created |
-| 0.12 | Establish secrets and environment controls | Engineering | Not started | krenovia | S | — |
-| 0.13 | Create database migration policy | Engineering | **COMPLETE** | krenovia | XS | docs/MIGRATION_POLICY.md |
-| 0.14 | Audit documentation against code | Engineering | **COMPLETE** | krenovia | M | docs/CLAIMS_AUDIT.md |
-| 0.15 | Define country and commodity activation states | Product | Not started | krenovia | M | — |
+| ID | Work Package | Status | Owner | Effort | Blocker |
+|---|---|---|---|---|---|
+| 1.1 | Generate initial TypeORM migration | Not started | krenovia | M | — |
+| 1.2 | Implement quotation frontend | Not started | krenovia | M | — |
+| 1.3 | Implement contract generation | Not started | krenovia | L | — |
+| 1.4 | Implement contract acceptance records | Not started | krenovia | M | 1.3 |
+| 1.5 | Build compliance dashboard | Not started | krenovia | M | — |
+| 1.6 | Build document review workflow | Not started | krenovia | M | — |
+| 1.7 | Build inspection workflow frontend | Not started | krenovia | S | — |
+| 1.8 | Payment provider abstraction | Not started | krenovia | M | — |
+| 1.9 | Payment webhook verification | Not started | krenovia | S | — |
+| 1.10 | Rate limiting enforcement | Not started | krenovia | XS | — |
+| 1.11 | MFA for privileged users | Not started | krenovia | M | — |
+| 1.12 | Upload controls and validation | Not started | krenovia | S | — |
+| 1.13 | Audit logging system | Not started | krenovia | M | — |
+| 1.14 | Critical-path tests | Not started | krenovia | L | — |
+| 1.15 | CI pipeline validation | Not started | krenovia | S | — |
+| 1.16 | Backup and restore test | Not started | krenovia | S | — |
 
-**Phase 0 Completion:** 10/15 work packages complete (67%)
+## Phase 1 Work Packages — Compliance
+
+| ID | Work Package | Status | Owner | Effort | Blocker |
+|---|---|---|---|---|---|
+| 1.17 | Kenyan supplier verification flow | Not started | krenovia | M | — |
+| 1.18 | U.S. buyer verification flow | Not started | krenovia | M | — |
+| 1.19 | Kenya export-document map | Not started | krenovia | M | — |
+| 1.20 | U.S. green-coffee import requirement map | Not started | krenovia | L | — |
+| 1.21 | Sanctions-screening workflow | Not started | krenovia | M | — |
+| 1.22 | Privacy framework implementation | Not started | krenovia | M | — |
+| 1.23 | Compliance rule review process | Not started | krenovia | S | — |
+| 1.24 | Certificate-expiration tracking | Not started | krenovia | S | — |
+
+## Phase 1 Work Packages — Product
+
+| ID | Work Package | Status | Owner | Effort | Blocker |
+|---|---|---|---|---|---|
+| 1.25 | Supplier onboarding journey | Not started | krenovia | M | — |
+| 1.26 | Buyer onboarding journey | Not started | krenovia | M | — |
+| 1.27 | Green-coffee product schema | Not started | krenovia | S | — |
+| 1.28 | RFQ journey refinement | Not started | krenovia | S | — |
+| 1.29 | Quotation journey | Not started | krenovia | M | 1.2 |
+| 1.30 | Deal journey | Not started | krenovia | S | — |
+| 1.31 | Compliance journey | Not started | krenovia | M | 1.5 |
+| 1.32 | Inspection journey | Not started | krenovia | S | 1.7 |
+| 1.33 | Payment milestone journey | Not started | krenovia | S | 1.8 |
+| 1.34 | Admin review journey | Not started | krenovia | M | — |
 
 ---
 
@@ -48,27 +75,7 @@
 | D026: Pilot Scope — Kenya→U.S. Green Coffee | 2026-08-04 | Executive | APPROVED |
 | D027: Payment Model — No Custody | 2026-08-04 | Autonomous CTO | RECORDED |
 | D028: Jurisdiction — Delaware Working Assumption | 2026-08-04 | Autonomous CTO | RECORDED |
-
----
-
-## Open Blockers
-
-| Blocker | Blocks | Owner | Resolution |
-|---|---|---|---|
-| Terms of Service draft | Phase 0 gate | Legal / Autonomous | Delaware assumption accepted; draft in progress |
-| Liability framework | Phase 0 gate | Legal / Autonomous | Depends on ToS draft |
-| Country/commodity activation model | Phase 0 gate | Product | In progress |
-| Initial TypeORM migration | Phase 0 gate | Engineering | Schema exists; migration generation pending |
-
----
-
-## Next Actions (Priority Order)
-
-1. **WP 0.15** — Define country and commodity activation states (enables corridor controls)
-2. **WP 0.4** — Draft Terms of Service framework (Delaware law, no custody, no guarantees)
-3. **WP 0.5** — Draft liability framework (limited liability, platform not regulated party)
-4. **WP 0.12** — Establish secrets controls (.env validation, no secrets in repo)
-5. **Generate initial TypeORM migration** from schema/01_core_schema.sql
+| D029: Phase 0 Gate — PASSED | 2026-08-04 | krenovia | APPROVED |
 
 ---
 
