@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Upload, FileText, Search, Download, Trash2, X, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import api from '@/lib/api'
+import { api } from '@/lib/api'
 
 interface DocumentItem {
   id: string

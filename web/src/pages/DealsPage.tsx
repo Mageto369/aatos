@@ -11,7 +11,7 @@ import {
   Truck,
   ArrowRight,
 } from 'lucide-react'
-import api from '@/lib/api'
+import { api } from '@/lib/api'
 
 interface Deal {
   id: string

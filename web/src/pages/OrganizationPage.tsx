@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Shield, MapPin, Users, Building2, Award, Mail, Globe, Phone } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import api from '@/lib/api'
+import { api } from '@/lib/api'
 
 interface Organization {
   id: string

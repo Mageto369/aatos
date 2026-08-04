@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Plus, Search, Calendar, MapPin, ClipboardCheck, CheckCircle, Clock, XCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import api from '@/lib/api'
+import { api } from '@/lib/api'
 
 interface Inspection {
   id: string

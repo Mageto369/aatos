@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Bell, Check, LogOut, User } from 'lucide-react'
+import { Bell, LogOut, User } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
 import { cn } from '@/lib/utils'
-import api from '@/lib/api'
+import { api } from '@/lib/api'
 
 interface Notification {
   id: string

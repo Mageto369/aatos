@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import api from '@/lib/api'
+import { api } from '@/lib/api'
 
 interface User {
   id: string
@@ -9,6 +9,7 @@ interface User {
   lastName: string
   displayName: string
   status: string
+  orgId: string
 }
 
 interface AuthState {

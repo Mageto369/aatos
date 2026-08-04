@@ -1,8 +1,7 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Plus, Search, Package, MapPin, Tag } from 'lucide-react'
-import api from '@/lib/api'
+import { api } from '@/lib/api'
 
 interface Product {
   id: string

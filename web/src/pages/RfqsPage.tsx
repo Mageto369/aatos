@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Plus, Search, Calendar, MapPin, Tag, FileQuestion } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import api from '@/lib/api'
+import { api } from '@/lib/api'
 
 interface RFQ {
   id: string

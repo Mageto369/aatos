@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useAuthStore } from '@/stores/authStore'
-import { Bell, Shield, User, Globe, Moon, Sun } from 'lucide-react'
+import { Bell, Shield, User } from 'lucide-react'
 
 export function SettingsPage() {
   const { user } = useAuthStore()

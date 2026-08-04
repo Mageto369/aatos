@@ -5,12 +5,9 @@ import {
   Package,
   FileQuestion,
   FileText,
-  TrendingUp,
-  AlertCircle,
-  Clock,
   ArrowRight,
 } from 'lucide-react'
-import api from '@/lib/api'
+import { api } from '@/lib/api'
 
 export function DashboardPage() {
   const { data: stats } = useQuery({

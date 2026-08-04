@@ -10,13 +10,10 @@ import {
   Activity,
   Shield,
   Clock,
-  Mail,
   CheckCircle,
-  XCircle,
   AlertTriangle,
 } from 'lucide-react'
-import api from '@/lib/api'
-import { Link } from 'react-router-dom'
+import { api } from '@/lib/api'
 
 interface PlatformStats {
   users: { total: number }

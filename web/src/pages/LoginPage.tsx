@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
 import { Eye, EyeOff, Mail, Lock, ArrowRight } from 'lucide-react'
 
@@ -148,15 +147,6 @@ export function LoginPage() {
             <a href="#" className="text-primary-600 font-medium hover:text-primary-700">
               Get started
             </a>
-          </p>
-        </div>
-      </div>
-    </div>
-  )
-}
-text-primary-700">
-              Get started
-            </Link>
           </p>
         </div>
       </div>

@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
-import { ClipboardCheck, Calendar, MapPin, CheckCircle, AlertTriangle, Plus } from 'lucide-react'
+import { ClipboardCheck, Calendar, MapPin, Plus } from 'lucide-react'
 
 interface Inspection {
   id: string

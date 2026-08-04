@@ -9,9 +9,8 @@ import {
   XCircle,
   Shield,
   Wallet,
-  TrendingUp,
 } from 'lucide-react'
-import api from '@/lib/api'
+import { api } from '@/lib/api'
 
 interface Payment {
   id: string
@@ -147,14 +146,6 @@ export function PaymentsPage() {
       const params = new URLSearchParams()
       if (statusFilter) params.append('status', statusFilter)
       const res = await api.get(`/payments?${params}`)
-      return res.data
-    },
-  })
-
-  const { data: summary } = useQuery({
-    queryKey: ['payments-summary'],
-    queryFn: async () => {
-      const res = await api.get('/payments/deal/all/summary')
       return res.data
     },
   })

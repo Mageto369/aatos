@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { io, Socket } from 'socket.io-client'
+import io from 'socket.io-client'
 import { ArrowLeft, Send, Paperclip, CheckCircle, Clock, Circle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores/authStore'
-import api from '@/lib/api'
+import { api } from '@/lib/api'
 
 interface Message {
   id: string
@@ -42,7 +42,7 @@ export function DealRoomPage() {
   const [inputValue, setInputValue] = useState('')
   const [isConnected, setIsConnected] = useState(false)
   const [typingUsers, setTypingUsers] = useState<string[]>([])
-  const socketRef = useRef<Socket | null>(null)
+  const socketRef = useRef<any>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout>>()
 

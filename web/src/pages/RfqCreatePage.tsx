@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import { ArrowLeft, Plus } from 'lucide-react'
-import api from '@/lib/api'
+import { api } from '@/lib/api'
 
 export function RfqCreatePage() {
   const navigate = useNavigate()
