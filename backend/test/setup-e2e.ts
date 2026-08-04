@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import * as request from 'supertest';
+import request from 'supertest';
 import { AppModule } from '../src/app.module';
 
 let app: INestApplication;
@@ -17,6 +17,10 @@ beforeAll(async () => {
   await app.init();
 
   dataSource = app.get(DataSource);
+
+  (global as any).app = app;
+  (global as any).request = request;
+  (global as any).dataSource = dataSource;
 });
 
 afterAll(async () => {
@@ -27,7 +31,3 @@ beforeEach(async () => {
   await dataSource.dropDatabase();
   await dataSource.synchronize();
 });
-
-global.app = app;
-global.request = request;
-global.dataSource = dataSource;

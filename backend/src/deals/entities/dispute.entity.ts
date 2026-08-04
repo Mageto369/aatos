@@ -1,5 +1,14 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
+export interface DisputeEvidence {
+  id: string;
+  type: 'document' | 'photo' | 'video' | 'message';
+  url: string;
+  description: string;
+  uploadedBy: string;
+  uploadedAt: Date;
+}
+
 @Entity('disputes')
 export class DisputeEntity {
   @PrimaryGeneratedColumn('uuid')
@@ -18,10 +27,10 @@ export class DisputeEntity {
   description: string;
 
   @Column({ type: 'varchar', length: 50, default: 'open' })
-  status: string;
+  status: 'open' | 'under_review' | 'resolved' | 'escalated' | 'cancelled';
 
   @Column({ type: 'varchar', length: 50 })
-  type: string;
+  type: 'quality' | 'quantity' | 'delivery' | 'payment' | 'other';
 
   @Column({ type: 'decimal', precision: 14, scale: 2, nullable: true })
   claimedAmount: number;
@@ -29,8 +38,8 @@ export class DisputeEntity {
   @Column({ type: 'varchar', length: 10, nullable: true })
   currency: string;
 
-  @Column({ type: 'simple-array', nullable: true })
-  evidence: string[];
+  @Column({ type: 'jsonb', nullable: true })
+  evidence: DisputeEvidence[];
 
   @Column({ type: 'timestamp', nullable: true })
   resolvedAt: Date;

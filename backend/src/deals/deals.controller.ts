@@ -18,7 +18,7 @@ export class DealsController {
   @Post()
   @ApiOperation({ summary: 'Create a new deal' })
   @ApiResponse({ status: 201, description: 'Deal created' })
-  create(@Body() dto: CreateDealDto, @Request() req) {
+  create(@Body() dto: CreateDealDto, @Request() req: any) {
     if (!req.user.orgId) {
       throw new ForbiddenException('User must belong to an organization');
     }
@@ -27,13 +27,13 @@ export class DealsController {
 
   @Get()
   @ApiOperation({ summary: 'List deals for organization' })
-  findAll(@Query() filters, @Request() req) {
+  findAll(@Query() filters: any, @Request() req: any) {
     return this.dealsService.findAll({ ...filters, orgId: req.user.orgId });
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get deal details' })
-  async findOne(@Param('id') id: string, @Request() req) {
+  async findOne(@Param('id') id: string, @Request() req: any) {
     const deal = await this.dealsService.findOne(id);
     // Authorization check
     if (deal.buyerOrgId !== req.user.orgId && deal.supplierOrgId !== req.user.orgId) {
@@ -48,7 +48,7 @@ export class DealsController {
     @Param('id') dealId: string,
     @Param('milestoneId') milestoneId: string,
     @Body() dto: UpdateMilestoneDto,
-    @Request() req,
+    @Request() req: any,
   ) {
     const milestone = await this.dealsService.updateMilestone(dealId, milestoneId, req.user.orgId, dto);
     // Trigger workflow for completed milestones (payment releases, status transitions)

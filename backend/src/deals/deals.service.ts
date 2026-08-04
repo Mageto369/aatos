@@ -31,10 +31,12 @@ export class DealsService {
     const milestones = this.buildDefaultMilestones(saved.id, dto.milestones || []);
     await this.milestoneRepo.save(milestones);
 
-    return this.dealRepo.findOne({
+    const result = await this.dealRepo.findOne({
       where: { id: saved.id },
       relations: ['milestones', 'buyer', 'supplier'],
     });
+    if (!result) throw new Error('Deal not found after creation');
+    return result;
   }
 
   async findAll(filters: any) {
@@ -60,7 +62,7 @@ export class DealsService {
 
   async findOne(id: string): Promise<Deal> {
     const deal = await this.dealRepo.findOne({
-      where: { id, deletedAt: null },
+      where: { id,  },
       relations: ['milestones', 'buyer', 'supplier'],
     });
     if (!deal) {

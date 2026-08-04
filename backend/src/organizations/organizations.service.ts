@@ -93,7 +93,7 @@ export class OrganizationsService {
   }
 
   async findOne(id: string): Promise<Organization> {
-    const org = await this.orgRepo.findOne({ where: { id, deletedAt: null } });
+    const org = await this.orgRepo.findOne({ where: { id,  } });
     if (!org) {
       throw new NotFoundException('Organization not found');
     }
@@ -101,7 +101,7 @@ export class OrganizationsService {
   }
 
   async findBySlug(slug: string): Promise<Organization> {
-    const org = await this.orgRepo.findOne({ where: { slug, deletedAt: null } });
+    const org = await this.orgRepo.findOne({ where: { slug,  } });
     if (!org) {
       throw new NotFoundException('Organization not found');
     }
@@ -121,7 +121,7 @@ export class OrganizationsService {
 
   async getMembers(organizationId: string) {
     return this.memberRepo.find({
-      where: { organizationId, deletedAt: null },
+      where: { organizationId,  },
       relations: ['user'],
     });
   }

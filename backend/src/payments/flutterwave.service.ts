@@ -5,7 +5,7 @@ import {
   PaymentProvider,
   InitiatePaymentParams,
   PaymentInitiationResult,
-  PaymentVerificationResult,
+  PaymentResult,
   PayoutParams,
   PayoutResult,
   WebhookResult,
@@ -104,9 +104,9 @@ export class FlutterwaveService implements PaymentProvider {
     }
   }
 
-  async verifyPayment(txRef: string): Promise<PaymentVerificationResult> {
+  async verifyPayment(txRef: string): Promise<PaymentResult> {
     if (!this.isConfigured) {
-      return { success: true, status: 'successful', amount: 1000, currency: 'USD' };
+      return { success: true, transactionId: txRef, status: 'completed', providerRef: txRef, amount: 1000, currency: 'USD', message: 'Mock verification' };
     }
 
     try {
@@ -117,22 +117,19 @@ export class FlutterwaveService implements PaymentProvider {
         const d = verify.data;
         return {
           success: d.status === 'successful',
-          status: d.status === 'successful' ? 'successful' : d.status === 'pending' ? 'pending' : 'failed',
-          amount: d.amount,
-          currency: d.currency,
-          chargedAmount: d.charged_amount,
-          appFee: d.app_fee,
-          processorResponse: d.processor_response,
-          customerEmail: d.customer?.email,
-          customerName: d.customer?.name,
-          paidAt: d.created_at,
+          transactionId: txRef,
+          status: d.status === 'successful' ? 'completed' : d.status === 'pending' ? 'pending' : 'failed',
+          providerRef: d.id?.toString() || txRef,
+          amount: d.amount || 0,
+          currency: d.currency || 'USD',
+          message: d.processor_response || 'Payment verified',
           metadata: d.meta,
         };
       }
-      return { success: false, status: 'unknown', error: 'Transaction not found' };
+      return { success: false, transactionId: txRef, status: 'failed', providerRef: txRef, amount: 0, currency: 'USD', message: 'Transaction not found' };
     } catch (err: any) {
       this.logger.error(`Flutterwave verify failed: ${err.message}`);
-      return { success: false, status: 'unknown', error: err.message };
+      return { success: false, transactionId: txRef, status: 'failed', providerRef: txRef, amount: 0, currency: 'USD', message: err.message };
     }
   }
 

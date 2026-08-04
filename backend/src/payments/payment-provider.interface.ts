@@ -5,13 +5,42 @@ import { Injectable } from '@nestjs/common';
  * All payment providers must implement this interface.
  * AATOS does not custody funds. Providers handle actual money movement.
  */
+export interface CreatePaymentInput {
+  amount: number;
+  currency: string;
+  txRef: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface PaymentResult {
+  success: boolean;
+  transactionId: string;
+  status: string;
+  providerRef: string;
+  amount: number;
+  currency: string;
+  message: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface RefundResult {
+  success: boolean;
+  refundId: string;
+  originalTransactionId: string;
+  amount: number;
+  status: string;
+  message: string;
+}
+
 export interface PaymentProvider {
   readonly name: string;
   readonly supportedCurrencies: string[];
   readonly supportsEscrow: boolean;
 
   initiatePayment(params: InitiatePaymentParams): Promise<PaymentInitiationResult>;
-  verifyPayment(txRef: string): Promise<PaymentVerificationResult>;
+  verifyPayment(txRef: string): Promise<PaymentResult>;
+  createPayment?(input: CreatePaymentInput): Promise<PaymentResult>;
+  refundPayment?(transactionId: string, amount?: number): Promise<RefundResult>;
   initiatePayout?(params: PayoutParams): Promise<PayoutResult>;
   handleWebhook?(payload: unknown, signature?: string): Promise<WebhookResult>;
 }

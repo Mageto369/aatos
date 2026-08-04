@@ -15,7 +15,7 @@ export class UploadController {
   async getPresignedUrl(
     @Body('fileName') fileName: string,
     @Body('mimeType') mimeType: string,
-    @Request() req,
+    @Request() req: any,
   ) {
     const result = await this.uploadService.generatePresignedUrl(
       fileName,

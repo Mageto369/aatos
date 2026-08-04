@@ -56,7 +56,7 @@ export class RfqsService {
 
   async findOne(id: string): Promise<RFQ> {
     const rfq = await this.rfqRepo.findOne({
-      where: { id, deletedAt: null },
+      where: { id,  },
     });
     if (!rfq) {
       throw new NotFoundException('RFQ not found');
@@ -94,7 +94,7 @@ export class RfqsService {
 
   async getQuotations(rfqId: string) {
     return this.quotationRepo.find({
-      where: { rfqId, deletedAt: null },
+      where: { rfqId,  },
       order: { createdAt: 'DESC' },
     });
   }

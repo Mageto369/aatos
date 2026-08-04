@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, Index } from 'typeorm';
 
-export type InspectionType = 'farm' | 'facility' | 'warehouse' | 'packing' | 'port' | 'pre_shipment' | 'destination';
+export type InspectionType = 'farm' | 'facility' | 'warehouse' | 'packing' | 'port' | 'pre_shipment' | 'destination' | 'loading' | 'discharge' | 'quality' | 'quantity' | 'packaging';
 export type InspectionResult = 'pending' | 'pass' | 'fail' | 'conditional' | 'waiver';
 
 @Entity('inspections')

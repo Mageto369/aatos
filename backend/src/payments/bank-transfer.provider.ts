@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PaymentProvider, CreatePaymentInput, PaymentResult, RefundResult } from './payment-provider.interface';
+import { PaymentProvider, CreatePaymentInput, PaymentResult, RefundResult, InitiatePaymentParams, PaymentInitiationResult } from './payment-provider.interface';
 
 export interface BankTransferDetails {
   accountNumber: string;
@@ -24,6 +24,14 @@ export interface MobileMoneyDetails {
 export class BankTransferProvider implements PaymentProvider {
   readonly name = 'bank_transfer';
   readonly supportedCurrencies = ['USD', 'EUR', 'GBP', 'NGN', 'KES', 'GHS', 'ZAR'];
+  readonly supportsEscrow = false;
+
+  async initiatePayment(params: InitiatePaymentParams): Promise<PaymentInitiationResult> {
+    return {
+      link: null,
+      txRef: params.txRef,
+    };
+  }
 
   async createPayment(input: CreatePaymentInput): Promise<PaymentResult> {
     const details = input.metadata?.bankDetails as BankTransferDetails;
@@ -86,6 +94,14 @@ export class BankTransferProvider implements PaymentProvider {
 export class MobileMoneyProvider implements PaymentProvider {
   readonly name = 'mobile_money';
   readonly supportedCurrencies = ['NGN', 'KES', 'GHS', 'UGX', 'TZS', 'XOF', 'XAF'];
+  readonly supportsEscrow = false;
+
+  async initiatePayment(params: InitiatePaymentParams): Promise<PaymentInitiationResult> {
+    return {
+      link: null,
+      txRef: params.txRef,
+    };
+  }
 
   async createPayment(input: CreatePaymentInput): Promise<PaymentResult> {
     const details = input.metadata?.mobileMoneyDetails as MobileMoneyDetails;

@@ -1,8 +1,8 @@
 import { DataSource } from 'typeorm';
-import { User } from '../users/entities/user.entity';
-import { Organization } from '../organizations/entities/organization.entity';
-import { Product } from '../products/entities/product.entity';
-import { ProductCategory } from '../products/entities/product-category.entity';
+import { User } from '../../auth/entities/user.entity';
+import { Organization } from '../../organizations/entities/organization.entity';
+import { Product } from '../../products/entities/product.entity';
+import { ProductCategory } from '../../products/entities/product-category.entity';
 
 export async function seedDatabase(dataSource: DataSource): Promise<void> {
   console.log('Seeding database...');
@@ -66,7 +66,7 @@ export async function seedDatabase(dataSource: DataSource): Promise<void> {
   if (coffeeCategory) {
     const products = [
       {
-        name: 'Kenya AA Green Coffee',
+        title: 'Kenya AA Green Coffee',
         description: 'Premium Kenyan AA grade green coffee beans',
         categoryId: coffeeCategory.id,
         origin: 'KE',
@@ -78,7 +78,7 @@ export async function seedDatabase(dataSource: DataSource): Promise<void> {
         active: true,
       },
       {
-        name: 'Ethiopian Yirgacheffe',
+        title: 'Ethiopian Yirgacheffe',
         description: 'Single-origin Ethiopian Yirgacheffe',
         categoryId: coffeeCategory.id,
         origin: 'ET',
@@ -92,10 +92,10 @@ export async function seedDatabase(dataSource: DataSource): Promise<void> {
     ];
 
     for (const prod of products) {
-      const exists = await productRepo.findOne({ where: { name: prod.name } });
+      const exists = await productRepo.findOne({ where: { title: prod.title } });
       if (!exists) {
         await productRepo.save(prod);
-        console.log(`Created product: ${prod.name}`);
+        console.log(`Created product: ${prod.title}`);
       }
     }
   }

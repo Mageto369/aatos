@@ -2,6 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, LessThan } from 'typeorm';
 
+import { Document } from '../documents/entities/document.entity';
+
 export interface ExpiringCertificate {
   documentId: string;
   organizationId: string;
@@ -22,8 +24,8 @@ export class CertificateExpirationService {
   private readonly logger = new Logger(CertificateExpirationService.name);
 
   constructor(
-    @InjectRepository('documents')
-    private readonly documentRepo: Repository<any>,
+    @InjectRepository(Document)
+    private readonly documentRepo: Repository<Document>,
   ) {}
 
   /**
@@ -125,7 +127,6 @@ AATOS Compliance Team`,
         type: criticalTypes as any,
         expiryDate: LessThan(new Date()),
         status: 'verified' as any,
-        deletedAt: null,
       },
     });
     return count > 0;

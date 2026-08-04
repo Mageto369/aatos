@@ -31,7 +31,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
     // Look up primary organization
     const member = await this.memberRepo.findOne({
-      where: { userId: user.id, deletedAt: null },
+      where: { userId: user.id,  },
       order: { createdAt: 'ASC' },
     });
     return { userId: user.id, email: user.email, orgId: member?.organizationId || null };

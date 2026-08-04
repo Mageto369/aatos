@@ -1,6 +1,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Not } from 'typeorm';
+import { DisputeEntity, DisputeEvidence } from './entities/dispute.entity';
 
 export interface Dispute {
   id: string;
@@ -10,22 +11,11 @@ export interface Dispute {
   type: 'quality' | 'quantity' | 'delivery' | 'payment' | 'other';
   status: 'open' | 'under_review' | 'resolved' | 'escalated' | 'cancelled';
   description: string;
-  requestedResolution: string;
   evidence: DisputeEvidence[];
   resolution?: string;
-  resolvedBy?: string;
   resolvedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
-}
-
-export interface DisputeEvidence {
-  id: string;
-  type: 'document' | 'photo' | 'video' | 'message';
-  url: string;
-  description: string;
-  uploadedBy: string;
-  uploadedAt: Date;
 }
 
 /**
@@ -37,8 +27,8 @@ export class DisputeResolutionService {
   private readonly logger = new Logger(DisputeResolutionService.name);
 
   constructor(
-    @InjectRepository('disputes')
-    private readonly disputeRepo: Repository<any>,
+    @InjectRepository(DisputeEntity)
+    private readonly disputeRepo: Repository<DisputeEntity>,
   ) {}
 
   async createDispute(data: {
@@ -88,7 +78,6 @@ export class DisputeResolutionService {
     if (resolution) {
       dispute.resolution = resolution;
       dispute.resolvedAt = new Date();
-      dispute.resolvedBy = resolvedBy;
     }
 
     this.logger.log(`Dispute ${disputeId} status updated to ${status}`);
@@ -132,7 +121,7 @@ export class DisputeResolutionService {
 
     // Calculate average resolution time
     const resolvedDisputes = await this.disputeRepo.find({
-      where: { status: 'resolved', resolvedAt: Not(null) },
+      where: { status: 'resolved' },
     });
 
     const avgResolutionTime = resolvedDisputes.length > 0

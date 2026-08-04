@@ -3,6 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PaymentProviderRegistry } from '../payments/payment-provider.registry';
 
+import { Deal } from './entities/deal.entity';
+import { Payment } from '../payments/entities/payment.entity';
+
 export interface CancellationRequest {
   id: string;
   dealId: string;
@@ -40,10 +43,10 @@ export class RefundCancellationService {
   private readonly logger = new Logger(RefundCancellationService.name);
 
   constructor(
-    @InjectRepository('deals')
-    private readonly dealRepo: Repository<any>,
-    @InjectRepository('payments')
-    private readonly paymentRepo: Repository<any>,
+    @InjectRepository(Deal)
+    private readonly dealRepo: Repository<Deal>,
+    @InjectRepository(Payment)
+    private readonly paymentRepo: Repository<Payment>,
     private readonly providerRegistry: PaymentProviderRegistry,
   ) {}
 
@@ -70,7 +73,7 @@ export class RefundCancellationService {
       reason: data.reason,
       status: 'pending',
       refundAmount,
-      refundCurrency: deal.currency,
+      refundCurrency: deal.priceCurrency,
       createdAt: new Date(),
     };
 
@@ -120,7 +123,7 @@ export class RefundCancellationService {
     requestedBy: string;
   }): Promise<RefundRequest> {
     const payment = await this.paymentRepo.findOne({
-      where: { dealId: data.dealId, status: 'completed' },
+      where: { dealId: data.dealId, status: 'held' },
       order: { createdAt: 'DESC' },
     });
 
@@ -128,8 +131,11 @@ export class RefundCancellationService {
       throw new BadRequestException('No completed payment found for refund');
     }
 
-    const provider = this.providerRegistry.get(payment.provider);
-    const refundResult = await provider.refundPayment(payment.providerRef, data.amount);
+    const provider = payment.externalProvider ? this.providerRegistry.get(payment.externalProvider) : undefined;
+    if (!provider || !provider.refundPayment) {
+      throw new BadRequestException('Refund not supported for this payment method');
+    }
+    const refundResult = await provider.refundPayment(payment.externalReference || '', data.amount);
 
     const refund: RefundRequest = {
       id: crypto.randomUUID(),

@@ -66,7 +66,7 @@ export class WorkflowService {
     // Send notifications to supplier members
     for (const supplier of suppliers) {
       const members = await this.memberRepo.find({
-        where: { organizationId: supplier.id, deletedAt: null },
+        where: { organizationId: supplier.id,  },
       });
 
       for (const member of members) {
@@ -100,11 +100,11 @@ export class WorkflowService {
     try {
       const quote = await this.quoteRepo.findOne({
         where: { id: quoteId },
-        relations: ['rfq'],
       });
       if (!quote) throw new Error('Quote not found');
 
-      const rfq = quote.rfq;
+      const rfq = await this.rfqRepo.findOne({ where: { id: quote.rfqId } });
+      if (!rfq) throw new Error('RFQ not found');
 
       // Create Deal
       const deal = this.dealRepo.create({
@@ -343,8 +343,8 @@ export class WorkflowService {
   private async notifyDealCreated(deal: Deal): Promise<void> {
     const members = await this.memberRepo.find({
       where: [
-        { organizationId: deal.buyerOrgId, deletedAt: null },
-        { organizationId: deal.supplierOrgId, deletedAt: null },
+        { organizationId: deal.buyerOrgId,  },
+        { organizationId: deal.supplierOrgId,  },
       ],
     });
 
@@ -369,8 +369,8 @@ export class WorkflowService {
 
     const members = await this.memberRepo.find({
       where: [
-        { organizationId: deal.buyerOrgId, deletedAt: null },
-        { organizationId: deal.supplierOrgId, deletedAt: null },
+        { organizationId: deal.buyerOrgId,  },
+        { organizationId: deal.supplierOrgId,  },
       ],
     });
 
@@ -392,8 +392,8 @@ export class WorkflowService {
   private async notifyInspectionResult(deal: Deal, result: string): Promise<void> {
     const members = await this.memberRepo.find({
       where: [
-        { organizationId: deal.buyerOrgId, deletedAt: null },
-        { organizationId: deal.supplierOrgId, deletedAt: null },
+        { organizationId: deal.buyerOrgId,  },
+        { organizationId: deal.supplierOrgId,  },
       ],
     });
 

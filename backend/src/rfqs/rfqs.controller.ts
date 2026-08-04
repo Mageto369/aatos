@@ -16,7 +16,7 @@ export class RfqsController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new RFQ' })
-  create(@Body() data: any, @Request() req) {
+  create(@Body() data: any, @Request() req: any) {
     if (!req.user.orgId) {
       throw new ForbiddenException('User must belong to an organization');
     }
@@ -25,7 +25,7 @@ export class RfqsController {
 
   @Post(':id/publish')
   @ApiOperation({ summary: 'Publish an RFQ' })
-  async publish(@Param('id') id: string, @Request() req) {
+  async publish(@Param('id') id: string, @Request() req: any) {
     const result = await this.rfqsService.publish(id, req.user.orgId);
     // Trigger workflow: find matching suppliers and send notifications
     this.workflowService.onRfqPublished(id).catch(console.error);
@@ -34,7 +34,7 @@ export class RfqsController {
 
   @Get()
   @ApiOperation({ summary: 'List RFQs' })
-  findAll(@Query() filters, @Request() req) {
+  findAll(@Query() filters: any, @Request() req: any) {
     return this.rfqsService.findAll({ ...filters, orgId: req.user.orgId });
   }
 
@@ -46,7 +46,7 @@ export class RfqsController {
 
   @Post(':id/quotes')
   @ApiOperation({ summary: 'Submit a quotation' })
-  createQuotation(@Param('id') id: string, @Body() data: any, @Request() req) {
+  createQuotation(@Param('id') id: string, @Body() data: any, @Request() req: any) {
     if (!req.user.orgId) {
       throw new ForbiddenException('User must belong to an organization');
     }
@@ -58,7 +58,7 @@ export class RfqsController {
   async acceptQuote(
     @Param('id') rfqId: string,
     @Param('quoteId') quoteId: string,
-    @Request() req,
+    @Request() req: any,
   ) {
     if (!req.user.orgId) {
       throw new ForbiddenException('User must belong to an organization');

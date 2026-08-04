@@ -17,7 +17,7 @@ export class InspectionsController {
 
   @Post()
   @ApiOperation({ summary: 'Request a new inspection' })
-  async create(@Body() data: CreateInspectionDto, @Request() req) {
+  async create(@Body() data: CreateInspectionDto, @Request() req: any) {
     return this.inspectionsService.create(req.user.orgId, req.user.userId, data);
   }
 
@@ -29,7 +29,7 @@ export class InspectionsController {
     @Query('type') type?: string,
     @Query('limit') limit?: string,
     @Query('offset') offset?: string,
-    @Request() req,
+    @Request() req?: any,
   ) {
     return this.inspectionsService.findAll({
       orgId: req.user.orgId,
@@ -43,7 +43,7 @@ export class InspectionsController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get inspection details' })
-  async findOne(@Param('id') id: string, @Request() req) {
+  async findOne(@Param('id') id: string, @Request() req: any) {
     return this.inspectionsService.findOne(id, req.user.orgId);
   }
 
@@ -52,7 +52,7 @@ export class InspectionsController {
   async updateStatus(
     @Param('id') id: string,
     @Body() data: UpdateInspectionDto,
-    @Request() req,
+    @Request() req: any,
   ) {
     const result = await this.inspectionsService.updateStatus(id, req.user.orgId, data.status || '', data);
     // Trigger workflow if inspection passed — auto-advances deal milestone
@@ -64,7 +64,7 @@ export class InspectionsController {
 
   @Delete(':id')
   @ApiOperation({ summary: 'Cancel inspection' })
-  async remove(@Param('id') id: string, @Request() req) {
+  async remove(@Param('id') id: string, @Request() req: any) {
     await this.inspectionsService.remove(id, req.user.orgId);
     return { message: 'Inspection cancelled' };
   }

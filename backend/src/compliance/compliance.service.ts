@@ -53,7 +53,7 @@ export class ComplianceService {
       where: {
         originCountry: data.originCountry,
         destinationCountry: data.destinationCountry,
-        productCategoryId: data.productCategoryId || null,
+        ...(data.productCategoryId ? { productCategoryId: data.productCategoryId } : {}),
         ruleStatus: 'active',
       },
     });
@@ -86,10 +86,12 @@ export class ComplianceService {
 
     await this.itemRepo.save(items);
 
-    return this.checklistRepo.findOne({
+    const result = await this.checklistRepo.findOne({
       where: { id: saved.id },
       relations: ['items'],
     });
+    if (!result) throw new Error('Checklist not found after creation');
+    return result;
   }
 
   async updateItemStatus(

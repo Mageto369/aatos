@@ -1,7 +1,9 @@
 import { IsString, IsOptional, IsEnum, IsUUID, IsDateString } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-const INSPECTION_TYPES = ['pre_shipment', 'loading', 'discharge', 'destination', 'quality', 'quantity', 'packaging'] as const;
+import { InspectionType } from '../entities/inspection.entity';
+
+const INSPECTION_TYPES: InspectionType[] = ['pre_shipment', 'loading', 'discharge', 'destination', 'quality', 'quantity', 'packaging'];
 const INSPECTION_STATUSES = ['requested', 'scheduled', 'in_progress', 'completed', 'failed', 'cancelled'] as const;
 
 export class CreateInspectionDto {
@@ -11,7 +13,7 @@ export class CreateInspectionDto {
 
   @ApiProperty({ enum: INSPECTION_TYPES })
   @IsEnum(INSPECTION_TYPES)
-  inspectionType: string;
+  inspectionType: InspectionType;
 
   @ApiPropertyOptional()
   @IsOptional()
@@ -21,7 +23,7 @@ export class CreateInspectionDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsDateString()
-  scheduledDate?: string;
+  scheduledDate?: Date;
 
   @ApiPropertyOptional()
   @IsOptional()

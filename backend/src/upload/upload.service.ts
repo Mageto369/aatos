@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-interface PresignedUrlResponse {
+export interface PresignedUrlResponse {
   uploadUrl: string;
   fileUrl: string;
   key: string;

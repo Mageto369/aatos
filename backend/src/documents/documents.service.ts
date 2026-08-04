@@ -48,7 +48,7 @@ export class DocumentsService {
 
   async findOne(id: string, orgId: string): Promise<Document> {
     const doc = await this.docRepo.findOne({
-      where: { id, deletedAt: null },
+      where: { id,  },
     });
     if (!doc) {
       throw new NotFoundException('Document not found');

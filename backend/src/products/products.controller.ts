@@ -14,7 +14,7 @@ export class ProductsController {
   @Post()
   @ApiOperation({ summary: 'Create a product listing' })
   @ApiResponse({ status: 201, description: 'Product created' })
-  create(@Body() dto: CreateProductDto, @Request() req) {
+  create(@Body() dto: CreateProductDto, @Request() req: any) {
     // Active org would come from middleware/context
     const orgId = req.headers['x-organization-id'] || req.user.userId;
     return this.productsService.create(req.user.userId, orgId, dto);
@@ -32,7 +32,7 @@ export class ProductsController {
   @ApiQuery({ name: 'sort', required: false })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'cursor', required: false })
-  findAll(@Query() filters) {
+  findAll(@Query() filters: any) {
     return this.productsService.findAll(filters);
   }
 
@@ -44,14 +44,14 @@ export class ProductsController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update product' })
-  update(@Param('id') id: string, @Body() dto: UpdateProductDto, @Request() req) {
+  update(@Param('id') id: string, @Body() dto: UpdateProductDto, @Request() req: any) {
     const orgId = req.headers['x-organization-id'] || req.user.userId;
     return this.productsService.update(id, req.user.userId, orgId, dto);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete product' })
-  remove(@Param('id') id: string, @Request() req) {
+  remove(@Param('id') id: string, @Request() req: any) {
     const orgId = req.headers['x-organization-id'] || req.user.userId;
     return this.productsService.remove(id, orgId);
   }

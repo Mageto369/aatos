@@ -64,7 +64,7 @@ export class AuthService {
   }
 
   async validateUser(userId: string): Promise<User | null> {
-    return this.userRepo.findOne({ where: { id: userId, deletedAt: null } });
+    return this.userRepo.findOne({ where: { id: userId,  } });
   }
 
   private buildAuthResponse(user: User): AuthResponse {

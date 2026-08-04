@@ -13,7 +13,7 @@ export class DocumentsController {
 
   @Post()
   @ApiOperation({ summary: 'Create a document record' })
-  async create(@Body() data: CreateDocumentDto, @Req() req) {
+  async create(@Body() data: CreateDocumentDto, @Req() req: any) {
     return this.documentsService.create(req.user.orgId, req.user.userId, data);
   }
 
@@ -30,7 +30,7 @@ export class DocumentsController {
     @Query('status') status?: string,
     @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit?: number,
     @Query('offset', new DefaultValuePipe(0), ParseIntPipe) offset?: number,
-    @Req() req,
+    @Req() req?: any,
   ) {
     return this.documentsService.findAll({
       orgId: req.user.orgId,
@@ -44,19 +44,19 @@ export class DocumentsController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get document by ID' })
-  async findOne(@Param('id') id: string, @Req() req) {
+  async findOne(@Param('id') id: string, @Req() req: any) {
     return this.documentsService.findOne(id, req.user.orgId);
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update document metadata' })
-  async update(@Param('id') id: string, @Body() data: UpdateDocumentDto, @Req() req) {
+  async update(@Param('id') id: string, @Body() data: UpdateDocumentDto, @Req() req: any) {
     return this.documentsService.update(id, req.user.orgId, data);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Soft delete document' })
-  async remove(@Param('id') id: string, @Req() req) {
+  async remove(@Param('id') id: string, @Req() req: any) {
     await this.documentsService.remove(id, req.user.orgId);
     return { message: 'Document deleted' };
   }

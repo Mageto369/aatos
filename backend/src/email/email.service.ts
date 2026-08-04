@@ -23,7 +23,7 @@ export class EmailService {
 
   constructor(private readonly config: ConfigService) {
     this.apiKey = this.config.get<string>('SENDGRID_API_KEY', '');
-    this.fromEmail = this.config.get<string('EMAIL_FROM', 'noreply@aatos.trade');
+    this.fromEmail = this.config.get<string>('EMAIL_FROM', 'noreply@aatos.trade');
     this.fromName = this.config.get<string>('EMAIL_FROM_NAME', 'AATOS Platform');
     this.isConfigured = !!this.apiKey;
 

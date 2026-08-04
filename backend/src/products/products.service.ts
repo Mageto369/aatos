@@ -89,7 +89,7 @@ export class ProductsService {
 
   async findOne(id: string): Promise<Product> {
     const product = await this.productRepo.findOne({
-      where: { id, deletedAt: null },
+      where: { id,  },
       relations: ['organization'],
     });
     if (!product) {

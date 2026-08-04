@@ -68,6 +68,12 @@ export class InsuranceReferralService {
     };
   }
 
+  async findPartnersForCorridor(origin: string, destination: string): Promise<InsurancePartner[]> {
+    return this.partners.filter(
+      p => p.active && p.corridors.some(c => c.origin === origin && c.destination === destination),
+    );
+  }
+
   async getPartnersByCoverage(coverageType: string): Promise<InsurancePartner[]> {
     return this.partners.filter(
       p => p.active && p.coverage.includes(coverageType),
@@ -109,7 +115,7 @@ export class InsuranceReferralService {
     return { score, reasons };
   }
 
-  private estimatePremium(partner: InsurancePartner, request: InsuranceReferralRequest): number | undefined {
+  estimatePremium(partner: InsurancePartner, request: InsuranceReferralRequest): number | undefined {
     // Simplified premium estimation: 0.1% - 0.5% of insured value based on corridor risk
     const baseRate = 0.001;
     const riskMultiplier = partner.corridors.some(c => c.origin === request.origin && c.destination === request.destination) ? 1.0 : 1.5;

@@ -45,7 +45,7 @@ export class PaymentsService {
 
   async findOne(id: string): Promise<Payment> {
     const payment = await this.paymentRepo.findOne({
-      where: { id, deletedAt: null },
+      where: { id,  },
     });
     if (!payment) throw new NotFoundException('Payment not found');
     return payment;
@@ -61,13 +61,13 @@ export class PaymentsService {
 
   async getDealPayments(dealId: string) {
     return this.paymentRepo.find({
-      where: { dealId, deletedAt: null },
+      where: { dealId,  },
       order: { createdAt: 'DESC' },
     });
   }
 
   async getPaymentSummary(dealId: string) {
-    const payments = await this.paymentRepo.find({ where: { dealId, deletedAt: null } });
+    const payments = await this.paymentRepo.find({ where: { dealId,  } });
     return payments.reduce(
       (acc, p) => {
         const amount = Number(p.amountUsd || p.amount);
@@ -87,14 +87,12 @@ export class PaymentsService {
     const payment = await this.findOne(paymentId);
 
     const result = await this.flutterwaveService.initiatePayment({
-      tx_ref: `AATOS-${payment.id}`,
+      txRef: `AATOS-${payment.id}`,
       amount: payment.amount.toString(),
       currency: payment.currency,
-      redirect_url: redirectUrl,
-      customer: {
-        email: 'buyer@aatos.trade', // Would come from user profile
-        name: 'AATOS Buyer',
-      },
+      redirectUrl: redirectUrl,
+      customerEmail: 'buyer@aatos.trade',
+      customerName: 'AATOS Buyer',
       meta: {
         paymentId: payment.id,
         dealId: payment.dealId,
@@ -123,15 +121,15 @@ export class PaymentsService {
     const payment = await this.findOne(paymentId);
     if (!payment.externalReference) return false;
 
-    const result = await this.flutterwaveService.verifyByTxRef(payment.externalReference);
-    if (!result || result.data.status !== 'successful') return false;
+    const result = await this.flutterwaveService.verifyPayment(payment.externalReference);
+    if (!result || result.status !== 'completed') return false;
 
     payment.status = 'held';
     payment.externalMetadata = {
       ...payment.externalMetadata,
-      flutterwave: result.data,
+      flutterwave: result,
     };
-    payment.providerFeeAmount = result.data.app_fee;
+    payment.providerFeeAmount = result.amount * 0.015; // Approximate fee
     await this.paymentRepo.save(payment);
     return true;
   }
@@ -153,7 +151,7 @@ export class PaymentsService {
     paidAt?: string;
   }): Promise<void> {
     const payment = await this.paymentRepo.findOne({
-      where: { externalReference: txRef, deletedAt: null },
+      where: { externalReference: txRef,  },
     });
 
     if (!payment) {
@@ -177,7 +175,7 @@ export class PaymentsService {
    */
   async handlePaymentFailure(txRef: string, reason: string): Promise<void> {
     const payment = await this.paymentRepo.findOne({
-      where: { externalReference: txRef, deletedAt: null },
+      where: { externalReference: txRef,  },
     });
 
     if (!payment) {
@@ -200,7 +198,7 @@ export class PaymentsService {
    */
   async handleTransferCompleted(txRef: string, data: { transferId?: string; status?: string; amount?: number }): Promise<void> {
     const payment = await this.paymentRepo.findOne({
-      where: { externalReference: txRef, deletedAt: null },
+      where: { externalReference: txRef,  },
     });
 
     if (!payment) return;

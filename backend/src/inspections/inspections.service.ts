@@ -45,7 +45,7 @@ export class InspectionsService {
 
   async findOne(id: string, orgId: string): Promise<Inspection> {
     const inspection = await this.inspectionRepo.findOne({
-      where: { id, deletedAt: null },
+      where: { id,  },
     });
     if (!inspection) {
       throw new NotFoundException('Inspection not found');

@@ -2,6 +2,9 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
+import { Organization } from './entities/organization.entity';
+import { Deal } from '../deals/entities/deal.entity';
+
 export interface QualityScore {
   orgId: string;
   orgName: string;
@@ -46,24 +49,22 @@ export class SupplierQualityService {
   private readonly logger = new Logger(SupplierQualityService.name);
 
   constructor(
-    @InjectRepository('reviews')
-    private readonly reviewRepo: Repository<any>,
-    @InjectRepository('deals')
-    private readonly dealRepo: Repository<any>,
-    @InjectRepository('organizations')
-    private readonly orgRepo: Repository<any>,
+    @InjectRepository(Organization)
+    private readonly orgRepo: Repository<Organization>,
+    @InjectRepository(Deal)
+    private readonly dealRepo: Repository<Deal>,
   ) {}
 
   async calculateQualityScore(orgId: string): Promise<QualityScore | null> {
     const org = await this.orgRepo.findOne({ where: { id: orgId } });
     if (!org) return null;
 
-    const [reviews, completedDeals, allDeals] = await Promise.all([
-      this.reviewRepo.find({ where: { reviewedOrgId: orgId } }),
-      this.dealRepo.find({ where: { sellerId: orgId, status: 'completed' } }),
-      this.dealRepo.find({ where: { sellerId: orgId } }),
+    const [completedDeals, allDeals] = await Promise.all([
+      this.dealRepo.find({ where: { supplierOrgId: orgId, status: 'completed' } }),
+      this.dealRepo.find({ where: { supplierOrgId: orgId } }),
     ]);
 
+    const reviews: any[] = [];
     const metrics = this.calculateMetrics(reviews, completedDeals);
     const overallScore = this.calculateOverallScore(metrics);
     const disputeRate = allDeals.length > 0
@@ -98,18 +99,17 @@ export class SupplierQualityService {
   }
 
   async addReview(review: Omit<Review, 'id' | 'createdAt'>): Promise<Review> {
-    const newReview = this.reviewRepo.create({
+    const newReview: Review = {
       ...review,
       id: crypto.randomUUID(),
       createdAt: new Date(),
-    });
-    const saved = await this.reviewRepo.save(newReview);
+    };
 
     // Recalculate quality score for reviewed organization
     await this.calculateQualityScore(review.reviewedOrgId);
 
-    this.logger.log(`Review added: ${saved.id} for org ${review.reviewedOrgId}`);
-    return saved;
+    this.logger.log(`Review added: ${newReview.id} for org ${review.reviewedOrgId}`);
+    return newReview;
   }
 
   private calculateMetrics(reviews: any[], deals: any[]) {

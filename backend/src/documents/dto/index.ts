@@ -1,8 +1,10 @@
 import { IsString, IsOptional, IsEnum, IsNumber, IsUUID, MaxLength } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
+import { DocumentStatus } from '../entities/document.entity';
+
 const DOC_TYPES = ['contract', 'invoice', 'certificate', 'inspection_report', 'shipping_doc', 'compliance_doc', 'other'] as const;
-const DOC_STATUSES = ['draft', 'pending_review', 'approved', 'rejected', 'expired'] as const;
+const DOC_STATUSES: DocumentStatus[] = ['uploaded', 'pending_review', 'verified', 'rejected', 'expired', 'revoked'];
 
 export class CreateDocumentDto {
   @ApiProperty({ example: 'Export Contract - Kenya Coffee' })
@@ -61,7 +63,7 @@ export class UpdateDocumentDto {
   @ApiPropertyOptional({ enum: DOC_STATUSES })
   @IsOptional()
   @IsEnum(DOC_STATUSES)
-  status?: string;
+  status?: DocumentStatus;
 
   @ApiPropertyOptional()
   @IsOptional()

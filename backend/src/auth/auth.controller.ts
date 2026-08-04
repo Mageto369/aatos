@@ -2,7 +2,7 @@ import { Controller, Post, Get, Body, HttpCode, HttpStatus, UseGuards, Req } fro
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { RegisterDto, LoginDto } from './dto';
-import { JwtAuthGuard } from './jwt.strategy';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -31,8 +31,11 @@ export class AuthController {
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Get current authenticated user' })
   @ApiResponse({ status: 200, description: 'Current user profile' })
-  async me(@Req() req) {
+  async me(@Req() req: any) {
     const user = await this.authService.validateUser(req.user.userId);
+    if (!user) {
+      return { error: 'User not found' };
+    }
     return {
       id: user.id,
       email: user.email,

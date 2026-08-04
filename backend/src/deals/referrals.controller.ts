@@ -45,7 +45,15 @@ export class ReferralsController {
     @Query('partnerId') partnerId: string,
     @Query('weightKg') weightKg: number,
   ) {
-    return this.logisticsService.getQuote(partnerId, weightKg);
+    return this.logisticsService.getQuote(partnerId, {
+      dealId: '',
+      orgId: '',
+      origin: '',
+      destination: '',
+      productType: '',
+      quantity: weightKg,
+      preferredServices: [],
+    });
   }
 
   // Insurance
@@ -64,6 +72,17 @@ export class ReferralsController {
     @Query('partnerId') partnerId: string,
     @Query('cargoValue') cargoValue: number,
   ) {
-    return this.insuranceService.estimatePremium(partnerId, cargoValue);
+    const partners = await this.insuranceService.findPartnersForCorridor('', '');
+    const partner = partners.find(p => p.id === partnerId);
+    if (!partner) return null;
+    return this.insuranceService.estimatePremium(partner, {
+      dealId: '',
+      orgId: '',
+      origin: '',
+      destination: '',
+      productType: '',
+      insuredValue: cargoValue,
+      coverageTypes: [],
+    });
   }
 }

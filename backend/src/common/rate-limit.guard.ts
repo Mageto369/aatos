@@ -7,7 +7,7 @@ interface RateLimitConfig {
   keyPrefix?: string;
 }
 
-interface RateLimitStore {
+interface RateLimitEntry {
   [key: string]: { count: number; resetAt: number };
 }
 
@@ -17,7 +17,7 @@ interface RateLimitStore {
  */
 @Injectable()
 export class RateLimitStore {
-  private store: RateLimitStore = {};
+  private store: RateLimitEntry = {};
 
   async increment(key: string, windowMs: number): Promise<{ count: number; resetAt: number }> {
     const now = Date.now();

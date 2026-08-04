@@ -32,13 +32,13 @@ export class AdminService {
       activeDeals,
       completedDeals,
     ] = await Promise.all([
-      this.userRepo.count({ where: { deletedAt: null } }),
-      this.orgRepo.count({ where: { deletedAt: null } }),
-      this.dealRepo.count({ where: { deletedAt: null } }),
-      this.rfqRepo.count({ where: { deletedAt: null } }),
-      this.paymentRepo.count({ where: { deletedAt: null } }),
-      this.dealRepo.count({ where: { status: 'active', deletedAt: null } }),
-      this.dealRepo.count({ where: { status: 'completed', deletedAt: null } }),
+      this.userRepo.count({ where: {  } }),
+      this.orgRepo.count({ where: {  } }),
+      this.dealRepo.count({ where: {  } }),
+      this.rfqRepo.count({ where: {  } }),
+      this.paymentRepo.count({ where: {  } }),
+      this.dealRepo.count({ where: { status: 'active',  } }),
+      this.dealRepo.count({ where: { status: 'completed',  } }),
     ]);
 
     const totalVolume = await this.paymentRepo
@@ -69,18 +69,18 @@ export class AdminService {
   async getRecentActivity(limit: number = 20) {
     const [recentDeals, recentRfqs, recentUsers] = await Promise.all([
       this.dealRepo.find({
-        where: { deletedAt: null },
+        where: {  },
         order: { createdAt: 'DESC' },
         take: limit,
         relations: ['buyer', 'supplier'],
       }),
       this.rfqRepo.find({
-        where: { deletedAt: null },
+        where: {  },
         order: { createdAt: 'DESC' },
         take: limit,
       }),
       this.userRepo.find({
-        where: { deletedAt: null },
+        where: {  },
         order: { createdAt: 'DESC' },
         take: limit,
       }),

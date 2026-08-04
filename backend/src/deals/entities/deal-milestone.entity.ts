@@ -9,6 +9,9 @@ export class DealMilestone {
   @Column({ name: 'deal_id' })
   dealId: string;
 
+  @Column({ name: 'inspection_id', nullable: true, type: 'uuid' })
+  inspectionId: string | null;
+
   @Column({
     name: 'milestone_type',
     type: 'enum',

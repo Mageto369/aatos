@@ -16,7 +16,7 @@ export class NotificationsController {
     @Query('unread') unread?: string,
     @Query('limit') limit?: string,
     @Query('offset') offset?: string,
-    @Request() req,
+    @Request() req?: any,
   ) {
     return this.notificationsService.findAll(req.user.userId, {
       unreadOnly: unread === 'true',
@@ -27,20 +27,20 @@ export class NotificationsController {
 
   @Patch(':id/read')
   @ApiOperation({ summary: 'Mark notification as read' })
-  async markRead(@Param('id') id: string, @Request() req) {
+  async markRead(@Param('id') id: string, @Request() req: any) {
     return this.notificationsService.markRead(id, req.user.userId);
   }
 
   @Post('read-all')
   @ApiOperation({ summary: 'Mark all notifications as read' })
-  async markAllRead(@Request() req) {
+  async markAllRead(@Request() req: any) {
     await this.notificationsService.markAllRead(req.user.userId);
     return { message: 'All notifications marked as read' };
   }
 
   @Patch(':id/dismiss')
   @ApiOperation({ summary: 'Dismiss notification' })
-  async dismiss(@Param('id') id: string, @Request() req) {
+  async dismiss(@Param('id') id: string, @Request() req: any) {
     await this.notificationsService.dismiss(id, req.user.userId);
     return { message: 'Notification dismissed' };
   }

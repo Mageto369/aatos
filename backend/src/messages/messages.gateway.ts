@@ -95,7 +95,7 @@ export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect
 
     // Send recent messages
     const messages = await this.messageRepo.find({
-      where: { dealId: data.dealId, deletedAt: null },
+      where: { dealId: data.dealId,  },
       order: { createdAt: 'DESC' },
       take: 50,
     });
@@ -126,12 +126,12 @@ export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect
     const message = this.messageRepo.create({
       dealId: data.dealId,
       senderUserId: client.userId,
-      senderOrgId: client.orgId || null,
+      senderOrgId: client.orgId || undefined,
       content: data.content,
       messageType: data.messageType || 'text',
-    });
+    } as any);
 
-    const saved = await this.messageRepo.save(message);
+    const saved = await this.messageRepo.save(message) as any;
 
     const roomId = `deal:${data.dealId}`;
     this.server.to(roomId).emit('new_message', {

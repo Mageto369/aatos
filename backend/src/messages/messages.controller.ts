@@ -14,7 +14,7 @@ export class MessagesController {
   @ApiOperation({ summary: 'Send a message' })
   async createMessage(
     @Body() data: { dealId?: string; rfqId?: string; content: string; messageType?: string },
-    @Request() req,
+    @Request() req: any,
   ) {
     return this.messagesService.createMessage(req.user.orgId, req.user.userId, data);
   }

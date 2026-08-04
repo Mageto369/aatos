@@ -2,6 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
+import { AuditLog } from './entities/audit-log.entity';
+
 /**
  * Audit Log Entry
  * Immutable record of significant system events.
@@ -34,8 +36,8 @@ export class AuditLogger {
   private readonly logger = new Logger(AuditLogger.name);
 
   constructor(
-    @InjectRepository('audit_logs')
-    private readonly auditRepo: Repository<any>,
+    @InjectRepository(AuditLog)
+    private readonly auditRepo: Repository<AuditLog>,
   ) {}
 
   /**

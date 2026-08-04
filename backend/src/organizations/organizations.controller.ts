@@ -15,7 +15,7 @@ export class OrganizationsController {
   @ApiOperation({ summary: 'Create a new organization' })
   @ApiResponse({ status: 201, description: 'Organization created' })
   @ApiResponse({ status: 409, description: 'Organization already exists' })
-  create(@Body() dto: CreateOrganizationDto, @Request() req) {
+  create(@Body() dto: CreateOrganizationDto, @Request() req: any) {
     return this.orgService.create(req.user.userId, dto);
   }
 
@@ -30,7 +30,7 @@ export class OrganizationsController {
   @ApiQuery({ name: 'sort', required: false })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'cursor', required: false })
-  findAll(@Query() filters) {
+  findAll(@Query() filters: any) {
     return this.orgService.findAll(filters);
   }
 

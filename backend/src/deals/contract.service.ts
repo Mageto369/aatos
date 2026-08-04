@@ -51,7 +51,7 @@ export class ContractService {
    */
   async generateContract(dealId: string, generatedByUserId: string): Promise<GeneratedContract> {
     const deal = await this.dealRepo.findOne({
-      where: { id: dealId, deletedAt: null },
+      where: { id: dealId,  },
       relations: ['buyer', 'supplier', 'productCategory'],
     });
 
@@ -110,7 +110,7 @@ export class ContractService {
     };
   }
 
-  private async this.extractVariables(deal: Deal): Promise<Record<string, string>> {
+  private async extractVariables(deal: Deal): Promise<Record<string, string>> {
     const buyer = deal.buyer as Organization;
     const supplier = deal.supplier as Organization;
 
@@ -126,7 +126,7 @@ export class ContractService {
       supplierLegalName: supplier?.legalName || supplier?.name || 'Supplier',
       supplierCountry: supplier?.countryCode || '',
       supplierAddress: supplier?.address || '',
-      productCategory: deal.productCategory?.name || 'Product',
+      productCategory: deal.productCategoryId || 'Product',
       agreedQuantity: deal.agreedQuantity.toString(),
       quantityUnit: deal.quantityUnit,
       agreedPrice: deal.agreedPrice.toString(),

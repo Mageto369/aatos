@@ -64,6 +64,17 @@ export class LogisticsReferralService {
     };
   }
 
+  async findPartnersForCorridor(origin: string, destination: string): Promise<LogisticsPartner[]> {
+    return this.getPartnersByCorridor(origin, destination);
+  }
+
+  async getQuote(partnerId: string, request: ReferralRequest): Promise<{ partner: LogisticsPartner; estimatedCost: number } | null> {
+    const partner = this.partners.find(p => p.id === partnerId);
+    if (!partner) return null;
+    const estimatedCost = request.quantity * 100; // Simplified estimate
+    return { partner, estimatedCost };
+  }
+
   async getPartnersByCorridor(origin: string, destination: string): Promise<LogisticsPartner[]> {
     return this.partners.filter(
       p => p.active && p.corridors.some(c => c.origin === origin && c.destination === destination),

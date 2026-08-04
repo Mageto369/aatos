@@ -18,7 +18,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       status,
       detail: exceptionResponse.message || exception.message,
       instance: request.url,
-      requestId: request.id || 'unknown',
+      requestId: (request as any).id || 'unknown',
       timestamp: new Date().toISOString(),
       errors: Array.isArray(exceptionResponse.message) ? exceptionResponse.message : undefined,
     };

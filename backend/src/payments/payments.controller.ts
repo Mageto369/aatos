@@ -12,7 +12,7 @@ export class PaymentsController {
 
   @Post()
   @ApiOperation({ summary: 'Create a payment record' })
-  async create(@Body() data: any, @Request() req) {
+  async create(@Body() data: any, @Request() req: any) {
     return this.paymentsService.create({ ...data, payerOrgId: req.user.orgId });
   }
 
@@ -23,7 +23,7 @@ export class PaymentsController {
     @Query('status') status?: string,
     @Query('limit') limit?: string,
     @Query('offset') offset?: string,
-    @Request() req,
+    @Request() req?: any,
   ) {
     return this.paymentsService.findAll({
       dealId,
@@ -57,7 +57,7 @@ export class PaymentsController {
   async initiatePayment(
     @Param('id') id: string,
     @Body('redirectUrl') redirectUrl: string,
-    @Request() req,
+    @Request() req: any,
   ) {
     const payment = await this.paymentsService.findOne(id);
     // Authorization: must be payer
@@ -69,7 +69,7 @@ export class PaymentsController {
 
   @Post(':id/verify')
   @ApiOperation({ summary: 'Verify Flutterwave payment' })
-  async verifyPayment(@Param('id') id: string, @Request() req) {
+  async verifyPayment(@Param('id') id: string, @Request() req: any) {
     const payment = await this.paymentsService.findOne(id);
     if (payment.payerOrgId !== req.user.orgId) {
       throw new ForbiddenException('Not authorized');
@@ -80,7 +80,7 @@ export class PaymentsController {
 
   @Post(':id/release')
   @ApiOperation({ summary: 'Release held payment to payee' })
-  async releasePayment(@Param('id') id: string, @Request() req) {
+  async releasePayment(@Param('id') id: string, @Request() req: any) {
     const payment = await this.paymentsService.findOne(id);
     // Both parties can trigger release based on milestone completion
     if (payment.payerOrgId !== req.user.orgId && payment.payeeOrgId !== req.user.orgId) {

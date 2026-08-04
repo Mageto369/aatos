@@ -1,6 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
+import { Deal } from '../deals/entities/deal.entity';
+import { Organization } from '../organizations/entities/organization.entity';
+import { RFQ } from '../rfqs/entities/rfq.entity';
 
 export interface DashboardStats {
   totalOrganizations: number;
@@ -41,14 +44,12 @@ export class AnalyticsService {
   private readonly logger = new Logger(AnalyticsService.name);
 
   constructor(
-    @InjectRepository('deals')
-    private readonly dealRepo: Repository<any>,
-    @InjectRepository('organizations')
-    private readonly orgRepo: Repository<any>,
-    @InjectRepository('rfqs')
-    private readonly rfqRepo: Repository<any>,
-    @InjectRepository('quotations')
-    private readonly quotationRepo: Repository<any>,
+    @InjectRepository(Deal)
+    private readonly dealRepo: Repository<Deal>,
+    @InjectRepository(Organization)
+    private readonly orgRepo: Repository<Organization>,
+    @InjectRepository(RFQ)
+    private readonly rfqRepo: Repository<RFQ>,
   ) {}
 
   async getDashboardStats(): Promise<DashboardStats> {
@@ -70,7 +71,7 @@ export class AnalyticsService {
       this.dealRepo.count({ where: { status: 'completed' } }),
       this.rfqRepo.count(),
       this.rfqRepo.count({ where: { status: 'open' } }),
-      this.quotationRepo.count(),
+      0, // quotations not yet implemented
       this.dealRepo
         .createQueryBuilder('d')
         .select('COALESCE(SUM(d.total_value), 0)', 'total')
@@ -98,9 +99,9 @@ export class AnalyticsService {
       completedDeals,
       totalRFQs,
       openRFQs,
-      totalQuotations,
+      totalQuotations: 0, // quotations not yet implemented
       tradeVolume: parseFloat(tradeVolumeResult?.total || 0),
-      averageDealValue,
+      averageDealValue: avgDealValue,
       conversionRate,
       topCorridors,
       topProducts,
@@ -113,9 +114,9 @@ export class AnalyticsService {
     if (!org) return null;
 
     const [totalDeals, completedDeals, totalRFQs, tradeVolumeResult] = await Promise.all([
-      this.dealRepo.count({ where: { buyerId: orgId } }),
-      this.dealRepo.count({ where: { buyerId: orgId, status: 'completed' } }),
-      this.rfqRepo.count({ where: { buyerId: orgId } }),
+      this.dealRepo.count({ where: { buyerOrgId: orgId } }),
+      this.dealRepo.count({ where: { buyerOrgId: orgId, status: 'completed' } }),
+      this.rfqRepo.count({ where: { buyerOrgId: orgId } }),
       this.dealRepo
         .createQueryBuilder('d')
         .select('COALESCE(SUM(d.total_value), 0)', 'total')
