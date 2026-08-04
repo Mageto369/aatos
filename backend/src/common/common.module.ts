@@ -1,4 +1,5 @@
 import { Module, Global } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_INTERCEPTOR, APP_FILTER, APP_PIPE } from '@nestjs/core';
 import { TransformInterceptor } from './interceptors/transform.interceptor';
 import { HttpExceptionFilter } from './filters/http-exception.filter';
@@ -19,9 +20,11 @@ import { MatchingEngineService } from './matching-engine.service';
 import { SearchController } from './search.controller';
 import { PlatformController } from './platform.controller';
 import { EnterpriseController } from './enterprise.controller';
+import { AuditLog } from './entities/audit-log.entity';
 
 @Global()
 @Module({
+  imports: [TypeOrmModule.forFeature([AuditLog])],
   providers: [
     {
       provide: APP_INTERCEPTOR,
