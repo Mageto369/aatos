@@ -10,15 +10,17 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=aatos_production
-      - DB_USER=aatos
-      - DB_PASSWORD=${DB_PASSWORD}
+      - DATABASE_URL=postgresql://aatos:${DB_PASSWORD}@postgres:5432/aatos_production
       - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
       - FLUTTERWAVE_PUBLIC_KEY=${FLUTTERWAVE_PUBLIC_KEY}
       - FLUTTERWAVE_SECRET_KEY=${FLUTTERWAVE_SECRET_KEY}
       - REDIS_URL=redis://redis:6379
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost}
+      - AWS_S3_BUCKET=${AWS_S3_BUCKET:-aatos-documents}
+      - AWS_REGION=${AWS_REGION:-us-east-1}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
     depends_on:
       - postgres
       - redis

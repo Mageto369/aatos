@@ -16,6 +16,9 @@ import { PaymentsModule } from './payments/payments.module';
 import { WorkflowsModule } from './workflows/workflows.module';
 import { CommonModule } from './common/common.module';
 import { AnalyticsModule } from './analytics/analytics.module';
+import { AdminModule } from './admin/admin.module';
+import { HealthModule } from './health/health.module';
+import { EmailModule } from './email/email.module';
 import * as Joi from 'joi';
 
 @Module({
@@ -39,7 +42,10 @@ import * as Joi from 'joi';
     }),
     DatabaseModule,
     CommonModule,
+    EmailModule,
+    HealthModule,
     AuthModule,
+    AdminModule,
     OrganizationsModule,
     ProductsModule,
     RfqsModule,
