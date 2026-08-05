@@ -68,7 +68,7 @@
 | **Organization** | /organization | Real org profile, members list, verification badges |
 | **Documents** | /documents | Table view, type/status filters, **presigned URL upload**, download |
 | **Settings** | /settings | Profile, notification preferences, security (password, 2FA) |
-| **Payments** | /payments | Payment timeline, escrow status, fee breakdown, filter by status |
+| **Payments** | /payments | Payment timeline, payment status tracking, fee breakdown, filter by status |
 
 ### Components
 | Component | Features |
@@ -161,7 +161,7 @@ docker-compose up -d
 ---
 
 ## Next Phase Enhancements
-1. **Payment/Escrow Integration** — Stripe/Flutterwave for milestone payments
+1. **Payment Integration** — Stripe/Flutterwave for milestone payments
 2. **AI Document Processing** — Python microservice for OCR/classification
 3. **Advanced Search** — Elasticsearch for products and deals
 4. **Email/SMS Notifications** — SendGrid/Twilio integration

@@ -28,15 +28,15 @@
 
 | WP | Title | Track | Status | Evidence | Commit |
 |---|---|---|---|---|---|
-| 1.1 | Disable unsafe schema synchronization | Engineering | In Progress | — | — |
-| 1.2 | Claims audit | Trust | Not started | — | — |
-| 1.3 | Legal role definition | Legal | Not started | — | — |
-| 1.4 | Terms of Service framework | Legal | Not started | — | — |
-| 1.5 | Privacy framework | Legal | Not started | — | — |
-| 1.6 | Escrow truth correction | Trust | Not started | — | — |
-| 1.7 | Pilot scope enforcement | Product | Not started | — | — |
-| 1.8 | Git and recovery discipline | Engineering | Not started | — | — |
-| 1.9 | Week 1 pilot workflow baseline | Product | Not started | — | — |
+| 1.1 | Disable unsafe schema synchronization | Engineering | Complete | backend/src/database/database.module.ts safeguard | 880d96c |
+| 1.2 | Claims audit | Trust | Complete | docs/CLAIMS_AUDIT.md | 880d96c |
+| 1.3 | Legal role definition | Legal | Complete | docs/PLATFORM_ROLE.md | — |
+| 1.4 | Terms of Service framework | Legal | Complete | docs/TERMS_OF_SERVICE_DRAFT.md | pre-existing |
+| 1.5 | Privacy framework | Legal | Complete | docs/PRIVACY_POLICY_DRAFT.md | — |
+| 1.6 | Escrow truth correction | Trust | Complete | DEV_STATUS.md corrected, CLAIMS_AUDIT.md | — |
+| 1.7 | Pilot scope enforcement | Product | Complete | docs/PILOT_SCOPE.md | — |
+| 1.8 | Git and recovery discipline | Engineering | Complete | docs/GIT_RECOVERY_DISCIPLINE.md | — |
+| 1.9 | Week 1 pilot workflow baseline | Product | In Progress | — | — |
 
 ### Evidence Level Changes This Week
 
