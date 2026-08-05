@@ -8,7 +8,7 @@ export class ComplianceChecklistItem {
   @Column({ name: 'checklist_id' })
   checklistId: string;
 
-  @Column({ name: 'rule_id', nullable: true })
+  @Column({ type: 'varchar', name: 'rule_id', nullable: true })
   ruleId: string | null;
 
   @Column({ name: 'requirement_type', type: 'enum', enum: ['document', 'inspection', 'laboratory_test', 'certification', 'registration', 'label', 'permit', 'fee', 'tax'] })
@@ -26,13 +26,13 @@ export class ComplianceChecklistItem {
   @Column({ length: 20, default: 'pending' })
   status: string;
 
-  @Column({ name: 'document_id', nullable: true })
+  @Column({ type: 'varchar', name: 'document_id', nullable: true })
   documentId: string | null;
 
   @Column({ name: 'evidence_notes', type: 'text', nullable: true })
   evidenceNotes: string | null;
 
-  @Column({ name: 'completed_by', nullable: true })
+  @Column({ type: 'varchar', name: 'completed_by', nullable: true })
   completedBy: string | null;
 
   @Column({ name: 'completed_at', type: 'timestamptz', nullable: true })

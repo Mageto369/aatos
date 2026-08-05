@@ -6,9 +6,9 @@ import { Organization } from '../../organizations/entities/organization.entity';
 import { DealMilestone } from './deal-milestone.entity';
 
 @Entity('deals')
-@Index(['buyerOrgId'], { where: '"deletedAt" IS NULL' })
-@Index(['supplierOrgId'], { where: '"deletedAt" IS NULL' })
-@Index(['status'], { where: '"deletedAt" IS NULL' })
+@Index(['buyerOrgId'], { where: '"deleted_at" IS NULL' })
+@Index(['supplierOrgId'], { where: '"deleted_at" IS NULL' })
+@Index(['status'], { where: '"deleted_at" IS NULL' })
 export class Deal {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -19,10 +19,10 @@ export class Deal {
   @Column({ name: 'supplier_org_id' })
   supplierOrgId: string;
 
-  @Column({ name: 'rfq_id', nullable: true })
+  @Column({ type: 'varchar', name: 'rfq_id', nullable: true })
   rfqId: string | null;
 
-  @Column({ name: 'winning_quotation_id', nullable: true })
+  @Column({ type: 'varchar', name: 'winning_quotation_id', nullable: true })
   winningQuotationId: string | null;
 
   @Column({ length: 255 })
@@ -49,7 +49,7 @@ export class Deal {
   @Column({ type: 'enum', enum: ['EXW', 'FCA', 'FOB', 'CFR', 'CIF', 'DAP', 'DDP'] })
   incoterm: string;
 
-  @Column({ name: 'payment_terms', length: 255, nullable: true })
+  @Column({ type: 'varchar', name: 'payment_terms', length: 255, nullable: true })
   paymentTerms: string | null;
 
   @Column({ name: 'delivery_date', type: 'date', nullable: true })
@@ -65,7 +65,7 @@ export class Deal {
   })
   status: string;
 
-  @Column({ name: 'compliance_checklist_id', nullable: true })
+  @Column({ type: 'varchar', name: 'compliance_checklist_id', nullable: true })
   complianceChecklistId: string | null;
 
   @Column({ name: 'compliance_status', length: 20, default: 'pending' })
@@ -77,10 +77,10 @@ export class Deal {
   @Column({ name: 'payment_method', type: 'enum', enum: ['bank_transfer', 'escrow', 'letter_of_credit', 'documentary_collection', 'advance_payment', 'installment', 'trade_finance'], nullable: true })
   paymentMethod: string | null;
 
-  @Column({ name: 'escrow_id', length: 255, nullable: true })
+  @Column({ type: 'varchar', name: 'escrow_id', length: 255, nullable: true })
   escrowId: string | null;
 
-  @Column({ name: 'contract_document_id', nullable: true })
+  @Column({ type: 'varchar', name: 'contract_document_id', nullable: true })
   contractDocumentId: string | null;
 
   @Column({ name: 'total_value_usd', type: 'decimal', precision: 18, scale: 4, nullable: true })

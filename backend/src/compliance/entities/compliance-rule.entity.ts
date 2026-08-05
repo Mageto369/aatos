@@ -13,7 +13,7 @@ export class ComplianceRule {
   @Column({ name: 'destination_country', length: 2 })
   destinationCountry: string;
 
-  @Column({ name: 'product_category_id', nullable: true })
+  @Column({ type: 'varchar', name: 'product_category_id', nullable: true })
   productCategoryId: string | null;
 
   @Column({ name: 'requirement_type', type: 'enum', enum: ['document', 'inspection', 'laboratory_test', 'certification', 'registration', 'label', 'permit', 'fee', 'tax'] })
@@ -28,7 +28,7 @@ export class ComplianceRule {
   @Column({ name: 'responsible_party', length: 50 })
   responsibleParty: string;
 
-  @Column({ name: 'issuing_authority', length: 255, nullable: true })
+  @Column({ type: 'varchar', name: 'issuing_authority', length: 255, nullable: true })
   issuingAuthority: string | null;
 
   @Column({ name: 'estimated_time_days', type: 'int', nullable: true })
@@ -37,16 +37,16 @@ export class ComplianceRule {
   @Column({ name: 'estimated_cost_usd', type: 'decimal', precision: 12, scale: 2, nullable: true })
   estimatedCostUsd: number | null;
 
-  @Column({ name: 'validity_period', length: 50, nullable: true })
+  @Column({ type: 'varchar', name: 'validity_period', length: 50, nullable: true })
   validityPeriod: string | null;
 
-  @Column({ name: 'verification_method', length: 255, nullable: true })
+  @Column({ type: 'varchar', name: 'verification_method', length: 255, nullable: true })
   verificationMethod: string | null;
 
-  @Column({ name: 'source_url', length: 500, nullable: true })
+  @Column({ type: 'varchar', name: 'source_url', length: 500, nullable: true })
   sourceUrl: string | null;
 
-  @Column({ name: 'source_name', length: 255, nullable: true })
+  @Column({ type: 'varchar', name: 'source_name', length: 255, nullable: true })
   sourceName: string | null;
 
   @Column({ name: 'reviewed_at', type: 'date', default: () => 'CURRENT_DATE' })

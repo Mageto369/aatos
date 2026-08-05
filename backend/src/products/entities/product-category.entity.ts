@@ -5,7 +5,7 @@ export class ProductCategory {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ name: 'parent_id', nullable: true })
+  @Column({ type: 'varchar', name: 'parent_id', nullable: true })
   parentId: string | null;
 
   @Column({
@@ -27,7 +27,7 @@ export class ProductCategory {
   @Column({ type: 'text', nullable: true })
   description: string | null;
 
-  @Column({ name: 'hs_code', length: 20, nullable: true })
+  @Column({ type: 'varchar', name: 'hs_code', length: 20, nullable: true })
   hsCode: string | null;
 
   @Column({ name: 'attribute_schema', type: 'jsonb', default: {} })
@@ -36,10 +36,10 @@ export class ProductCategory {
   @Column({ name: 'default_compliance_rules', type: 'jsonb', default: [] })
   defaultComplianceRules: any[];
 
-  @Column({ name: 'icon_url', length: 500, nullable: true })
+  @Column({ type: 'varchar', name: 'icon_url', length: 500, nullable: true })
   iconUrl: string | null;
 
-  @Column({ name: 'image_url', length: 500, nullable: true })
+  @Column({ type: 'varchar', name: 'image_url', length: 500, nullable: true })
   imageUrl: string | null;
 
   @Column({ name: 'sort_order', type: 'int', default: 0 })

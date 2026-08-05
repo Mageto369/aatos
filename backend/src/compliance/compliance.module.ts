@@ -15,8 +15,10 @@ import { ComplianceRule } from './entities/compliance-rule.entity';
 import { ComplianceChecklist } from './entities/compliance-checklist.entity';
 import { ComplianceChecklistItem } from './entities/compliance-checklist-item.entity';
 
+import { Document } from '../documents/entities/document.entity';
+
 @Module({
-  imports: [TypeOrmModule.forFeature([ComplianceRule, ComplianceChecklist, ComplianceChecklistItem])],
+  imports: [TypeOrmModule.forFeature([ComplianceRule, ComplianceChecklist, ComplianceChecklistItem, Document])],
   providers: [
     ComplianceService,
     VerificationFlowService,

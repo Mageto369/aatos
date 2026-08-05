@@ -5,10 +5,10 @@ import {
 import { Organization } from '../../organizations/entities/organization.entity';
 
 @Entity('products')
-@Index(['organizationId'], { where: '"deletedAt" IS NULL' })
-@Index(['status'], { where: '"deletedAt" IS NULL' })
-@Index(['originCountry'], { where: '"deletedAt" IS NULL' })
-@Index(['categoryId'], { where: '"deletedAt" IS NULL' })
+@Index(['organizationId'], { where: '"deleted_at" IS NULL' })
+@Index(['status'], { where: '"deleted_at" IS NULL' })
+@Index(['originCountry'], { where: '"deleted_at" IS NULL' })
+@Index(['categoryId'], { where: '"deleted_at" IS NULL' })
 export class Product {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -25,7 +25,7 @@ export class Product {
   @Column({ length: 255 })
   title: string;
 
-  @Column({ length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   slug: string | null;
 
   @Column({ type: 'text', nullable: true })
@@ -37,7 +37,7 @@ export class Product {
   @Column({ name: 'origin_country', length: 2 })
   originCountry: string;
 
-  @Column({ name: 'origin_region', length: 100, nullable: true })
+  @Column({ type: 'varchar', name: 'origin_region', length: 100, nullable: true })
   originRegion: string | null;
 
   @Column({ name: 'available_quantity', type: 'decimal', precision: 18, scale: 4 })
@@ -61,13 +61,13 @@ export class Product {
   @Column({ name: 'price_currency', type: 'enum', enum: ['USD', 'EUR', 'GBP', 'KES', 'NGN', 'ETB', 'GHS'], default: 'USD' })
   priceCurrency: string;
 
-  @Column({ name: 'packaging_type', length: 100, nullable: true })
+  @Column({ type: 'varchar', name: 'packaging_type', length: 100, nullable: true })
   packagingType: string | null;
 
   @Column({ name: 'incoterm', type: 'enum', enum: ['EXW', 'FCA', 'FOB', 'CFR', 'CIF', 'DAP', 'DDP'], default: 'FOB' })
   incoterm: string;
 
-  @Column({ name: 'quality_grade', length: 50, nullable: true })
+  @Column({ type: 'varchar', name: 'quality_grade', length: 50, nullable: true })
   qualityGrade: string | null;
 
   @Column({ type: 'text', array: true, default: [] })
@@ -95,7 +95,7 @@ export class Product {
   @Column({ name: 'compliance_score', type: 'smallint', default: 0 })
   complianceScore: number;
 
-  @Column({ name: 'primary_image_url', length: 500, nullable: true })
+  @Column({ type: 'varchar', name: 'primary_image_url', length: 500, nullable: true })
   primaryImageUrl: string | null;
 
   @Column({ type: 'text', array: true, default: [] })

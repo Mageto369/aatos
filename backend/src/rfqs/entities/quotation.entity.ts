@@ -4,9 +4,9 @@ import {
 } from 'typeorm';
 
 @Entity('quotations')
-@Index(['rfqId'], { where: '"deletedAt" IS NULL' })
-@Index(['supplierOrgId'], { where: '"deletedAt" IS NULL' })
-@Index(['status'], { where: '"deletedAt" IS NULL' })
+@Index(['rfqId'], { where: '"deleted_at" IS NULL' })
+@Index(['supplierOrgId'], { where: '"deleted_at" IS NULL' })
+@Index(['status'], { where: '"deleted_at" IS NULL' })
 export class Quotation {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -17,7 +17,7 @@ export class Quotation {
   @Column({ name: 'supplier_org_id' })
   supplierOrgId: string;
 
-  @Column({ name: 'product_id', nullable: true })
+  @Column({ type: 'varchar', name: 'product_id', nullable: true })
   productId: string | null;
 
   @Column({ name: 'created_by_user_id' })
@@ -47,7 +47,7 @@ export class Quotation {
   @Column({ name: 'delivery_time_days', type: 'int', nullable: true })
   deliveryTimeDays: number | null;
 
-  @Column({ name: 'payment_terms', length: 255, nullable: true })
+  @Column({ type: 'varchar', name: 'payment_terms', length: 255, nullable: true })
   paymentTerms: string | null;
 
   @Column({ name: 'validity_days', type: 'int', default: 30 })
@@ -56,7 +56,7 @@ export class Quotation {
   @Column({ name: 'valid_until', type: 'date', nullable: true })
   validUntil: Date | null;
 
-  @Column({ name: 'quality_grade', length: 50, nullable: true })
+  @Column({ type: 'varchar', name: 'quality_grade', length: 50, nullable: true })
   qualityGrade: string | null;
 
   @Column({ name: 'packaging_details', type: 'text', nullable: true })

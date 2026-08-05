@@ -4,8 +4,8 @@ import {
 } from 'typeorm';
 
 @Entity('users')
-@Index(['email'], { unique: true, where: '"deletedAt" IS NULL' })
-@Index(['status'], { where: '"deletedAt" IS NULL' })
+@Index(['email'], { unique: true, where: '"deleted_at" IS NULL' })
+@Index(['status'], { where: '"deleted_at" IS NULL' })
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -19,7 +19,7 @@ export class User {
   @Column({ name: 'email_verified_at', type: 'timestamptz', nullable: true })
   emailVerifiedAt: Date | null;
 
-  @Column({ nullable: true, length: 30 })
+  @Column({ type: 'varchar', nullable: true, length: 30 })
   phone: string | null;
 
   @Column({ name: 'phone_verified', default: false })
@@ -31,10 +31,10 @@ export class User {
   @Column({ name: 'last_name', length: 100 })
   lastName: string;
 
-  @Column({ name: 'display_name', length: 200, nullable: true })
+  @Column({ type: 'varchar', name: 'display_name', length: 200, nullable: true })
   displayName: string | null;
 
-  @Column({ name: 'avatar_url', length: 500, nullable: true })
+  @Column({ type: 'varchar', name: 'avatar_url', length: 500, nullable: true })
   avatarUrl: string | null;
 
   @Column({ name: 'password_hash', length: 255 })
@@ -43,7 +43,7 @@ export class User {
   @Column({ name: 'mfa_enabled', default: false })
   mfaEnabled: boolean;
 
-  @Column({ name: 'mfa_secret', length: 255, nullable: true })
+  @Column({ type: 'varchar', name: 'mfa_secret', length: 255, nullable: true })
   mfaSecret: string | null;
 
   @Column({ name: 'last_login_at', type: 'timestamptz', nullable: true })

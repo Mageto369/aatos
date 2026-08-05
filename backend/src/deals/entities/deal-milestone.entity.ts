@@ -37,10 +37,10 @@ export class DealMilestone {
   @Column({ name: 'completed_at', type: 'timestamptz', nullable: true })
   completedAt: Date | null;
 
-  @Column({ name: 'completed_by', nullable: true })
+  @Column({ type: 'varchar', name: 'completed_by', nullable: true })
   completedBy: string | null;
 
-  @Column({ name: 'evidence_document_id', nullable: true })
+  @Column({ type: 'varchar', name: 'evidence_document_id', nullable: true })
   evidenceDocumentId: string | null;
 
   @Column({ type: 'text', nullable: true })

@@ -5,11 +5,11 @@ import {
 import { OrganizationMember } from './organization-member.entity';
 
 @Entity('organizations')
-@Index(['slug'], { unique: true, where: '"deletedAt" IS NULL' })
-@Index(['countryCode'], { where: '"deletedAt" IS NULL' })
-@Index(['type'], { where: '"deletedAt" IS NULL' })
-@Index(['status'], { where: '"deletedAt" IS NULL' })
-@Index(['verificationLevel'], { where: '"deletedAt" IS NULL' })
+@Index(['slug'], { unique: true, where: '"deleted_at" IS NULL' })
+@Index(['countryCode'], { where: '"deleted_at" IS NULL' })
+@Index(['type'], { where: '"deleted_at" IS NULL' })
+@Index(['status'], { where: '"deleted_at" IS NULL' })
+@Index(['verificationLevel'], { where: '"deleted_at" IS NULL' })
 export class Organization {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -51,31 +51,31 @@ export class Organization {
   @Column({ name: 'country_code', length: 2 })
   countryCode: string;
 
-  @Column({ length: 100, nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   region: string | null;
 
-  @Column({ length: 100, nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   city: string | null;
 
   @Column({ type: 'text', nullable: true })
   address: string | null;
 
-  @Column({ name: 'postal_code', length: 20, nullable: true })
+  @Column({ type: 'varchar', name: 'postal_code', length: 20, nullable: true })
   postalCode: string | null;
 
-  @Column({ name: 'registration_number', length: 100, nullable: true })
+  @Column({ type: 'varchar', name: 'registration_number', length: 100, nullable: true })
   registrationNumber: string | null;
 
-  @Column({ name: 'tax_id', length: 100, nullable: true })
+  @Column({ type: 'varchar', name: 'tax_id', length: 100, nullable: true })
   taxId: string | null;
 
   @Column({ name: 'year_established', type: 'smallint', nullable: true })
   yearEstablished: number | null;
 
-  @Column({ name: 'employee_count', length: 20, nullable: true })
+  @Column({ type: 'varchar', name: 'employee_count', length: 20, nullable: true })
   employeeCount: string | null;
 
-  @Column({ length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   website: string | null;
 
   @Column({ type: 'text', nullable: true })
@@ -93,7 +93,7 @@ export class Organization {
   @Column({ name: 'trust_score', type: 'smallint', default: 0 })
   trustScore: number;
 
-  @Column({ name: 'bank_name', length: 200, nullable: true })
+  @Column({ type: 'varchar', name: 'bank_name', length: 200, nullable: true })
   bankName: string | null;
 
   @Column({ name: 'bank_account_verified', default: false })

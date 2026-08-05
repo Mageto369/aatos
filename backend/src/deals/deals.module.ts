@@ -13,8 +13,13 @@ import { Deal } from './entities/deal.entity';
 import { DealMilestone } from './entities/deal-milestone.entity';
 import { PaymentsModule } from '../payments/payments.module';
 
+import { DisputeEntity } from './entities/dispute.entity';
+import { Payment } from '../payments/entities/payment.entity';
+
+import { WorkflowsModule } from '../workflows/workflows.module';
+
 @Module({
-  imports: [TypeOrmModule.forFeature([Deal, DealMilestone]), PaymentsModule],
+  imports: [TypeOrmModule.forFeature([Deal, DealMilestone, DisputeEntity, Payment]), PaymentsModule, WorkflowsModule],
   providers: [
     DealsService,
     ContractService,

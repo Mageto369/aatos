@@ -4,16 +4,16 @@ import {
 } from 'typeorm';
 
 @Entity('messages')
-@Index(['dealId', 'createdAt'], { where: '"deletedAt" IS NULL' })
-@Index(['rfqId', 'createdAt'], { where: '"deletedAt" IS NULL' })
+@Index(['dealId', 'createdAt'], { where: '"deleted_at" IS NULL' })
+@Index(['rfqId', 'createdAt'], { where: '"deleted_at" IS NULL' })
 export class Message {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ name: 'deal_id', nullable: true })
+  @Column({ type: 'varchar', name: 'deal_id', nullable: true })
   dealId: string | null;
 
-  @Column({ name: 'rfq_id', nullable: true })
+  @Column({ type: 'varchar', name: 'rfq_id', nullable: true })
   rfqId: string | null;
 
   @Column({ name: 'sender_org_id' })
@@ -38,7 +38,7 @@ export class Message {
   @Column({ name: 'translated_content', type: 'jsonb', nullable: true })
   translatedContent: Record<string, string> | null;
 
-  @Column({ name: 'attachment_document_id', nullable: true })
+  @Column({ type: 'varchar', name: 'attachment_document_id', nullable: true })
   attachmentDocumentId: string | null;
 
   @Column({ name: 'is_edited', default: false })

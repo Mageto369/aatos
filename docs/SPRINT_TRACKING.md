@@ -36,13 +36,14 @@
 | 1.6 | Escrow truth correction | Trust | Complete | DEV_STATUS.md corrected, CLAIMS_AUDIT.md | — |
 | 1.7 | Pilot scope enforcement | Product | Complete | docs/PILOT_SCOPE.md | — |
 | 1.8 | Git and recovery discipline | Engineering | Complete | docs/GIT_RECOVERY_DISCIPLINE.md | — |
-| 1.9 | Week 1 pilot workflow baseline | Product | In Progress | — | — |
+| 1.9 | Week 1 pilot workflow baseline | Product | Complete | docs/PILOT_WORKFLOW_BASELINE.md | — |
 
 ### Evidence Level Changes This Week
 
 | Item | From | To | Date | Evidence |
 |---|---|---|---|---|
 | Schema synchronization | L2 | L3 | — | — |
+| End-to-end pilot workflow | L0 | L3 | 2026-08-05 | Full API test through deal creation |
 
 ---
 

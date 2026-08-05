@@ -4,9 +4,9 @@ import {
 } from 'typeorm';
 
 @Entity('rfqs')
-@Index(['buyerOrgId'], { where: '"deletedAt" IS NULL' })
-@Index(['status'], { where: '"deletedAt" IS NULL' })
-@Index(['destinationCountry'], { where: '"deletedAt" IS NULL' })
+@Index(['buyerOrgId'], { where: '"deleted_at" IS NULL' })
+@Index(['status'], { where: '"deleted_at" IS NULL' })
+@Index(['destinationCountry'], { where: '"deleted_at" IS NULL' })
 export class RFQ {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -35,13 +35,13 @@ export class RFQ {
   @Column({ name: 'required_unit', type: 'enum', enum: ['kg', 'mt', 'lb', 'ton', 'bag', 'box', 'carton', 'container_20ft', 'container_40ft', 'liter', 'gallon', 'piece', 'dozen', 'pallet'] })
   requiredUnit: string;
 
-  @Column({ length: 50, nullable: true })
+  @Column({ type: 'varchar', length: 50, nullable: true })
   frequency: string | null;
 
   @Column({ name: 'destination_country', length: 2 })
   destinationCountry: string;
 
-  @Column({ name: 'destination_city', length: 100, nullable: true })
+  @Column({ type: 'varchar', name: 'destination_city', length: 100, nullable: true })
   destinationCity: string | null;
 
   @Column({ name: 'delivery_date_start', type: 'date', nullable: true })
@@ -62,7 +62,7 @@ export class RFQ {
   @Column({ name: 'preferred_incoterm', type: 'enum', enum: ['EXW', 'FCA', 'FOB', 'CFR', 'CIF', 'DAP', 'DDP'], nullable: true })
   preferredIncoterm: string | null;
 
-  @Column({ name: 'payment_terms', length: 100, nullable: true })
+  @Column({ type: 'varchar', name: 'payment_terms', length: 100, nullable: true })
   paymentTerms: string | null;
 
   @Column({ name: 'required_certifications', type: 'text', array: true, default: [] })

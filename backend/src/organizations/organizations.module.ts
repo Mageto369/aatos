@@ -5,10 +5,10 @@ import { OrganizationsController } from './organizations.controller';
 import { SupplierQualityService } from './supplier-quality.service';
 import { Organization } from './entities/organization.entity';
 import { OrganizationMember } from './entities/organization-member.entity';
-import { AuthModule } from '../auth/auth.module';
+import { Deal } from '../deals/entities/deal.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Organization, OrganizationMember])],
+  imports: [TypeOrmModule.forFeature([Organization, OrganizationMember, Deal])],
   providers: [OrganizationsService, SupplierQualityService],
   controllers: [OrganizationsController],
   exports: [OrganizationsService, SupplierQualityService],

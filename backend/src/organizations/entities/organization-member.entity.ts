@@ -27,7 +27,7 @@ export class OrganizationMember {
   @Column({ name: 'is_primary_contact', default: false })
   isPrimaryContact: boolean;
 
-  @Column({ name: 'invited_by', nullable: true })
+  @Column({ type: 'varchar', name: 'invited_by', nullable: true })
   invitedBy: string | null;
 
   @Column({ name: 'invited_at', type: 'timestamptz', nullable: true })

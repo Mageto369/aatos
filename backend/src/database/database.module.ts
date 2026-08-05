@@ -22,7 +22,7 @@ import { ConfigService } from '@nestjs/config';
           type: 'postgres',
           url: config.get<string>('DATABASE_URL'),
           autoLoadEntities: true,
-          synchronize: false,
+          synchronize: synchronize,
           migrationsRun: config.get('NODE_ENV') === 'production',
           logging: config.get('NODE_ENV') === 'development' ? ['query', 'error'] : ['error'],
           ssl: config.get('NODE_ENV') === 'production' ? { rejectUnauthorized: false } : false,

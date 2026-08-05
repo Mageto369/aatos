@@ -66,7 +66,7 @@ export class RfqsService {
 
   async createQuotation(rfqId: string, supplierOrgId: string, userId: string, data: Partial<Quotation>): Promise<Quotation> {
     const rfq = await this.findOne(rfqId);
-    if (rfq.status !== 'published') {
+    if (!['published', 'matching'].includes(rfq.status)) {
       throw new Error('RFQ is not open for quotations');
     }
 
