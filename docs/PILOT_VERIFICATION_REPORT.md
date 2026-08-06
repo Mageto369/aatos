@@ -150,7 +150,31 @@ See `docs/EXTERNAL_GATE_REGISTER.md` for full details.
 
 ---
 
-## 9. Pilot Decision
+## 9. Schema Drift Resolution
+
+**Status:** Resolved in commit `3aed89c`
+
+### Issues Found and Fixed
+
+1. **Partitioned table primary keys:** `messages` and `audit_logs` tables lacked composite primary keys including the partition column (`created_at`). Fixed in initial migration.
+
+2. **Missing column:** `deal_milestones` entity expected `inspection_id` but database lacked it. Created additive migration `1722800000002-AddInspectionIdToDealMilestones`.
+
+3. **Entity naming mismatches:** Common entities (`webhooks`, `subscriptions`, `feature_flags`, `carbon_footprints`) used camelCase property names without explicit `name:` attributes, causing mismatches with snake_case database columns. Fixed all entities to use explicit column name mappings.
+
+4. **Duplicate entity:** Removed duplicate `NotificationEntity` in `src/common/entities/` that conflicted with the correct `Notification` entity in `src/notifications/entities/`.
+
+5. **Product entity:** Fixed `price_currency` column reference to match database `currency` column.
+
+### Verification
+- Database-backed drift detector created at `backend/src/database/drift-detector-db.ts`
+- Zero drift confirmed on fresh database after all migrations
+- Rollback test passed for new migration
+- Build passes after all changes
+
+---
+
+## 10. Pilot Decision
 
 ### PILOT CONDITIONALLY APPROVED
 
@@ -183,7 +207,7 @@ See `docs/EXTERNAL_GATE_REGISTER.md` for full details.
 
 | Item | Priority | Owner | Status |
 |------|----------|-------|--------|
-| Schema drift fix | P1 | Engineering | Open |
+| Schema drift fix | P1 | Engineering | **Resolved** (commit `3aed89c`) |
 | Refresh token rotation | P1 | Engineering | Open |
 | Security headers | P2 | Engineering | Open |
 | Lint errors | P3 | Engineering | Open |
