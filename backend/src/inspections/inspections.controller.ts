@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { InspectionsService } from './inspections.service';
 import { WorkflowService } from '../workflows/workflows.service';
 import { CreateInspectionDto, UpdateInspectionDto } from './dto';
@@ -17,6 +18,7 @@ export class InspectionsController {
 
   @Post()
   @ApiOperation({ summary: 'Request a new inspection' })
+  @Roles('owner', 'admin', 'operator', 'logistics_officer')
   async create(@Body() data: CreateInspectionDto, @Request() req: any) {
     return this.inspectionsService.create(req.user.orgId, req.user.userId, data);
   }
@@ -49,13 +51,13 @@ export class InspectionsController {
 
   @Patch(':id/status')
   @ApiOperation({ summary: 'Update inspection status' })
+  @Roles('owner', 'admin', 'operator', 'logistics_officer')
   async updateStatus(
     @Param('id') id: string,
     @Body() data: UpdateInspectionDto,
     @Request() req: any,
   ) {
     const result = await this.inspectionsService.updateStatus(id, req.user.orgId, data.status || '', data);
-    // Trigger workflow if inspection passed — auto-advances deal milestone
     if (data.status === 'pass' || data.status === 'fail') {
       this.workflowService.onInspectionCompleted(id, data.status).catch(console.error);
     }
@@ -64,6 +66,7 @@ export class InspectionsController {
 
   @Delete(':id')
   @ApiOperation({ summary: 'Cancel inspection' })
+  @Roles('owner', 'admin')
   async remove(@Param('id') id: string, @Request() req: any) {
     await this.inspectionsService.remove(id, req.user.orgId);
     return { message: 'Inspection cancelled' };

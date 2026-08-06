@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Patch, Body, Param, Query, UseGuards, Request, ForbiddenException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { DealsService } from './deals.service';
 import { WorkflowService } from '../workflows/workflows.service';
 import { CreateDealDto, UpdateMilestoneDto } from './dto';
@@ -18,6 +19,7 @@ export class DealsController {
   @Post()
   @ApiOperation({ summary: 'Create a new deal' })
   @ApiResponse({ status: 201, description: 'Deal created' })
+  @Roles('owner', 'admin', 'operator')
   create(@Body() dto: CreateDealDto, @Request() req: any) {
     if (!req.user.orgId) {
       throw new ForbiddenException('User must belong to an organization');
@@ -35,7 +37,6 @@ export class DealsController {
   @ApiOperation({ summary: 'Get deal details' })
   async findOne(@Param('id') id: string, @Request() req: any) {
     const deal = await this.dealsService.findOne(id);
-    // Authorization check
     if (deal.buyerOrgId !== req.user.orgId && deal.supplierOrgId !== req.user.orgId) {
       throw new ForbiddenException('Not authorized to view this deal');
     }
@@ -44,6 +45,7 @@ export class DealsController {
 
   @Patch(':id/milestones/:milestoneId')
   @ApiOperation({ summary: 'Update milestone status' })
+  @Roles('owner', 'admin', 'operator')
   async updateMilestone(
     @Param('id') dealId: string,
     @Param('milestoneId') milestoneId: string,
@@ -51,7 +53,6 @@ export class DealsController {
     @Request() req: any,
   ) {
     const milestone = await this.dealsService.updateMilestone(dealId, milestoneId, req.user.orgId, dto);
-    // Trigger workflow for completed milestones (payment releases, status transitions)
     if (dto.status === 'completed') {
       this.workflowService.onMilestoneCompleted(milestoneId).catch(console.error);
     }

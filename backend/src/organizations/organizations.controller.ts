@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards, Request, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { OrganizationsService } from './organizations.service';
 import { CreateOrganizationDto, UpdateOrganizationDto } from './dto';
 
@@ -50,6 +51,7 @@ export class OrganizationsController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update organization' })
+  @Roles('owner', 'admin')
   update(@Param('id') id: string, @Body() dto: UpdateOrganizationDto) {
     return this.orgService.update(id, dto);
   }
@@ -57,6 +59,7 @@ export class OrganizationsController {
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete organization' })
+  @Roles('owner')
   remove(@Param('id') id: string) {
     return this.orgService.remove(id);
   }
@@ -69,6 +72,7 @@ export class OrganizationsController {
 
   @Post(':id/members')
   @ApiOperation({ summary: 'Add member to organization' })
+  @Roles('owner', 'admin')
   addMember(@Param('id') orgId: string, @Body('userId') userId: string, @Body('role') role: string) {
     return this.orgService.addMember(orgId, userId, role);
   }

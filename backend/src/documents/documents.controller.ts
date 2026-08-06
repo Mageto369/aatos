@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Patch, Delete, Body, Param, Query, Req, UseGuards, ParseIntPipe, DefaultValuePipe } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { DocumentsService } from './documents.service';
 import { CreateDocumentDto, UpdateDocumentDto } from './dto';
 
@@ -13,6 +14,7 @@ export class DocumentsController {
 
   @Post()
   @ApiOperation({ summary: 'Create a document record' })
+  @Roles('owner', 'admin', 'operator', 'compliance_officer')
   async create(@Body() data: CreateDocumentDto, @Req() req: any) {
     return this.documentsService.create(req.user.orgId, req.user.userId, data);
   }
@@ -50,12 +52,14 @@ export class DocumentsController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update document metadata' })
+  @Roles('owner', 'admin', 'operator', 'compliance_officer')
   async update(@Param('id') id: string, @Body() data: UpdateDocumentDto, @Req() req: any) {
     return this.documentsService.update(id, req.user.orgId, data);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Soft delete document' })
+  @Roles('owner', 'admin')
   async remove(@Param('id') id: string, @Req() req: any) {
     await this.documentsService.remove(id, req.user.orgId);
     return { message: 'Document deleted' };
