@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Param, Body, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { WorkflowService } from './workflows.service';
 
 @ApiTags('Workflows')
@@ -12,6 +13,7 @@ export class WorkflowsController {
 
   @Post('rfq/:id/publish')
   @ApiOperation({ summary: 'Manually trigger RFQ published workflow' })
+  @Roles('owner', 'admin', 'operator')
   async triggerRfqPublish(@Param('id') rfqId: string) {
     await this.workflowService.onRfqPublished(rfqId);
     return { success: true, message: `RFQ ${rfqId} publish workflow triggered` };
@@ -19,6 +21,7 @@ export class WorkflowsController {
 
   @Post('quote/:id/accept')
   @ApiOperation({ summary: 'Manually trigger quote acceptance workflow' })
+  @Roles('owner', 'admin', 'operator')
   async triggerQuoteAccept(@Param('id') quoteId: string) {
     const deal = await this.workflowService.onQuoteAccepted(quoteId);
     return { success: true, dealId: deal.id, message: `Quote ${quoteId} accepted. Deal created.` };
@@ -26,6 +29,7 @@ export class WorkflowsController {
 
   @Post('milestone/:id/complete')
   @ApiOperation({ summary: 'Manually trigger milestone completion workflow' })
+  @Roles('owner', 'admin', 'operator')
   async triggerMilestoneComplete(@Param('id') milestoneId: string) {
     await this.workflowService.onMilestoneCompleted(milestoneId);
     return { success: true, message: `Milestone ${milestoneId} completion workflow triggered` };
@@ -33,6 +37,7 @@ export class WorkflowsController {
 
   @Post('inspection/:id/result')
   @ApiOperation({ summary: 'Manually trigger inspection result workflow' })
+  @Roles('owner', 'admin', 'operator', 'logistics_officer')
   async triggerInspectionResult(
     @Param('id') inspectionId: string,
     @Body() body: { result: string },

@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Body, Param, Query, UseGuards, Request, Patch, Delete, ParseIntPipe, DefaultValuePipe } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { MessagesService } from './messages.service';
 
 @ApiTags('Messages')
@@ -12,6 +13,7 @@ export class MessagesController {
 
   @Post()
   @ApiOperation({ summary: 'Send a message' })
+  @Roles('owner', 'admin', 'operator')
   async createMessage(
     @Body() data: { dealId?: string; rfqId?: string; content: string; messageType?: string },
     @Request() req: any,

@@ -56,7 +56,6 @@ async function test() {
     entityId: exporterId,
     originCountry: 'KE',
     destinationCountry: 'US',
-    productCategoryId: 'green-coffee',
     generatedByRules: rules.map(r => r.id),
     overallStatus: 'pending',
     completionPercent: 0,

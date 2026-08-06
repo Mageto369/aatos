@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Body, Param, Query, UseGuards, Request, Patch, ForbiddenException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { RfqsService } from './rfqs.service';
 import { WorkflowService } from '../workflows/workflows.service';
 
@@ -16,6 +17,7 @@ export class RfqsController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new RFQ' })
+  @Roles('owner', 'admin', 'operator')
   create(@Body() data: any, @Request() req: any) {
     if (!req.user.orgId) {
       throw new ForbiddenException('User must belong to an organization');
@@ -25,9 +27,9 @@ export class RfqsController {
 
   @Post(':id/publish')
   @ApiOperation({ summary: 'Publish an RFQ' })
+  @Roles('owner', 'admin', 'operator')
   async publish(@Param('id') id: string, @Request() req: any) {
     const result = await this.rfqsService.publish(id, req.user.orgId);
-    // Trigger workflow: find matching suppliers and send notifications
     this.workflowService.onRfqPublished(id).catch(console.error);
     return result;
   }
@@ -46,6 +48,7 @@ export class RfqsController {
 
   @Post(':id/quotes')
   @ApiOperation({ summary: 'Submit a quotation' })
+  @Roles('owner', 'admin', 'operator')
   createQuotation(@Param('id') id: string, @Body() data: any, @Request() req: any) {
     if (!req.user.orgId) {
       throw new ForbiddenException('User must belong to an organization');
@@ -55,6 +58,7 @@ export class RfqsController {
 
   @Post(':id/quotes/:quoteId/accept')
   @ApiOperation({ summary: 'Accept a quotation and create a deal' })
+  @Roles('owner', 'admin', 'operator')
   async acceptQuote(
     @Param('id') rfqId: string,
     @Param('quoteId') quoteId: string,
@@ -63,7 +67,6 @@ export class RfqsController {
     if (!req.user.orgId) {
       throw new ForbiddenException('User must belong to an organization');
     }
-    // Trigger the full deal creation workflow
     const deal = await this.workflowService.onQuoteAccepted(quoteId);
     return { success: true, dealId: deal.id, message: 'Quotation accepted. Deal created.' };
   }

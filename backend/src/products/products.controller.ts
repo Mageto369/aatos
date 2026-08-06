@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { ProductsService } from './products.service';
 import { CreateProductDto, UpdateProductDto } from './dto';
 
@@ -14,8 +15,8 @@ export class ProductsController {
   @Post()
   @ApiOperation({ summary: 'Create a product listing' })
   @ApiResponse({ status: 201, description: 'Product created' })
+  @Roles('owner', 'admin', 'operator')
   create(@Body() dto: CreateProductDto, @Request() req: any) {
-    // Active org would come from middleware/context
     const orgId = req.headers['x-organization-id'] || req.user.userId;
     return this.productsService.create(req.user.userId, orgId, dto);
   }
@@ -44,6 +45,7 @@ export class ProductsController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update product' })
+  @Roles('owner', 'admin', 'operator')
   update(@Param('id') id: string, @Body() dto: UpdateProductDto, @Request() req: any) {
     const orgId = req.headers['x-organization-id'] || req.user.userId;
     return this.productsService.update(id, req.user.userId, orgId, dto);
@@ -51,6 +53,7 @@ export class ProductsController {
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete product' })
+  @Roles('owner', 'admin')
   remove(@Param('id') id: string, @Request() req: any) {
     const orgId = req.headers['x-organization-id'] || req.user.userId;
     return this.productsService.remove(id, orgId);
