@@ -1,53 +1,47 @@
-import { Controller, Post, Body, UseGuards, UnauthorizedException } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, UnauthorizedException, Req } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { JwtService } from '@nestjs/jwt';
-import { AuthService } from './auth.service';
+import { RefreshTokenService } from './services/refresh-token.service';
 import { CurrentUser, UserPayload } from './decorators/current-user.decorator';
 
 /**
  * Token Refresh Endpoint
  * 
- * Accepts a valid (non-expired) refresh token and issues a new access token.
- * For pilot: re-uses the JWT token with extended expiry as refresh token.
- * Production: should use opaque refresh tokens stored in database.
+ * Accepts a valid refresh token and issues a new access token + new refresh token.
+ * Implements refresh token rotation for security.
  */
 @ApiTags('Auth')
 @Controller('auth')
 export class RefreshController {
   constructor(
     private jwtService: JwtService,
-    private authService: AuthService,
+    private refreshTokenService: RefreshTokenService,
   ) {}
 
   @Post('refresh')
   @ApiOperation({ summary: 'Refresh access token' })
-  @UseGuards(AuthGuard('jwt'))
-  async refresh(@Body('refreshToken') refreshToken: string, @CurrentUser() user: UserPayload) {
+  async refresh(
+    @Body('refreshToken') refreshToken: string,
+    @Req() req: any,
+  ) {
     if (!refreshToken) {
       throw new UnauthorizedException('Refresh token required');
     }
 
-    // Verify the refresh token is valid
     try {
-      const payload = this.jwtService.verify(refreshToken, {
-        secret: process.env.JWT_SECRET,
-        issuer: 'aatos-api',
-        audience: 'aatos-client',
-      });
-
-      // Ensure the refresh token belongs to the current user
-      if (payload.sub !== user.userId) {
-        throw new UnauthorizedException('Invalid refresh token');
-      }
+      // Validate and rotate: old token revoked, new token issued
+      const { userId, newToken, newExpiresAt } = await this.refreshTokenService.validateAndRotate(
+        refreshToken,
+        req.ip,
+        req.headers['user-agent'],
+      );
 
       // Issue new access token
+      const user = { userId }; // Could fetch user details from DB if needed
       const accessToken = this.jwtService.sign(
         {
-          sub: user.userId,
-          email: user.email,
-          orgId: user.orgId,
-          role: user.role,
+          sub: userId,
         },
         {
           expiresIn: '1h',
@@ -56,27 +50,27 @@ export class RefreshController {
         },
       );
 
-      // Issue new refresh token
-      const newRefreshToken = this.jwtService.sign(
-        {
-          sub: user.userId,
-          type: 'refresh',
-        },
-        {
-          expiresIn: '7d',
-          issuer: 'aatos-api',
-          audience: 'aatos-client',
-        },
-      );
-
       return {
         access_token: accessToken,
-        refresh_token: newRefreshToken,
+        refresh_token: newToken,
         token_type: 'Bearer',
         expires_in: 3600,
+        refresh_expires_at: newExpiresAt.toISOString(),
       };
     } catch (err) {
+      if (err instanceof UnauthorizedException) {
+        throw err;
+      }
       throw new UnauthorizedException('Invalid or expired refresh token');
     }
+  }
+
+  @Post('logout')
+  @ApiOperation({ summary: 'Revoke refresh token' })
+  async logout(@Body('refreshToken') refreshToken: string) {
+    if (refreshToken) {
+      await this.refreshTokenService.revokeToken(refreshToken);
+    }
+    return { message: 'Logged out successfully' };
   }
 }

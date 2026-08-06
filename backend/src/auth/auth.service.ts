@@ -4,7 +4,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from './entities/user.entity';
+import { RefreshToken } from './entities/refresh-token.entity';
 import { RegisterDto, LoginDto, AuthResponse } from './dto';
+import { RefreshTokenService } from './services/refresh-token.service';
+
+export interface FullAuthResponse extends AuthResponse {
+  refreshToken: string;
+  expiresIn: number;
+  tokenType: string;
+}
 
 @Injectable()
 export class AuthService {
@@ -12,9 +20,10 @@ export class AuthService {
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
     private readonly jwtService: JwtService,
+    private readonly refreshTokenService: RefreshTokenService,
   ) {}
 
-  async register(dto: RegisterDto): Promise<AuthResponse> {
+  async register(dto: RegisterDto): Promise<FullAuthResponse> {
     const existing = await this.userRepo.findOne({ where: { email: dto.email.toLowerCase() } });
     if (existing) {
       throw new ConflictException('Email already registered');
@@ -31,10 +40,10 @@ export class AuthService {
     });
 
     await this.userRepo.save(user);
-    return this.buildAuthResponse(user);
+    return this.buildFullAuthResponse(user);
   }
 
-  async login(dto: LoginDto): Promise<AuthResponse> {
+  async login(dto: LoginDto): Promise<FullAuthResponse> {
     const user = await this.userRepo.findOne({ where: { email: dto.email.toLowerCase() } });
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
@@ -60,17 +69,21 @@ export class AuthService {
     user.lockedUntil = null;
     await this.userRepo.save(user);
 
-    return this.buildAuthResponse(user);
+    return this.buildFullAuthResponse(user);
   }
 
   async validateUser(userId: string): Promise<User | null> {
     return this.userRepo.findOne({ where: { id: userId,  } });
   }
 
-  private buildAuthResponse(user: User): AuthResponse {
+  private buildFullAuthResponse(user: User): FullAuthResponse {
     const payload = { sub: user.id, email: user.email };
+    const accessToken = this.jwtService.sign(payload);
+    
+    // Note: refresh token creation happens at controller level to access req.ip / req.headers['user-agent']
+    // For service-level generation we return without refresh token
     return {
-      accessToken: this.jwtService.sign(payload),
+      accessToken,
       user: {
         id: user.id,
         email: user.email,
@@ -79,6 +92,9 @@ export class AuthService {
         displayName: `${user.firstName} ${user.lastName}`,
         status: user.status,
       },
+      refreshToken: '', // populated by controller
+      expiresIn: 3600,
+      tokenType: 'Bearer',
     };
   }
 }

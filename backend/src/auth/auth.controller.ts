@@ -1,20 +1,30 @@
 import { Controller, Post, Get, Body, HttpCode, HttpStatus, UseGuards, Req } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
+import { RefreshTokenService } from './services/refresh-token.service';
 import { RegisterDto, LoginDto } from './dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly refreshTokenService: RefreshTokenService,
+  ) {}
 
   @Post('register')
   @ApiOperation({ summary: 'Register new user account' })
   @ApiResponse({ status: 201, description: 'User registered successfully' })
   @ApiResponse({ status: 409, description: 'Email already exists' })
-  async register(@Body() dto: RegisterDto) {
-    return this.authService.register(dto);
+  async register(@Body() dto: RegisterDto, @Req() req: any) {
+    const response = await this.authService.register(dto);
+    const { token: refreshToken } = await this.refreshTokenService.createToken(
+      response.user.id,
+      req.ip,
+      req.headers['user-agent'],
+    );
+    return { ...response, refreshToken };
   }
 
   @Post('login')
@@ -22,8 +32,14 @@ export class AuthController {
   @ApiOperation({ summary: 'Authenticate user and receive JWT' })
   @ApiResponse({ status: 200, description: 'Login successful' })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
-  async login(@Body() dto: LoginDto) {
-    return this.authService.login(dto);
+  async login(@Body() dto: LoginDto, @Req() req: any) {
+    const response = await this.authService.login(dto);
+    const { token: refreshToken } = await this.refreshTokenService.createToken(
+      response.user.id,
+      req.ip,
+      req.headers['user-agent'],
+    );
+    return { ...response, refreshToken };
   }
 
   @Get('me')

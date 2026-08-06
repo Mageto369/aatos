@@ -8,15 +8,17 @@ import { AuthController } from './auth.controller';
 import { RefreshController } from './refresh.controller';
 import { JwtStrategy } from './jwt.strategy';
 import { MfaService } from './mfa.service';
+import { RefreshTokenService } from './services/refresh-token.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
+import { RefreshToken } from './entities/refresh-token.entity';
 import { OrganizationMember } from '../organizations/entities/organization-member.entity';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, OrganizationMember]),
+    TypeOrmModule.forFeature([User, OrganizationMember, RefreshToken]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -35,6 +37,7 @@ import { RolesGuard } from './guards/roles.guard';
     AuthService,
     JwtStrategy,
     MfaService,
+    RefreshTokenService,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
@@ -45,6 +48,6 @@ import { RolesGuard } from './guards/roles.guard';
     },
   ],
   controllers: [AuthController, RefreshController],
-  exports: [AuthService, JwtModule, MfaService],
+  exports: [AuthService, JwtModule, MfaService, RefreshTokenService],
 })
 export class AuthModule {}
