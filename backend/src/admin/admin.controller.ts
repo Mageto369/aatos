@@ -1,12 +1,14 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { AdminService } from './admin.service';
 
 @ApiTags('Admin')
 @Controller('admin')
 @UseGuards(AuthGuard('jwt'))
 @ApiBearerAuth('access-token')
+@Roles('owner', 'admin')
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 

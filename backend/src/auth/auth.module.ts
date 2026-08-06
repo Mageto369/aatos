@@ -1,7 +1,8 @@
-import { Module } from '@nestjs/common';
+import { Module, Global } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './jwt.strategy';
@@ -9,6 +10,8 @@ import { MfaService } from './mfa.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { OrganizationMember } from '../organizations/entities/organization-member.entity';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { RolesGuard } from './guards/roles.guard';
 
 @Module({
   imports: [
@@ -27,7 +30,20 @@ import { OrganizationMember } from '../organizations/entities/organization-membe
       inject: [ConfigService],
     }),
   ],
-  providers: [AuthService, JwtStrategy, MfaService],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    MfaService,
+    // Global guards — applied to all routes
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
+  ],
   controllers: [AuthController],
   exports: [AuthService, JwtModule, MfaService],
 })

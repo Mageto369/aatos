@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Body, Param, Query, UseGuards, Request, Patch, ForbiddenException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { PaymentsService } from './payments.service';
 
 @ApiTags('Payments')
@@ -12,6 +13,7 @@ export class PaymentsController {
 
   @Post()
   @ApiOperation({ summary: 'Create a payment record' })
+  @Roles('owner', 'admin', 'finance_officer')
   async create(@Body() data: any, @Request() req: any) {
     return this.paymentsService.create({ ...data, payerOrgId: req.user.orgId });
   }
@@ -54,13 +56,13 @@ export class PaymentsController {
 
   @Post(':id/initiate')
   @ApiOperation({ summary: 'Initiate Flutterwave payment' })
+  @Roles('owner', 'admin', 'finance_officer')
   async initiatePayment(
     @Param('id') id: string,
     @Body('redirectUrl') redirectUrl: string,
     @Request() req: any,
   ) {
     const payment = await this.paymentsService.findOne(id);
-    // Authorization: must be payer
     if (payment.payerOrgId !== req.user.orgId) {
       throw new ForbiddenException('Only the payer can initiate payment');
     }
@@ -69,6 +71,7 @@ export class PaymentsController {
 
   @Post(':id/verify')
   @ApiOperation({ summary: 'Verify Flutterwave payment' })
+  @Roles('owner', 'admin', 'finance_officer')
   async verifyPayment(@Param('id') id: string, @Request() req: any) {
     const payment = await this.paymentsService.findOne(id);
     if (payment.payerOrgId !== req.user.orgId) {
@@ -80,9 +83,9 @@ export class PaymentsController {
 
   @Post(':id/release')
   @ApiOperation({ summary: 'Release held payment to payee' })
+  @Roles('owner', 'admin', 'finance_officer')
   async releasePayment(@Param('id') id: string, @Request() req: any) {
     const payment = await this.paymentsService.findOne(id);
-    // Both parties can trigger release based on milestone completion
     if (payment.payerOrgId !== req.user.orgId && payment.payeeOrgId !== req.user.orgId) {
       throw new ForbiddenException('Not authorized for this payment');
     }
@@ -91,6 +94,7 @@ export class PaymentsController {
 
   @Patch(':id/status')
   @ApiOperation({ summary: 'Update payment status' })
+  @Roles('owner', 'admin', 'finance_officer')
   async updateStatus(
     @Param('id') id: string,
     @Body('status') status: string,

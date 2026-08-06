@@ -29,11 +29,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (!user) {
       return null;
     }
-    // Look up primary organization
+    // Look up primary organization membership
     const member = await this.memberRepo.findOne({
-      where: { userId: user.id,  },
+      where: { userId: user.id },
       order: { createdAt: 'ASC' },
     });
-    return { userId: user.id, email: user.email, orgId: member?.organizationId || null };
+    return {
+      userId: user.id,
+      email: user.email,
+      orgId: member?.organizationId || null,
+      role: member?.role || null,
+    };
   }
 }

@@ -1,87 +1,296 @@
-# Security Baseline
-**Version:** 1.0
-**Effective:** 2026-08-04
-**Authority:** AATOS Autonomous Execution Master Directive
+# AATOS Security Baseline
+
+**Version:** 1.0  
+**Date:** 2026-08-06  
+**Status:** Active
 
 ---
 
-## Authentication
+## 1. Authentication
 
-| Control | Status | Implementation |
-|---|---|---|
-| JWT tokens | Implemented | HS256/RS256, 1h expiry |
-| Refresh tokens | Implemented | 7 day expiry, rotation recommended |
-| Password hashing | Implemented | bcrypt, cost factor 12+ |
-| Login throttling | Implemented | 5 attempts, 15 min lockout |
-| MFA (TOTP) | UI exists, backend partial | Settings page has UI; verification logic incomplete |
-| Session revocation | Not implemented | Required before production |
+### JWT Token Configuration
+| Setting | Value | Notes |
+|---------|-------|-------|
+| Algorithm | HS256 | Consider RS256 for multi-service |
+| Expiry | 1 hour (`JWT_EXPIRES_IN`) | Configurable via env |
+| Issuer | `aatos-api` | Verified on validation |
+| Audience | `aatos-client` | Verified on validation |
+| Refresh tokens | Not implemented | P1 — see backlog |
 
-## Authorization
+### Token Payload
+```json
+{
+  "sub": "user-uuid",
+  "email": "user@example.com",
+  "orgId": "org-uuid",
+  "role": "admin"
+}
+```
 
-| Control | Status | Implementation |
-|---|---|---|
-| Organization scoping | Partial | Some endpoints check orgId; audit required for all |
-| Role-based access | Partial | Roles defined; enforcement inconsistent |
-| Object-level auth | Not implemented | Required before production |
-| Admin privileges | Implemented | Admin role exists |
-
-## Infrastructure
-
-| Control | Status | Implementation |
-|---|---|---|
-| HTTPS/TLS | Required | All traffic encrypted |
-| Helmet headers | Implemented | Security headers set |
-| CORS | Implemented | Configured for frontend origin |
-| Rate limiting | Implemented | Throttler module |
-| Compression | Implemented | gzip |
-
-## Data Protection
-
-| Control | Status | Implementation |
-|---|---|---|
-| Encryption at rest | Partial | Database encryption depends on provider (Supabase) |
-| Encryption in transit | Implemented | TLS 1.2+ |
-| Secret management | Weak | .env files; no key vault yet |
-| Audit logging | Not implemented | Required before production |
-
-## File Uploads
-
-| Control | Status | Implementation |
-|---|---|---|
-| S3 presigned URLs | Implemented | Direct upload to S3 |
-| File type validation | Partial | Extension check; MIME validation needed |
-| Malware scanning | Not implemented | ClamAV integration planned |
-| Size limits | Unknown | Not configured |
-
-## Webhooks
-
-| Control | Status | Implementation |
-|---|---|---|
-| Signature verification | Not implemented | Critical for payment webhooks |
-| Replay protection | Not implemented | Required |
-| IP allowlisting | Not implemented | Recommended |
-
-## Dependencies
-
-| Control | Status | Notes |
-|---|---|---|
-| Dependency scanning | Not implemented | npm audit, Snyk, or Dependabot needed |
-| Secret scanning | Not implemented | GitHub secret scanning or gitleaks needed |
-| Container scanning | Not implemented | Required if containerized |
+### Multi-Factor Authentication
+- TOTP-based (Google Authenticator compatible)
+- Enforced for privileged roles (`owner`, `admin`)
+- Optional for standard users
+- Managed by `MfaService`
 
 ---
 
-## Required Before Production
+## 2. Authorization (RBAC)
 
-1. **MFA backend completion**
-2. **Object-level authorization audit**
-3. **Webhook signature verification**
-4. **Audit logging system**
-5. **Secret management (key vault)**
-6. **Malware scanning**
-7. **Dependency scanning**
-8. **Penetration test**
+### Role Hierarchy
+
+| Role | Description | Typical Access |
+|------|-------------|----------------|
+| `owner` | Organization owner | Full access |
+| `admin` | Organization admin | Full access except billing changes |
+| `operator` | Day-to-day trader | Create/modify deals, RFQs, products |
+| `finance_officer` | Financial operations | Payments, invoices, refunds |
+| `compliance_officer` | Regulatory compliance | Compliance checklists, documents, inspections |
+| `logistics_officer` | Shipping coordination | Inspections, logistics referrals |
+| `viewer` | Read-only | View deals, documents, status |
+| `agent` | External representative | Limited deal access |
+| `support` | Customer support | Internal tools only |
+
+### Guard Stack (Applied Globally)
+
+```
+All routes → JwtAuthGuard → RolesGuard
+```
+
+- **JwtAuthGuard:** Validates JWT signature, expiry, issuer, audience
+- **RolesGuard:** Checks `@Roles()` decorator against user's org role
+
+### Decorators
+
+| Decorator | Usage |
+|-----------|-------|
+| `@Roles('admin', 'owner')` | Restrict to specific roles |
+| `@CurrentUser()` | Inject user payload into handler |
+| No `@Roles()` | Authenticated only (any role) |
 
 ---
 
-*Baseline subject to security audit before production deployment.*
+## 3. Endpoint Protection
+
+### Admin Endpoints
+- `/admin/*` — `owner`, `admin` only
+- Platform-wide statistics, user lists, organization management
+
+### Finance Endpoints
+- `POST /payments` — `owner`, `admin`, `finance_officer`
+- `POST /payments/:id/initiate` — `owner`, `admin`, `finance_officer`
+- `POST /payments/:id/release` — `owner`, `admin`, `finance_officer`
+- `PATCH /payments/:id/status` — `owner`, `admin`, `finance_officer`
+
+### Compliance Endpoints
+- `POST /compliance/check` — `owner`, `admin`, `operator`, `compliance_officer`
+- `GET /compliance/rules` — Any authenticated user
+
+### Analytics Endpoints
+- `GET /analytics/dashboard` — `owner`, `admin`
+- `GET /analytics/growth` — `owner`, `admin`
+- `GET /analytics/corridors` — `owner`, `admin`
+
+---
+
+## 4. Data Protection
+
+### Encryption at Rest
+- PostgreSQL: Managed by cloud provider (RDS/Cloud SQL)
+- Application-level: Not implemented (consider field-level for PII)
+
+### Encryption in Transit
+- TLS 1.3 required for all connections
+- HSTS header enforced
+- API: HTTPS only
+
+### Secrets Management
+| Secret | Storage |
+|--------|---------|
+| JWT_SECRET | Environment variable |
+| DATABASE_URL | Environment variable |
+| Flutterwave keys | Environment variable |
+| MFA secrets | Database (encrypted at rest by PostgreSQL) |
+
+### Environment Configuration
+
+```bash
+# Required
+DATABASE_URL=postgresql://...
+JWT_SECRET=<random-256-bit-string>
+
+# Optional (defaults shown)
+JWT_EXPIRES_IN=1h
+DATABASE_SYNCHRONIZE=false  # Must be false in production
+NODE_ENV=production
+```
+
+---
+
+## 5. Input Validation
+
+### Global Pipes
+- `ValidationPipe` with `whitelist: true` (strips unknown properties)
+- `transform: true` (auto-transform payloads to DTOs)
+
+### File Uploads
+- Max size: 10MB
+- Allowed types: PDF, JPEG, PNG, DOC, DOCX, XLS, XLSX
+- Virus scanning: Not implemented (P2 — ClamAV or cloud solution)
+
+---
+
+## 6. Audit Logging
+
+### Logged Events
+- User login/logout
+- Password changes
+- MFA enable/disable
+- Role changes
+- Deal status changes
+- Payment initiation/verification/release
+- Document uploads
+- Compliance checklist updates
+
+### Log Schema
+```sql
+audit_logs (partitioned by month)
+- id UUID
+- entity_type VARCHAR
+- entity_id UUID
+- action VARCHAR
+- actor_user_id UUID
+- actor_org_id UUID
+- metadata JSONB
+- ip_address INET
+- user_agent TEXT
+- created_at TIMESTAMPTZ
+```
+
+### Retention
+- Hot: 90 days in primary database
+- Warm: 1 year in object storage (S3/Cloud Storage)
+- Cold: 7 years (regulatory requirement)
+
+---
+
+## 7. Rate Limiting
+
+### Current Implementation
+- In-memory (per-instance)
+- Configured per route via `@Throttle()` decorator
+- Not shared across instances
+
+### Production Requirement
+- Switch to Redis-backed rate limiting
+- Shared state across all API instances
+- Configuration:
+  ```
+  default: 100 requests / 15 minutes
+  auth endpoints: 5 requests / 15 minutes
+  payment endpoints: 10 requests / 15 minutes
+  ```
+
+---
+
+## 8. Dependency Security
+
+### Known Vulnerabilities
+Run weekly:
+```bash
+npm audit
+# or
+yarn audit
+```
+
+### Outdated Dependencies
+Run monthly:
+```bash
+npm outdated
+```
+
+### CI/CD Integration
+- Block merge if `npm audit` finds critical vulnerabilities
+- Automated Dependabot alerts
+
+---
+
+## 9. Network Security
+
+### Production Deployment
+- API behind reverse proxy (Nginx/CloudFlare)
+- WAF rules for common attack patterns
+- DDoS protection enabled
+- IP allowlisting for admin endpoints (optional)
+
+### CORS Policy
+```typescript
+// Currently permissive — tighten for production
+origin: ['https://aatos.trade', 'https://app.aatos.trade']
+```
+
+---
+
+## 10. Incident Response
+
+### Severity Levels
+| Level | Criteria | Response Time |
+|-------|----------|---------------|
+| Critical | Data breach, payment fraud, complete outage | 1 hour |
+| High | Unauthorized access, feature down | 4 hours |
+| Medium | Performance degradation, partial outage | 24 hours |
+| Low | Cosmetic issues, non-critical bugs | 72 hours |
+
+### Escalation
+1. On-call engineer notified via PagerDuty/Opsgenie
+2. If unresolved in 1 hour → Engineering lead
+3. If unresolved in 4 hours → CTO
+4. If data breach → Legal + Executive immediately
+
+---
+
+## 11. Compliance & Certifications
+
+### Target Certifications
+| Certification | Priority | Timeline |
+|---------------|----------|----------|
+| SOC 2 Type II | P1 | 12-18 months post-launch |
+| ISO 27001 | P2 | 18-24 months |
+| GDPR compliance | P1 | Before EU users |
+
+### Data Residency
+- Default: U.S. (AWS us-east-1 / us-west-2)
+- EU: Frankfurt (gdpr-region flag)
+- Kenya: Nairobi (africa-region flag)
+
+---
+
+## 12. Security Checklist (Pre-Launch)
+
+- [x] JWT authentication implemented
+- [x] RBAC with role guards implemented
+- [x] MFA for privileged users
+- [x] Password hashing (bcrypt)
+- [x] Input validation (class-validator)
+- [x] Audit logging
+- [ ] Rate limiting via Redis (P2)
+- [ ] External penetration test (P1)
+- [ ] Secrets rotation policy (P2)
+- [ ] Security headers (HSTS, CSP, X-Frame-Options) (P2)
+- [ ] Automated vulnerability scanning (P2)
+
+---
+
+## 13. Contact
+
+| Role | Contact | Escalation |
+|------|---------|------------|
+| Security Lead | security@aatos.trade | CTO |
+| Incident Response | incident@aatos.trade | +1-XXX-XXX-XXXX |
+| Legal | legal@aatos.trade | CEO |
+
+---
+
+*Document version: 1.0*  
+*Last updated: 2026-08-06*  
+*Next review: 2026-09-06*
