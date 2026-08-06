@@ -20,15 +20,15 @@ export class FeatureFlagEntity {
   @Column({ type: 'int', nullable: true })
   percentage: number;
 
-  @Column({ type: 'simple-array', nullable: true })
-  allowedUsers: string[];
+  @Column({ type: 'text', nullable: true, name: 'allowed_users' })
+  allowedUsers: string;
 
-  @Column({ type: 'simple-array', nullable: true })
-  allowedOrgs: string[];
+  @Column({ type: 'text', nullable: true, name: 'allowed_orgs' })
+  allowedOrgs: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }

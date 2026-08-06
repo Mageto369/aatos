@@ -5,16 +5,16 @@ export class CarbonFootprintEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'varchar', length: 100 })
+  @Column({ type: 'varchar', length: 100, name: 'org_id' })
   orgId: string;
 
-  @Column({ type: 'varchar', length: 100, nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true, name: 'deal_id' })
   dealId: string;
 
-  @Column({ type: 'varchar', length: 100, nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true, name: 'product_id' })
   productId: string;
 
-  @Column({ type: 'varchar', length: 20 })
+  @Column({ type: 'varchar', length: 20, name: 'transport_mode' })
   transportMode: string;
 
   @Column({ type: 'varchar', length: 10 })
@@ -23,18 +23,18 @@ export class CarbonFootprintEntity {
   @Column({ type: 'varchar', length: 10 })
   destination: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  @Column({ type: 'decimal', precision: 10, scale: 2, name: 'distance_km' })
   distanceKm: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  @Column({ type: 'decimal', precision: 10, scale: 2, name: 'weight_kg' })
   weightKg: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 4 })
+  @Column({ type: 'decimal', precision: 10, scale: 4, name: 'carbon_kg' })
   carbonKg: number;
 
-  @Column({ type: 'varchar', length: 100 })
+  @Column({ type: 'varchar', length: 100, name: 'calculation_method' })
   calculationMethod: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'calculated_at' })
   calculatedAt: Date;
 }

@@ -58,7 +58,7 @@ export class Product {
   @Column({ name: 'price_unit', type: 'enum', enum: ['kg', 'mt', 'lb', 'ton', 'bag', 'box', 'carton', 'container_20ft', 'container_40ft', 'liter', 'gallon', 'piece', 'dozen', 'pallet'], nullable: true })
   priceUnit: string | null;
 
-  @Column({ name: 'price_currency', type: 'enum', enum: ['USD', 'EUR', 'GBP', 'KES', 'NGN', 'ETB', 'GHS'], default: 'USD' })
+  @Column({ name: 'currency', type: 'enum', enum: ['USD', 'EUR', 'GBP', 'KES', 'NGN', 'ETB', 'GHS'], default: 'USD' })
   priceCurrency: string;
 
   @Column({ type: 'varchar', name: 'packaging_type', length: 100, nullable: true })

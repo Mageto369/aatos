@@ -612,7 +612,7 @@ export class InitialSchema1722720000000 implements MigrationInterface {
     // Messages (partitioned)
     await queryRunner.query(`
       CREATE TABLE messages (
-        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        id UUID NOT NULL DEFAULT uuid_generate_v4(),
         deal_id UUID REFERENCES deals(id) ON DELETE CASCADE,
         rfq_id UUID REFERENCES rfqs(id) ON DELETE CASCADE,
         sender_org_id UUID NOT NULL REFERENCES organizations(id),
@@ -627,7 +627,8 @@ export class InitialSchema1722720000000 implements MigrationInterface {
         read_by JSONB DEFAULT '{}',
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        deleted_at TIMESTAMPTZ
+        deleted_at TIMESTAMPTZ,
+        PRIMARY KEY (id, created_at)
       ) PARTITION BY RANGE (created_at)
     `);
     await queryRunner.query(`CREATE TABLE messages_2026_07 PARTITION OF messages FOR VALUES FROM ('2026-07-01') TO ('2026-08-01')`);
@@ -741,7 +742,7 @@ export class InitialSchema1722720000000 implements MigrationInterface {
     // Audit logs (partitioned)
     await queryRunner.query(`
       CREATE TABLE audit_logs (
-        id BIGSERIAL,
+        id BIGSERIAL NOT NULL,
         actor_user_id UUID REFERENCES users(id),
         actor_org_id UUID REFERENCES organizations(id),
         actor_ip INET,
@@ -754,7 +755,8 @@ export class InitialSchema1722720000000 implements MigrationInterface {
         change_summary TEXT,
         request_id VARCHAR(100),
         session_id VARCHAR(100),
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        PRIMARY KEY (id, created_at)
       ) PARTITION BY RANGE (created_at)
     `);
     await queryRunner.query(`CREATE TABLE audit_logs_2026_07 PARTITION OF audit_logs FOR VALUES FROM ('2026-07-01') TO ('2026-08-01')`);
