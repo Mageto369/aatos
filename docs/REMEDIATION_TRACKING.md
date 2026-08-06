@@ -1,5 +1,5 @@
 # AATOS Remediation Tracking
-**Updated:** 2026-08-04
+**Updated:** 2026-08-06
 **Current Phase:** All Phases Complete
 **Pilot Decision:** APPROVED — Kenya → United States, Green Specialty Coffee
 
@@ -46,6 +46,9 @@
 | 1.17 | Kenyan supplier verification flow | **COMPLETE** | krenovia | M | — |
 | 1.18 | U.S. buyer verification flow | **COMPLETE** | krenovia | M | — |
 | 1.19 | Kenya export-document map | **COMPLETE** (in compliance rules seed) | krenovia | M | — |
+| 1.19a | **KE→US Green Coffee Compliance Rule Set** | **COMPLETE** | krenovia | L | — |
+| 1.19b | **Compliance Source Matrix (verified)** | **COMPLETE** | krenovia | M | — |
+| 1.19c | **Compliance Rule Seeder + Validator** | **COMPLETE** | krenovia | M | — |
 | 1.20 | U.S. green-coffee import requirement map | **COMPLETE** (in compliance rules seed) | krenovia | L | — |
 | 1.21 | Sanctions-screening workflow | **COMPLETE** | krenovia | M | — |
 | 1.22 | Privacy framework implementation | **COMPLETE** (in SECURITY_BASELINE.md) | krenovia | M | — |
@@ -79,6 +82,7 @@
 | D029: Phase 0 Gate — PASSED | 2026-08-04 | krenovia | APPROVED |
 | D030: Phase 1 Gate — PASSED | 2026-08-04 | krenovia | APPROVED |
 | D031: Phase 2 Initiated | 2026-08-04 | krenovia | IN PROGRESS |
+| **D032: KE→US Compliance Rule Set Verified** | **2026-08-06** | **krenovia** | **COMPLETE** |
 
 ---
 
