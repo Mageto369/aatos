@@ -174,7 +174,44 @@ See `docs/EXTERNAL_GATE_REGISTER.md` for full details.
 
 ---
 
-## 10. Pilot Decision
+## 10. Refresh Token Rotation
+
+**Status:** Resolved in commit `fc9c234`
+
+### Implementation
+
+Replaced JWT-based refresh tokens with opaque database-stored tokens supporting rotation:
+
+- **Entity:** `RefreshToken` with fields: user_id, token (unique), ip_address, user_agent, expires_at, revoked_at
+- **Service:** `RefreshTokenService` providing:
+  - `createToken()` - generates cryptographically random 64-char hex token
+  - `validateAndRotate()` - validates token, revokes old, issues new
+  - `revokeToken()` - manual revocation (logout)
+  - `revokeAllUserTokens()` - revoke all tokens for user
+  - `cleanupOldTokens()` - remove expired/revoked tokens
+- **AuthController:** Login and register now return `{ accessToken, refreshToken, user }`
+- **RefreshController:** `/auth/refresh` performs rotation, `/auth/logout` revokes token
+- **Migration:** `1722800000003-CreateRefreshTokens` creates table with indexes
+
+### Security Properties
+
+| Property | Status |
+|----------|--------|
+| Opaque tokens (not JWTs) | ✓ |
+| Automatic rotation on use | ✓ |
+| Revocation support | ✓ |
+| IP/User-Agent tracking | ✓ |
+| 7-day expiry | ✓ |
+| Unique token constraint | ✓ |
+
+### Verification
+- Migration applies cleanly to fresh database
+- Table and indexes verified
+- Build passes
+
+---
+
+## 11. Pilot Decision
 
 ### PILOT CONDITIONALLY APPROVED
 
@@ -208,7 +245,7 @@ See `docs/EXTERNAL_GATE_REGISTER.md` for full details.
 | Item | Priority | Owner | Status |
 |------|----------|-------|--------|
 | Schema drift fix | P1 | Engineering | **Resolved** (commit `3aed89c`) |
-| Refresh token rotation | P1 | Engineering | Open |
+| Refresh token rotation | P1 | Engineering | **Resolved** (commit `fc9c234`) |
 | Security headers | P2 | Engineering | Open |
 | Lint errors | P3 | Engineering | Open |
 | Legal review | P0 | Legal | Blocked |
