@@ -11,7 +11,7 @@ const configService = new ConfigService();
 export default new DataSource({
   type: 'postgres',
   url: configService.get('DATABASE_URL') || process.env.DATABASE_URL || 'postgresql://aatos:aatos_password@localhost:5432/aatos_dev',
-  synchronize: true, // TEMPORARY: for pilot workflow baseline test only
+  synchronize: false, // NEVER enable in production; use migrations only
   logging: process.env.NODE_ENV === 'development',
   entities: [join(__dirname, '..', '**', '*.entity.ts')],
   migrations: [join(__dirname, '..', 'database', 'migrations', '*.ts')],
