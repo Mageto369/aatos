@@ -5,6 +5,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
+import { RefreshController } from './refresh.controller';
 import { JwtStrategy } from './jwt.strategy';
 import { MfaService } from './mfa.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -34,7 +35,6 @@ import { RolesGuard } from './guards/roles.guard';
     AuthService,
     JwtStrategy,
     MfaService,
-    // Global guards — applied to all routes
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
@@ -44,7 +44,7 @@ import { RolesGuard } from './guards/roles.guard';
       useClass: RolesGuard,
     },
   ],
-  controllers: [AuthController],
+  controllers: [AuthController, RefreshController],
   exports: [AuthService, JwtModule, MfaService],
 })
 export class AuthModule {}
