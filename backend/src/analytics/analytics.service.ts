@@ -13,7 +13,6 @@ export interface DashboardStats {
   completedDeals: number;
   totalRFQs: number;
   openRFQs: number;
-  totalQuotations: number;
   tradeVolume: number;
   averageDealValue: number;
   conversionRate: number;
@@ -61,7 +60,6 @@ export class AnalyticsService {
       completedDeals,
       totalRFQs,
       openRFQs,
-      totalQuotations,
       tradeVolumeResult,
     ] = await Promise.all([
       this.orgRepo.count(),
@@ -99,7 +97,6 @@ export class AnalyticsService {
       completedDeals,
       totalRFQs,
       openRFQs,
-      totalQuotations: 0, // quotations not yet implemented
       tradeVolume: parseFloat(tradeVolumeResult?.total || 0),
       averageDealValue: avgDealValue,
       conversionRate,

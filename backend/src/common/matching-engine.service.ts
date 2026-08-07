@@ -99,7 +99,7 @@ export class MatchingEngineService {
       .slice(0, limit);
   }
 
-  async getMarketInsights(product: string, destination: string): Promise<{
+  async getMarketInsights(_product: string, _destination: string): Promise<{
     avgPrice: number;
     priceTrend: 'rising' | 'stable' | 'falling';
     topSuppliers: string[];

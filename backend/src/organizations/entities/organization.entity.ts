@@ -1,6 +1,6 @@
 import {
   Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn,
-  DeleteDateColumn, Index, ManyToOne, JoinColumn, OneToMany,
+  DeleteDateColumn, Index, OneToMany,
 } from 'typeorm';
 import { OrganizationMember } from './organization-member.entity';
 

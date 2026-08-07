@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsEnum, IsNumber, IsEmail, MinLength, MaxLength, IsUUID } from 'class-validator';
+import { IsString, IsOptional, IsEnum, IsNumber, MinLength, MaxLength } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 const ORG_TYPES = ['farmer', 'cooperative', 'aggregator', 'processor', 'manufacturer',

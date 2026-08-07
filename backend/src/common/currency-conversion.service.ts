@@ -101,7 +101,7 @@ export class CurrencyConversionService {
     return Array.from(currencies).sort();
   }
 
-  async getHedgingOptions(base: string, target: string, amount: number): Promise<HedgingOption[]> {
+  async getHedgingOptions(base: string, target: string, _amount: number): Promise<HedgingOption[]> {
     const spotRate = await this.getRate(base, target);
     if (!spotRate) return [];
 

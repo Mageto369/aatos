@@ -80,7 +80,7 @@ export class BankTransferProvider implements PaymentProvider {
     };
   }
 
-  async getTransactionStatus(transactionId: string): Promise<string> {
+  async getTransactionStatus(_transactionId: string): Promise<string> {
     // In production, query bank API
     return 'pending';
   }
@@ -150,7 +150,7 @@ export class MobileMoneyProvider implements PaymentProvider {
     };
   }
 
-  async getTransactionStatus(transactionId: string): Promise<string> {
+  async getTransactionStatus(_transactionId: string): Promise<string> {
     // In production, query mobile money API
     return 'pending';
   }

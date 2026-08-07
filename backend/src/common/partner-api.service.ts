@@ -118,7 +118,7 @@ export class PartnerApiService {
     return this.webhooks.delete(webhookId);
   }
 
-  async deliverWebhook(event: string, payload: unknown): Promise<void> {
+  async deliverWebhook(event: string, _payload: unknown): Promise<void> {
     const relevantWebhooks = Array.from(this.webhooks.values()).filter(
       w => w.active && w.events.includes(event),
     );

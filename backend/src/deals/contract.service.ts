@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Deal } from '../deals/entities/deal.entity';
 import { Organization } from '../organizations/entities/organization.entity';
-import { User } from '../auth/entities/user.entity';
 
 export interface ContractTemplate {
   id: string;
@@ -97,7 +96,7 @@ export class ContractService {
     return `${prefix}-${year}-${sequence}`;
   }
 
-  private selectTemplate(deal: Deal): ContractTemplate {
+  private selectTemplate(_deal: Deal): ContractTemplate {
     // In production, templates would be fetched from a database
     // Default template for green coffee Kenya -> US
     return {

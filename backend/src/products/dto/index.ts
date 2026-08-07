@@ -2,7 +2,6 @@ import { IsString, IsOptional, IsNumber, IsEnum, IsObject, IsArray, Min, IsUUID 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 const UNITS = ['kg', 'mt', 'lb', 'ton', 'bag', 'box', 'carton', 'container_20ft', 'container_40ft', 'liter', 'gallon', 'piece', 'dozen', 'pallet'] as const;
-const CURRENCIES = ['USD', 'EUR', 'GBP', 'KES', 'NGN', 'ETB', 'GHS'] as const;
 const INCOTERMS = ['EXW', 'FCA', 'FOB', 'CFR', 'CIF', 'DAP', 'DDP'] as const;
 
 export class CreateProductDto {

@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, Index, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, Index } from 'typeorm';
 
 export type DocumentType = 'business_registration' | 'export_license' | 'import_license' | 'phytosanitary_certificate' | 'certificate_of_origin' | 'quality_certificate' | 'organic_certificate' | 'fair_trade_certificate' | 'bank_statement' | 'tax_certificate' | 'identity_document' | 'inspection_report' | 'lab_report' | 'contract' | 'invoice' | 'bill_of_lading' | 'insurance_policy' | 'customs_declaration' | 'packing_list' | 'other';
 export type DocumentStatus = 'uploaded' | 'pending_review' | 'verified' | 'rejected' | 'expired' | 'revoked';

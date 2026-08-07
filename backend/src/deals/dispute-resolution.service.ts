@@ -1,6 +1,6 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Not } from 'typeorm';
+import { Repository } from 'typeorm';
 import { DisputeEntity, DisputeEvidence } from './entities/dispute.entity';
 
 export interface Dispute {
@@ -68,7 +68,7 @@ export class DisputeResolutionService {
     return this.disputeRepo.save(dispute);
   }
 
-  async updateStatus(disputeId: string, status: Dispute['status'], resolution?: string, resolvedBy?: string): Promise<Dispute> {
+  async updateStatus(disputeId: string, status: Dispute['status'], resolution?: string, _resolvedBy?: string): Promise<Dispute> {
     const dispute = await this.disputeRepo.findOne({ where: { id: disputeId } });
     if (!dispute) throw new NotFoundException('Dispute not found');
 

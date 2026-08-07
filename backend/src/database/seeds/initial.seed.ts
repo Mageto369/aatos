@@ -1,5 +1,4 @@
 import { DataSource } from 'typeorm';
-import { User } from '../../auth/entities/user.entity';
 import { Organization } from '../../organizations/entities/organization.entity';
 import { Product } from '../../products/entities/product.entity';
 import { ProductCategory } from '../../products/entities/product-category.entity';
@@ -8,7 +7,6 @@ export async function seedDatabase(dataSource: DataSource): Promise<void> {
   console.log('Seeding database...');
 
   const orgRepo = dataSource.getRepository(Organization);
-  const userRepo = dataSource.getRepository(User);
   const productRepo = dataSource.getRepository(Product);
   const categoryRepo = dataSource.getRepository(ProductCategory);
 

@@ -119,7 +119,7 @@ export class ProductsService {
     if (!schema || Object.keys(schema).length === 0) return;
     // TODO: Implement JSON Schema validation using ajv
     // For MVP, basic type checking
-    for (const [key, value] of Object.entries(attributes)) {
+    for (const [, value] of Object.entries(attributes)) {
       if (value === null || value === undefined) continue;
       // Add validation logic here
     }

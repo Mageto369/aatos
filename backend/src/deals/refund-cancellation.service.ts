@@ -164,7 +164,6 @@ export class RefundCancellationService {
     // - If deal completed: 0% refund
 
     const completedMilestones = deal.milestones?.filter((m: any) => m.status === 'completed').length || 0;
-    const totalMilestones = deal.milestones?.length || 6;
 
     if (completedMilestones === 0) return deal.totalValue * 0.98;
     if (completedMilestones <= 2) return deal.totalValue * 0.75;

@@ -17,7 +17,7 @@ interface ValidationResult {
   overall: 'PASS' | 'FAIL' | 'WARN';
 }
 
-const REQUIRED_SOURCE_URLS = [
+const _REQUIRED_SOURCE_URLS = [
   'KEPHIS',
   'AFA',
   'FDA',
