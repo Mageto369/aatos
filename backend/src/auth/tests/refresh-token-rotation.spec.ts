@@ -5,10 +5,6 @@
  * Run against a running API server or as integration test.
  */
 
-import axios from 'axios';
-
-const API_BASE = process.env.API_BASE || 'http://localhost:3000';
-
 interface TestResult {
   scenario: string;
   passed: boolean;

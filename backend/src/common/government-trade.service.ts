@@ -123,7 +123,7 @@ export class GovernmentTradeService {
     return Array.from(this.certificates.values()).filter(c => c.orgId === orgId);
   }
 
-  async getTradeStatistics(country: string, period: string): Promise<{
+  async getTradeStatistics(_country: string, _period: string): Promise<{
     totalExports: number;
     totalImports: number;
     topProducts: string[];

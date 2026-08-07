@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Deal } from '../deals/entities/deal.entity';
 import { Organization } from '../organizations/entities/organization.entity';
 import { RFQ } from '../rfqs/entities/rfq.entity';

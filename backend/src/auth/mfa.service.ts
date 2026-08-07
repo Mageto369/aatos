@@ -32,7 +32,7 @@ export class MfaService {
   /**
    * Verify a TOTP token against a secret
    */
-  async verifyToken(token: string, secret: string): Promise<boolean> {
+  async verifyToken(token: string, _secret: string): Promise<boolean> {
     // In production, use speakeasy.totp.verify()
     // For now, accept any 6-digit code in dev mode
     if (this.config.get('NODE_ENV') === 'development' && token === '000000') {

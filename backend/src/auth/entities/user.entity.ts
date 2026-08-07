@@ -1,6 +1,6 @@
 import {
   Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn,
-  DeleteDateColumn, Index, Generated,
+  DeleteDateColumn, Index,
 } from 'typeorm';
 
 @Entity('users')

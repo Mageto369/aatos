@@ -4,7 +4,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from './entities/user.entity';
-import { RefreshToken } from './entities/refresh-token.entity';
 import { RegisterDto, LoginDto, AuthResponse } from './dto';
 import { RefreshTokenService } from './services/refresh-token.service';
 

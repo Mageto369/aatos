@@ -1,11 +1,10 @@
-import { Module, Global } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { APP_INTERCEPTOR, APP_FILTER, APP_PIPE } from '@nestjs/core';
+import { APP_INTERCEPTOR, APP_FILTER } from '@nestjs/core';
 import { TransformInterceptor } from './interceptors/transform.interceptor';
 import { HttpExceptionFilter } from './filters/http-exception.filter';
-import { ValidationPipe } from '@nestjs/common';
 import { AuditLogger } from './audit-logger.service';
-import { RateLimitStore, RateLimitGuard } from './rate-limit.guard';
+import { RateLimitStore } from './rate-limit.guard';
 import { NotificationService } from './notification.service';
 import { CurrencyConversionService } from './currency-conversion.service';
 import { FeatureFlagService } from './feature-flag.service';

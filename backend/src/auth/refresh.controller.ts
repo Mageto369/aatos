@@ -1,9 +1,7 @@
-import { Controller, Post, Body, UseGuards, UnauthorizedException, Req } from '@nestjs/common';
+import { Controller, Post, Body, UnauthorizedException, Req } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
-import { AuthGuard } from '@nestjs/passport';
 import { JwtService } from '@nestjs/jwt';
 import { RefreshTokenService } from './services/refresh-token.service';
-import { CurrentUser, UserPayload } from './decorators/current-user.decorator';
 
 /**
  * Token Refresh Endpoint
@@ -38,7 +36,6 @@ export class RefreshController {
       );
 
       // Issue new access token
-      const user = { userId }; // Could fetch user details from DB if needed
       const accessToken = this.jwtService.sign(
         {
           sub: userId,
