@@ -1,7 +1,8 @@
-import { Controller, Post, Body, UnauthorizedException, Req } from '@nestjs/common';
+import { Controller, Post, Body, UnauthorizedException, Req, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { JwtService } from '@nestjs/jwt';
 import { RefreshTokenService } from './services/refresh-token.service';
+import { RateLimitGuard, Throttle } from '../common/rate-limit.guard';
 
 /**
  * Token Refresh Endpoint
@@ -18,6 +19,8 @@ export class RefreshController {
   ) {}
 
   @Post('refresh')
+  @Throttle('strict')
+  @UseGuards(RateLimitGuard)
   @ApiOperation({ summary: 'Refresh access token' })
   async refresh(
     @Body('refreshToken') refreshToken: string,

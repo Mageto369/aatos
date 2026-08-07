@@ -4,6 +4,7 @@ import { AuthService } from './auth.service';
 import { RefreshTokenService } from './services/refresh-token.service';
 import { RegisterDto, LoginDto } from './dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { RateLimitGuard, Throttle } from '../common/rate-limit.guard';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -14,6 +15,8 @@ export class AuthController {
   ) {}
 
   @Post('register')
+  @Throttle('strict')
+  @UseGuards(RateLimitGuard)
   @ApiOperation({ summary: 'Register new user account' })
   @ApiResponse({ status: 201, description: 'User registered successfully' })
   @ApiResponse({ status: 409, description: 'Email already exists' })
@@ -29,6 +32,8 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
+  @Throttle('strict')
+  @UseGuards(RateLimitGuard)
   @ApiOperation({ summary: 'Authenticate user and receive JWT' })
   @ApiResponse({ status: 200, description: 'Login successful' })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
