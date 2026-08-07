@@ -11,7 +11,7 @@ import { UnauthorizedException, ConflictException } from '@nestjs/common';
 describe('AuthService', () => {
   let service: AuthService;
   let userRepo: jest.Mocked<Repository<User>>;
-  let jwtService: jest.Mocked<JwtService>;
+  let _jwtService: jest.Mocked<JwtService>;
 
   const mockUser = (): User =>
     ({
@@ -56,7 +56,7 @@ describe('AuthService', () => {
 
     service = module.get<AuthService>(AuthService);
     userRepo = module.get(getRepositoryToken(User));
-    jwtService = module.get(JwtService);
+    _jwtService = module.get(JwtService);
   });
 
   describe('register', () => {

@@ -2,6 +2,7 @@ import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards, Re
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { PilotGuardService } from '../common/pilot-guard.service';
 import { ProductsService } from './products.service';
 import { CreateProductDto, UpdateProductDto } from './dto';
 
@@ -10,13 +11,17 @@ import { CreateProductDto, UpdateProductDto } from './dto';
 @UseGuards(AuthGuard('jwt'))
 @ApiBearerAuth('access-token')
 export class ProductsController {
-  constructor(private readonly productsService: ProductsService) {}
+  constructor(
+    private readonly productsService: ProductsService,
+    private readonly pilotGuard: PilotGuardService,
+  ) {}
 
   @Post()
   @ApiOperation({ summary: 'Create a product listing' })
   @ApiResponse({ status: 201, description: 'Product created' })
   @Roles('owner', 'admin', 'operator')
   create(@Body() dto: CreateProductDto, @Request() req: any) {
+    this.pilotGuard.validateCommodity(dto.categoryId);
     const orgId = req.headers['x-organization-id'] || req.user.userId;
     return this.productsService.create(req.user.userId, orgId, dto);
   }

@@ -5,6 +5,7 @@ import { TransformInterceptor } from './interceptors/transform.interceptor';
 import { HttpExceptionFilter } from './filters/http-exception.filter';
 import { AuditLogger } from './audit-logger.service';
 import { RateLimitStore, RateLimitGuard } from './rate-limit.guard';
+import { PilotGuardService } from './pilot-guard.service';
 import { NotificationService } from './notification.service';
 import { CurrencyConversionService } from './currency-conversion.service';
 import { FeatureFlagService } from './feature-flag.service';
@@ -36,6 +37,7 @@ import { AuditLog } from './entities/audit-log.entity';
     AuditLogger,
     RateLimitStore,
     RateLimitGuard,
+    PilotGuardService,
     NotificationService,
     CurrencyConversionService,
     FeatureFlagService,
@@ -49,6 +51,6 @@ import { AuditLog } from './entities/audit-log.entity';
     MatchingEngineService,
   ],
   controllers: [SearchController, PlatformController, EnterpriseController],
-  exports: [AuditLogger, RateLimitStore, RateLimitGuard, NotificationService, CurrencyConversionService, FeatureFlagService, MonitoringService, AdvancedSearchService, EnterprisePricingService, ESGReportingService, WhiteLabelService, PartnerApiService, GovernmentTradeService, MatchingEngineService],
+  exports: [AuditLogger, RateLimitStore, RateLimitGuard, PilotGuardService, NotificationService, CurrencyConversionService, FeatureFlagService, MonitoringService, AdvancedSearchService, EnterprisePricingService, ESGReportingService, WhiteLabelService, PartnerApiService, GovernmentTradeService, MatchingEngineService],
 })
 export class CommonModule {}

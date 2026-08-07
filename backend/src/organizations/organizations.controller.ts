@@ -2,6 +2,7 @@ import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards, Re
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { PilotGuardService } from '../common/pilot-guard.service';
 import { OrganizationsService } from './organizations.service';
 import { CreateOrganizationDto, UpdateOrganizationDto } from './dto';
 
@@ -10,13 +11,18 @@ import { CreateOrganizationDto, UpdateOrganizationDto } from './dto';
 @UseGuards(AuthGuard('jwt'))
 @ApiBearerAuth('access-token')
 export class OrganizationsController {
-  constructor(private readonly orgService: OrganizationsService) {}
+  constructor(
+    private readonly orgService: OrganizationsService,
+    private readonly pilotGuard: PilotGuardService,
+  ) {}
 
   @Post()
   @ApiOperation({ summary: 'Create a new organization' })
   @ApiResponse({ status: 201, description: 'Organization created' })
   @ApiResponse({ status: 409, description: 'Organization already exists' })
-  create(@Body() dto: CreateOrganizationDto, @Request() req: any) {
+  async create(@Body() dto: CreateOrganizationDto, @Request() req: any) {
+    const { total } = await this.orgService.findAll({ limit: 1 });
+    await this.pilotGuard.validateOrgCap(total);
     return this.orgService.create(req.user.userId, dto);
   }
 

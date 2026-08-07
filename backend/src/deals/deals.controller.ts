@@ -2,6 +2,7 @@ import { Controller, Get, Post, Patch, Body, Param, Query, UseGuards, Request, F
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { PilotGuardService } from '../common/pilot-guard.service';
 import { DealsService } from './deals.service';
 import { WorkflowService } from '../workflows/workflows.service';
 import { CreateDealDto, UpdateMilestoneDto } from './dto';
@@ -14,6 +15,7 @@ export class DealsController {
   constructor(
     private readonly dealsService: DealsService,
     private readonly workflowService: WorkflowService,
+    private readonly pilotGuard: PilotGuardService,
   ) {}
 
   @Post()
@@ -24,6 +26,7 @@ export class DealsController {
     if (!req.user.orgId) {
       throw new ForbiddenException('User must belong to an organization');
     }
+    this.pilotGuard.validateCorridor(dto.originCountry, dto.destinationCountry);
     return this.dealsService.create(dto);
   }
 
