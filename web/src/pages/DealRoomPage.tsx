@@ -58,7 +58,10 @@ export function DealRoomPage() {
   useEffect(() => {
     if (!id || !token) return
 
-    const wsUrl = import.meta.env.VITE_WS_URL || 'http://localhost:4000'
+    const wsUrl = import.meta.env.VITE_WS_URL
+    if (!wsUrl) {
+      throw new Error('VITE_WS_URL is not configured')
+    }
     const socket = io(`${wsUrl}/messages`, {
       auth: { token },
       transports: ['websocket'],
