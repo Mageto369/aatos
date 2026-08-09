@@ -13,9 +13,5 @@
       "source": "/(.*)",
       "destination": "/index.html"
     }
-  ],
-  "env": {
-    "VITE_API_URL": "@aatos_api_url",
-    "VITE_WS_URL": "@aatos_ws_url"
-  }
+  ]
 }
