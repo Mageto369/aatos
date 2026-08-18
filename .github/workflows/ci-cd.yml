@@ -37,6 +37,13 @@ jobs:
       - run: cd backend && npm run build
       - name: Run schema drift detector
         run: cd backend && npx ts-node src/database/schema-drift-detector.ts
+      - name: Verify migrations run clean from empty database
+        run: cd backend && npx typeorm migration:run -d dist/database/data-source.js
+        env:
+          NODE_ENV: test
+          DATABASE_URL: postgresql://aatos:aatos_test@localhost:5432/aatos_test
+          JWT_SECRET: test-secret-key-32-chars-long!!
+          JWT_REFRESH_SECRET: test-refresh-secret-key-32!!
       - run: cd backend && npm run test
         env:
           NODE_ENV: test
