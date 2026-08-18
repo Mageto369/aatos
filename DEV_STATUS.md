@@ -1,175 +1,179 @@
-# AATOS — Development Complete
+# AATOS — Pilot Readiness Status
 
-## Repository
-**GitHub:** [https://github.com/Mageto369/aatos](https://github.com/Mageto369/aatos)
-
----
-
-## Backend (NestJS) — 66 Files
-
-### Core Modules
-| Module | Files | Key Features |
-|---|---|---|
-| **Auth** | 5 files | JWT strategy with orgId extraction, bcrypt, login lockout (5 attempts), /me endpoint. OAuth 2.0 planned for enterprise. |
-| **Organizations** | 5 files | CRUD, members, verification levels, cursor pagination, full-text search |
-| **Products** | 5 files | CRUD, categories, JSONB attributes, soft deletes, search/filter |
-| **RFQs** | 4 files | Create, publish, quotes, org-scoped queries, quote counting |
-| **Deals** | 5 files | Deal rooms, milestones, 1% platform fee, org auth, milestone pipeline |
-| **Messages** | 5 files | Entity + REST + **Socket.IO Gateway** for real-time deal rooms |
-| **Compliance** | 4 files | Rules engine, checklist generation, item tracking |
-| **Documents** | 4 files | Full CRUD, S3-ready, versioning, AI classification fields |
-| **Notifications** | 4 files | In-app notifications, unread tracking, mark read/dismiss |
-| **Inspections** | 4 files | Booking, scheduling, status tracking, results |
-| **Upload** | 3 files | S3 presigned URL generation for secure direct uploads |
-| **Common** | 3 files | Transform interceptor, HTTP exception filter |
-| **Database** | 1 file | TypeORM with PostgreSQL, autoLoadEntities |
-
-### API Endpoints
-- **Auth:** POST /auth/register, POST /auth/login, GET /auth/me
-- **Organizations:** CRUD, members, search with cursor pagination
-- **Products:** CRUD, search, filter by category
-- **RFQs:** Create, publish, list, get quotes, submit quotes
-- **Deals:** Create, list, get details, update milestones
-- **Messages:** REST + WebSocket /messages namespace
-- **Compliance:** Find rules, generate checklists, update items
-- **Documents:** CRUD, type/status filter
-- **Notifications:** List, mark read, mark all read, dismiss
-- **Inspections:** Create, list, update status, cancel
-- **Upload:** POST /upload/presigned-url
-
-### Infrastructure
-- PostgreSQL with 22+ tables, 60+ indexes
-- Docker Compose for dev and production
-- TypeORM migrations configured (scripts present; initial migration to be generated)
-- Helmet security headers, CORS, compression
-- API versioning (URI-based)
-- Swagger/OpenAPI at /api/docs
-- JWT Bearer auth with orgId context
-- GitHub Actions CI/CD (backend lint/build, frontend lint/build, DB schema test)
-- Test scripts configured; critical-path tests to be written in Phase 1
-- Docker Compose for dev and production
+**Repository:** https://github.com/Mageto369/aatos  
+**Branch:** `main`  
+**Last Updated:** 2026-08-19
 
 ---
 
-## Frontend (React + Vite + Tailwind) — 23 Files
+## Current Phase: 4A — Live Pilot and Revenue Validation
 
-### Pages
-| Page | Route | Features |
+**Goal:** Prove AATOS produces successful trade, not more software.
+
+**Pilot Constraints (Deliberately Scoped):**
+- Corridor: Kenya to U.S. only
+- Commodity: Green coffee only
+- Organizations: 20 maximum
+- Payments: Sandbox only
+- Compliance: Manual oversight
+
+---
+
+## Backend (NestJS) — Status
+
+### Production-Ready
+| Module | Status | Notes |
 |---|---|---|
-| **Login** | /login | Split-screen branding, form validation, auth store |
-| **Register** | /register | Full form, password confirmation, validation |
-| **Dashboard** | / | Real stats cards, recent deals, quick actions, platform status |
-| **Products** | /products | Grid view, category filter, search, real API data |
-| **RFQs** | /rfqs | List with search, status filter, quote counts |
-| **RFQ Create** | /rfqs/new | Full form: category, quantity, pricing, delivery, payment terms |
-| **Deals** | /deals | Real API data, status filtering, progress bars, milestone badges |
-| **Deal Room** | /deals/:id | **Real-time Socket.IO chat**, typing indicators, deal sidebar |
-| **Inspections** | /inspections | List, search, status filter, book new inspection modal |
-| **Organization** | /organization | Real org profile, members list, verification badges |
-| **Documents** | /documents | Table view, type/status filters, **presigned URL upload**, download |
-| **Settings** | /settings | Profile, notification preferences, security (password, 2FA) |
-| **Payments** | /payments | Payment timeline, payment status tracking, fee breakdown, filter by status |
+| Auth | Ready | JWT with orgId, bcrypt, login lockout, MFA (simulated) |
+| Organizations | Ready | CRUD, members, verification levels, cursor pagination |
+| Products | Ready | CRUD, categories, JSONB attributes, soft deletes |
+| RFQs | Ready | Create, publish, quotes, org-scoped queries |
+| Deals | Ready | Deal rooms, milestones, org auth, milestone pipeline |
+| Messages | Ready | REST + Socket.IO gateway for real-time deal rooms |
+| Documents | Ready | CRUD, S3-ready, versioning |
+| Notifications | Ready | In-app, unread tracking |
+| Inspections | Ready | Booking, scheduling, status tracking |
+| Upload | Ready | S3 presigned URL generation |
+| Compliance | Ready | Rules engine, checklist generation |
+| Analytics | Ready | Transaction metrics, user activity |
+| Email | Ready | SendGrid integration (simulated in dev) |
 
-### Components
-| Component | Features |
+### Database
+- **TypeORM** with PostgreSQL 15
+- **Partitioned tables:** `audit_logs`, `messages` (monthly partitions through Aug 2027)
+- **Automated maintenance:** Monthly cron job creates future partitions
+- **Schema drift detector:** Runs in CI to catch entity/migration mismatches
+- **Migration verification:** CI runs all migrations on clean database
+
+### API
+- Base path: `/api/v1`
+- CORS configured for production domains
+- Rate limiting enabled
+- Helmet security headers
+- Compression enabled
+
+---
+
+## Frontend (React + Vite) — Status
+
+### Production-Ready
+| Feature | Status |
 |---|---|
-| **AppShell** | Layout with TopBar + Sidebar |
-| **TopBar** | Search, **notification dropdown** with unread count, user menu, logout |
-| **Sidebar** | 8 nav items, nested route active states |
-| **ProtectedRoute** | Auth guard, auto-redirect, token refresh |
+| Auth (login/register) | Ready |
+| Protected routes | Ready |
+| Dashboard | Ready |
+| RFQ list/create | Ready |
+| Deal rooms (real-time) | Ready |
+| Document upload | Ready |
+| Compliance dashboard | Ready |
+| Products | Ready |
+| Organization profile | Ready |
+| Payments (UI only) | Ready |
+| Settings | Ready |
+| Admin | Ready |
 
-### State Management
-- **Zustand auth store** with localStorage persist
-- React Query for server state (caching, refetching, mutations)
-- API interceptors for JWT injection and 401 handling
-
----
-
-## Database Schema
-
-### Tables (22+)
-- users, organization_members, organizations
-- products, product_categories
-- rfqs, quotations
-- deals, deal_milestones
-- messages
-- compliance_rules, compliance_checklists, compliance_checklist_items
-- documents
-- notifications
-- inspections
-
-### Features
-- Soft deletes across all entities
-- Full-text search indexes
-- Composite indexes for common queries
-- JSONB fields for flexible attributes
-- Enum types for status fields
-- Audit timestamps (createdAt, updatedAt, deletedAt)
+### Build
+- CSS budget: 23.8 KB (checked in CI)
+- JS bundle: 432 KB gzipped
+- Error boundary: Implemented
+- 404 page: Implemented
+- Loading/error/empty states: All list pages
 
 ---
 
-## Commit History
-```
-b208f94 feat: Settings page with profile, notifications, security tabs
-9ea3d23 feat: Inspections page, Document upload with presigned URLs, sidebar nav
-e4580d5 feat: Notifications, Inspections, Upload modules + real data on all pages
-627fbe8 feat: Full auth integration, WebSocket deal rooms, document vault, RFQ system
-6af9512 feat: DealsPage links to deal rooms, uses real API data
-cf6f371 feat: Auth system, WebSocket deal rooms, Document Vault, RFQ pages
-32bd18d feat: RFQs, Compliance, Login page + entities
-67aff26 feat: Full stack development v1.1
-2e81c26 Initial commit: AATOS technical blueprint v1.0
-```
+## CI/CD Pipeline
+
+### GitHub Actions
+- **Backend:** Lint → Build → Schema drift check → Migration test → Unit tests
+- **Frontend:** Lint → Build → CSS budget check
+- **Triggers:** Push/PR to `main`
+
+### Safety Gates
+- TypeScript compilation must pass
+- Lint must pass
+- Migrations must run clean on empty database
+- Schema must not drift from entities
+- CSS must meet minimum budget
 
 ---
 
-## Total File Count
-- **Backend:** 66 TypeScript files
-- **Frontend:** 23 React/TS files
-- **Workflows:** Trade lifecycle engine (RFQ→Deal→Milestone→Payment)
-- **Database:** 2 SQL files (schema + seed)
-- **Documentation:** 6 markdown files
-- **Config:** Docker, CI/CD, package configs
-- **Total:** ~100+ files, ~15,000+ lines of code
+## Simulation Stubs (Throw in Production)
+
+These features are simulated in development but **will throw errors** if started in production without configuration:
+
+| Service | Dev Behavior | Production Requirement |
+|---|---|---|
+| Payments (Flutterwave) | Simulated | `FLUTTERWAVE_SECRET_KEY` |
+| Email (SendGrid) | Logged only | `SENDGRID_API_KEY` |
+| File Upload (S3) | Mock URLs | `AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY` |
+| MFA (TOTP) | Accepts `000000` | Install `otplib` and wire real TOTP |
+| Sanctions Screening | 11-entry hardcoded list | Connect OFAC/UN/EU lists |
+| Government Trade | In-memory Maps | Implement real API connections |
 
 ---
 
-## Running the Application
+## Environment Variables Required
 
 ### Backend
 ```bash
-cd backend
-npm install
-npm run start:dev
-# API: http://localhost:4000
-# Swagger: http://localhost:4000/api/docs
+NODE_ENV=production
+DATABASE_URL=postgresql://...
+JWT_SECRET=...
+JWT_REFRESH_SECRET=...
+FRONTEND_URL=https://...
+
+# Optional but recommended
+FLUTTERWAVE_SECRET_KEY=...
+SENDGRID_API_KEY=...
+AWS_ACCESS_KEY_ID=...
+AWS_SECRET_ACCESS_KEY=...
+AWS_S3_BUCKET=...
+AWS_REGION=...
 ```
 
 ### Frontend
 ```bash
-cd web
-npm install
-npm run dev
-# App: http://localhost:3000
-```
-
-### Database (Docker)
-```bash
-docker-compose up -d
+VITE_API_URL=https://api.aatos.trade/api/v1
+VITE_WS_URL=wss://api.aatos.trade
 ```
 
 ---
 
-## Next Phase Enhancements
-1. **Payment Integration** — Stripe/Flutterwave for milestone payments
-2. **AI Document Processing** — Python microservice for OCR/classification
-3. **Advanced Search** — Elasticsearch for products and deals
-4. **Email/SMS Notifications** — SendGrid/Twilio integration
-5. **Mobile App** — React Native or PWA
-6. **Analytics Dashboard** — Charts, reports, trade intelligence
-7. **Multi-language Support** — i18n for French, Swahili, Arabic
-8. **Blockchain Traceability** — Optional supply chain tracking
+## Deployment Checklist
+
+- [x] TypeScript compilation clean
+- [x] CI pipeline passes
+- [x] Database migrations verified
+- [x] Simulation stubs gated
+- [ ] Backend deployed to persistent host
+- [ ] Frontend deployed to CDN
+- [ ] SSL certificates configured
+- [ ] Domain DNS configured
+- [ ] Environment variables injected
+- [ ] Database backups configured
+- [ ] Monitoring/alerting configured
+- [ ] Vercel SSO disabled (if needed)
 
 ---
 
-*Built for the African Agricultural Trade Operating System*
+## Known Issues / Next Work
+
+1. **Backend hosting** — No persistent deployment target configured
+2. **Real payments** — Flutterwave sandbox only; production keys needed
+3. **Email** — SendGrid integration ready but not sending real emails
+4. **Mobile app** — Archived; out of pilot scope
+5. **AI matching** — After 100 transactions, teach what matching means
+6. **Additional corridors** — After Kenya-U.S. proven
+
+---
+
+## Exit Gate for Phase 4A
+
+- At least one real commercial transaction completed
+- At least three accepted deals
+- At least ten qualified RFQs
+- No critical authorization or compliance incident
+- No unresolved payment reconciliation issue
+- Full transaction audit trail
+- Measured off-platform leakage
+- Buyer and supplier feedback collected
