@@ -43,9 +43,9 @@ export class InspectionsService {
     return { items, total };
   }
 
-  async findOne(id: string, _orgId: string): Promise<Inspection> {
+  async findOne(id: string, orgId: string): Promise<Inspection> {
     const inspection = await this.inspectionRepo.findOne({
-      where: { id,  },
+      where: { id, organizationId: orgId },
     });
     if (!inspection) {
       throw new NotFoundException('Inspection not found');
@@ -53,7 +53,7 @@ export class InspectionsService {
     return inspection;
   }
 
-  async updateStatus(id: string, _orgId: string, result: string, data?: Partial<Inspection>): Promise<Inspection> {
+  async updateStatus(id: string, orgId: string, result: string, data?: Partial<Inspection>): Promise<Inspection> {
     const inspection = await this.findOne(id, orgId);
     inspection.result = result as any;
     if (result === 'pass' || result === 'fail' || result === 'conditional') {
@@ -65,7 +65,7 @@ export class InspectionsService {
     return this.inspectionRepo.save(inspection);
   }
 
-  async remove(id: string, _orgId: string): Promise<void> {
+  async remove(id: string, orgId: string): Promise<void> {
     const inspection = await this.findOne(id, orgId);
     await this.inspectionRepo.softRemove(inspection);
   }
