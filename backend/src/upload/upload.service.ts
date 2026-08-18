@@ -20,6 +20,11 @@ export class UploadService {
     this.region = this.config.get('AWS_REGION', 'us-east-1');
     this.accessKeyId = this.config.get('AWS_ACCESS_KEY_ID');
     this.secretAccessKey = this.config.get('AWS_SECRET_ACCESS_KEY');
+
+    const isProduction = this.config.get('NODE_ENV') === 'production';
+    if (isProduction && (!this.accessKeyId || !this.secretAccessKey)) {
+      throw new Error('AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY are required in production. Set them or disable uploads.');
+    }
   }
 
   /**

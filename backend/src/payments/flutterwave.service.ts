@@ -64,6 +64,10 @@ export class FlutterwaveService implements PaymentProvider {
     this.publicKey = this.config.get<string>('FLUTTERWAVE_PUBLIC_KEY', '');
     this.isTestMode = this.config.get<string>('FLUTTERWAVE_ENV', 'test') === 'test';
 
+    if (!this.secretKey && this.config.get('NODE_ENV') === 'production') {
+      throw new Error('FLUTTERWAVE_SECRET_KEY is required in production. Set it or disable payments.');
+    }
+
     if (!this.secretKey) {
       this.logger.warn('FLUTTERWAVE_SECRET_KEY not configured. Payments will be simulated.');
     }

@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 export interface GovernmentSystem {
   id: string;
@@ -47,7 +48,10 @@ export class GovernmentTradeService {
   private readonly filings: Map<string, TradeFiling> = new Map();
   private readonly certificates: Map<string, CertificateRequest> = new Map();
 
-  constructor() {
+  constructor(private readonly config: ConfigService) {
+    if (this.config.get('NODE_ENV') === 'production') {
+      throw new Error('Government trade integration is simulated. Remove from production or implement real API connections.');
+    }
     this.initializeSystems();
   }
 
