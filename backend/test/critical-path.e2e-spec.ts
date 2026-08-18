@@ -142,7 +142,6 @@ describe('Critical Path — Organization (e2e)', () => {
 describe('Critical Path — Product (e2e)', () => {
   let app: INestApplication;
   let authToken: string;
-  let orgId: string;
   let categoryId: string;
 
   beforeAll(async () => {
@@ -172,7 +171,10 @@ describe('Critical Path — Product (e2e)', () => {
         type: 'cooperative',
         countryCode: 'KE',
       });
-    orgId = orgRes.body.data.id;
+    // The organization is created so the registered user becomes its owner —
+    // POST /products requires an owner/admin/operator role. Its id is not
+    // needed: the controller derives the acting org from the JWT.
+    expect(orgRes.status).toBe(201);
 
     // POST /products resolves dto.categoryId against product_categories and
     // 404s when it is absent. Migrations create the table but seed no rows, so
