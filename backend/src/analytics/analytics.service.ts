@@ -69,7 +69,6 @@ export class AnalyticsService {
       this.dealRepo.count({ where: { status: 'completed' } }),
       this.rfqRepo.count(),
       this.rfqRepo.count({ where: { status: 'open' } }),
-      0, // quotations not yet implemented
       this.dealRepo
         .createQueryBuilder('d')
         .select('COALESCE(SUM(d.total_value), 0)', 'total')

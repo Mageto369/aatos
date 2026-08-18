@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsString, IsOptional, IsUUID, IsEnum, IsNumber, Min, IsArray } from 'class-validator';
 
 const UNITS = ['kg', 'mt', 'lb', 'ton', 'bag', 'box', 'carton', 'container_20ft', 'container_40ft', 'liter', 'gallon', 'piece', 'dozen', 'pallet'] as const;
 const CURRENCIES = ['USD', 'EUR', 'GBP', 'KES', 'NGN', 'ETB', 'GHS'] as const;
@@ -68,6 +69,14 @@ export class CreateDealDto {
   @ApiProperty({ enum: INCOTERMS, example: 'CIF' })
   @IsEnum(INCOTERMS)
   incoterm: string;
+
+  @ApiProperty({ example: 'KE' })
+  @IsString()
+  originCountry: string;
+
+  @ApiProperty({ example: 'US' })
+  @IsString()
+  destinationCountry: string;
 
   @ApiPropertyOptional({ type: [MilestoneDto] })
   @IsOptional()
