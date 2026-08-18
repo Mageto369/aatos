@@ -2,8 +2,10 @@ import { Controller, Post, Body, Headers, Logger } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { PaymentsService } from './payments.service';
 import { FlutterwaveService } from './flutterwave.service';
+import { Public } from '../auth/decorators/public.decorator';
 
 @ApiTags('Webhooks')
+@Public()
 @Controller('webhooks')
 export class WebhooksController {
   private readonly logger = new Logger(WebhooksController.name);

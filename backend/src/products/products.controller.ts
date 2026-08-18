@@ -1,10 +1,24 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards, Request, ForbiddenException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { PilotGuardService } from '../common/pilot-guard.service';
 import { ProductsService } from './products.service';
 import { CreateProductDto, UpdateProductDto } from './dto';
+
+/**
+ * Resolves the acting organization from the authenticated principal.
+ *
+ * The org must come from the JWT, never from a request header: a header is
+ * client-controlled, so trusting it would let any authenticated user create or
+ * modify products belonging to an organization they are not a member of.
+ */
+function actingOrgId(req: any): string {
+  if (!req.user?.orgId) {
+    throw new ForbiddenException('User must belong to an organization');
+  }
+  return req.user.orgId;
+}
 
 @ApiTags('Products')
 @Controller('products')
@@ -22,7 +36,7 @@ export class ProductsController {
   @Roles('owner', 'admin', 'operator')
   create(@Body() dto: CreateProductDto, @Request() req: any) {
     this.pilotGuard.validateCommodity(dto.categoryId);
-    const orgId = req.headers['x-organization-id'] || req.user.userId;
+    const orgId = actingOrgId(req);
     return this.productsService.create(req.user.userId, orgId, dto);
   }
 
@@ -52,7 +66,7 @@ export class ProductsController {
   @ApiOperation({ summary: 'Update product' })
   @Roles('owner', 'admin', 'operator')
   update(@Param('id') id: string, @Body() dto: UpdateProductDto, @Request() req: any) {
-    const orgId = req.headers['x-organization-id'] || req.user.userId;
+    const orgId = actingOrgId(req);
     return this.productsService.update(id, req.user.userId, orgId, dto);
   }
 
@@ -60,7 +74,7 @@ export class ProductsController {
   @ApiOperation({ summary: 'Delete product' })
   @Roles('owner', 'admin')
   remove(@Param('id') id: string, @Request() req: any) {
-    const orgId = req.headers['x-organization-id'] || req.user.userId;
+    const orgId = actingOrgId(req);
     return this.productsService.remove(id, orgId);
   }
 }

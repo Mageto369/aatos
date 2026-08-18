@@ -5,6 +5,7 @@ import { RefreshTokenService } from './services/refresh-token.service';
 import { RegisterDto, LoginDto } from './dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RateLimitGuard, Throttle } from '../common/rate-limit.guard';
+import { Public } from './decorators/public.decorator';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -15,6 +16,7 @@ export class AuthController {
   ) {}
 
   @Post('register')
+  @Public()
   @Throttle('strict')
   @UseGuards(RateLimitGuard)
   @ApiOperation({ summary: 'Register new user account' })
@@ -31,6 +33,7 @@ export class AuthController {
   }
 
   @Post('login')
+  @Public()
   @HttpCode(HttpStatus.OK)
   @Throttle('strict')
   @UseGuards(RateLimitGuard)

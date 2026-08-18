@@ -14,13 +14,13 @@ export class DisputeEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'varchar', length: 100 })
+  @Column({ name: 'deal_id', type: 'varchar', length: 100 })
   dealId: string;
 
-  @Column({ type: 'varchar', length: 100 })
+  @Column({ name: 'initiator_id', type: 'varchar', length: 100 })
   initiatorId: string;
 
-  @Column({ type: 'varchar', length: 100 })
+  @Column({ name: 'respondent_id', type: 'varchar', length: 100 })
   respondentId: string;
 
   @Column({ type: 'text' })
@@ -32,7 +32,7 @@ export class DisputeEntity {
   @Column({ type: 'varchar', length: 50 })
   type: 'quality' | 'quantity' | 'delivery' | 'payment' | 'other';
 
-  @Column({ type: 'decimal', precision: 14, scale: 2, nullable: true })
+  @Column({ name: 'claimed_amount', type: 'decimal', precision: 14, scale: 2, nullable: true })
   claimedAmount: number;
 
   @Column({ type: 'varchar', length: 10, nullable: true })
@@ -41,15 +41,15 @@ export class DisputeEntity {
   @Column({ type: 'jsonb', nullable: true })
   evidence: DisputeEvidence[];
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ name: 'resolved_at', type: 'timestamp', nullable: true })
   resolvedAt: Date;
 
   @Column({ type: 'text', nullable: true })
   resolution: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }

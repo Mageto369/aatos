@@ -8,42 +8,42 @@ export class AuditLog {
   @PrimaryGeneratedColumn()
   id: bigint;
 
-  @Column({ type: 'varchar', length: 100, nullable: true })
+  @Column({ name: 'actor_user_id', type: 'varchar', length: 100, nullable: true })
   actorUserId: string;
 
-  @Column({ type: 'varchar', length: 100, nullable: true })
+  @Column({ name: 'actor_org_id', type: 'varchar', length: 100, nullable: true })
   actorOrgId: string;
 
-  @Column({ type: 'varchar', length: 45, nullable: true })
+  @Column({ name: 'actor_ip', type: 'varchar', length: 45, nullable: true })
   actorIp: string;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ name: 'actor_user_agent', type: 'text', nullable: true })
   actorUserAgent: string;
 
   @Column({ type: 'varchar', length: 50 })
   action: string;
 
-  @Column({ type: 'varchar', length: 50 })
+  @Column({ name: 'entity_type', type: 'varchar', length: 50 })
   entityType: string;
 
-  @Column({ type: 'varchar', length: 100 })
+  @Column({ name: 'entity_id', type: 'varchar', length: 100 })
   entityId: string;
 
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ name: 'previous_state', type: 'jsonb', nullable: true })
   previousState: Record<string, any>;
 
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ name: 'new_state', type: 'jsonb', nullable: true })
   newState: Record<string, any>;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ name: 'change_summary', type: 'text', nullable: true })
   changeSummary: string;
 
-  @Column({ type: 'varchar', length: 100, nullable: true })
+  @Column({ name: 'request_id', type: 'varchar', length: 100, nullable: true })
   requestId: string;
 
-  @Column({ type: 'varchar', length: 100, nullable: true })
+  @Column({ name: 'session_id', type: 'varchar', length: 100, nullable: true })
   sessionId: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 }

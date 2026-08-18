@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
+import { DataSource } from 'typeorm';
 import { AppModule } from '../src/app.module';
 
 describe('Critical Path — Authentication (e2e)', () => {
@@ -31,8 +32,8 @@ describe('Critical Path — Authentication (e2e)', () => {
       })
       .expect(201)
       .expect((res) => {
-        expect(res.body).toHaveProperty('access_token');
-        expect(res.body).toHaveProperty('user');
+        expect(res.body.data).toHaveProperty('accessToken');
+        expect(res.body.data).toHaveProperty('user');
       });
   });
 
@@ -49,8 +50,8 @@ describe('Critical Path — Authentication (e2e)', () => {
       .send({ email, password })
       .expect(200)
       .expect((res) => {
-        expect(res.body).toHaveProperty('access_token');
-        expect(res.body).toHaveProperty('user');
+        expect(res.body.data).toHaveProperty('accessToken');
+        expect(res.body.data).toHaveProperty('user');
       });
   });
 
@@ -67,14 +68,14 @@ describe('Critical Path — Authentication (e2e)', () => {
       .post('/auth/register')
       .send({ email, password: 'SecurePass123!', firstName: 'Me', lastName: 'Test' });
 
-    const token = registerRes.body.access_token;
+    const token = registerRes.body.data.accessToken;
 
     return request(app.getHttpServer())
       .get('/auth/me')
       .set('Authorization', `Bearer ${token}`)
       .expect(200)
       .expect((res) => {
-        expect(res.body.email).toBe(email);
+        expect(res.body.data.email).toBe(email);
       });
   });
 });
@@ -100,7 +101,7 @@ describe('Critical Path — Organization (e2e)', () => {
         firstName: 'Org',
         lastName: 'Test',
       });
-    authToken = res.body.access_token;
+    authToken = res.body.data.accessToken;
   });
 
   afterAll(async () => {
@@ -112,7 +113,7 @@ describe('Critical Path — Organization (e2e)', () => {
       .post('/organizations')
       .set('Authorization', `Bearer ${authToken}`)
       .send({
-        name: 'Test Coffee Cooperative',
+        name: `Test Coffee Cooperative ${Date.now()}`,
         type: 'cooperative',
         countryCode: 'KE',
         city: 'Nairobi',
@@ -120,9 +121,9 @@ describe('Critical Path — Organization (e2e)', () => {
       })
       .expect(201)
       .expect((res) => {
-        expect(res.body).toHaveProperty('id');
-        expect(res.body.name).toBe('Test Coffee Cooperative');
-        expect(res.body.status).toBe('draft');
+        expect(res.body.data).toHaveProperty('id');
+        expect(res.body.data.name).toContain('Test Coffee Cooperative');
+        expect(res.body.data.status).toBe('draft');
       });
   });
 
@@ -132,8 +133,8 @@ describe('Critical Path — Organization (e2e)', () => {
       .set('Authorization', `Bearer ${authToken}`)
       .expect(200)
       .expect((res) => {
-        expect(res.body).toHaveProperty('items');
-        expect(Array.isArray(res.body.items)).toBe(true);
+        expect(res.body.data).toHaveProperty('items');
+        expect(Array.isArray(res.body.data.items)).toBe(true);
       });
   });
 });
@@ -142,6 +143,7 @@ describe('Critical Path — Product (e2e)', () => {
   let app: INestApplication;
   let authToken: string;
   let orgId: string;
+  let categoryId: string;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -160,17 +162,31 @@ describe('Critical Path — Product (e2e)', () => {
         firstName: 'Product',
         lastName: 'Test',
       });
-    authToken = authRes.body.access_token;
+    authToken = authRes.body.data.accessToken;
 
     const orgRes = await request(app.getHttpServer())
       .post('/organizations')
       .set('Authorization', `Bearer ${authToken}`)
       .send({
-        name: 'Product Test Org',
+        name: `Product Test Org ${Date.now()}`,
         type: 'cooperative',
         countryCode: 'KE',
       });
-    orgId = orgRes.body.id;
+    orgId = orgRes.body.data.id;
+
+    // POST /products resolves dto.categoryId against product_categories and
+    // 404s when it is absent. Migrations create the table but seed no rows, so
+    // the suite provisions the one category it needs and keeps itself
+    // independent of seed data.
+    const dataSource = app.get(DataSource);
+    const suffix = Date.now();
+    const [category] = await dataSource.query(
+      `INSERT INTO product_categories (group_type, name, slug, code)
+       VALUES ('beverage_crops', $1, $2, $3)
+       RETURNING id`,
+      [`Green Coffee ${suffix}`, `green-coffee-${suffix}`, `GC${suffix}`],
+    );
+    categoryId = category.id;
   });
 
   afterAll(async () => {
@@ -182,16 +198,13 @@ describe('Critical Path — Product (e2e)', () => {
       .post('/products')
       .set('Authorization', `Bearer ${authToken}`)
       .send({
-        organizationId: orgId,
         title: 'Kenya AA Green Coffee',
-        categoryId: '00000000-0000-0000-0000-000000000001', // Would need real category ID
+        categoryId,
+        attributes: { grade: 'AA', process: 'washed', screenSize: '17/18' },
         originCountry: 'KE',
         availableQuantity: 10000,
         availableUnit: 'kg',
         priceFob: 4.5,
-        priceUnit: 'kg',
-        currency: 'USD',
-        qualityGrade: 'AA',
         incoterm: 'FOB',
       })
       .expect(201);

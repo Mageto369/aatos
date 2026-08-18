@@ -98,7 +98,7 @@ export class Product {
   @Column({ type: 'varchar', name: 'primary_image_url', length: 500, nullable: true })
   primaryImageUrl: string | null;
 
-  @Column({ type: 'text', array: true, default: [] })
+  @Column({ name: 'image_urls', type: 'text', array: true, default: [] })
   imageUrls: string[];
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })

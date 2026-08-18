@@ -22,8 +22,7 @@ export class Message {
   @Column({ name: 'sender_user_id' })
   senderUserId: string;
 
-  @Column({
-    type: 'enum',
+  @Column({ name: 'message_type', type: 'enum',
     enum: ['text', 'file', 'quote', 'contract', 'system', 'translation'],
     default: 'text',
   })

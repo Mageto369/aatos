@@ -3,6 +3,7 @@ import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { JwtService } from '@nestjs/jwt';
 import { RefreshTokenService } from './services/refresh-token.service';
 import { RateLimitGuard, Throttle } from '../common/rate-limit.guard';
+import { Public } from './decorators/public.decorator';
 
 /**
  * Token Refresh Endpoint
@@ -19,6 +20,7 @@ export class RefreshController {
   ) {}
 
   @Post('refresh')
+  @Public()
   @Throttle('strict')
   @UseGuards(RateLimitGuard)
   @ApiOperation({ summary: 'Refresh access token' })
@@ -66,6 +68,7 @@ export class RefreshController {
   }
 
   @Post('logout')
+  @Public()
   @ApiOperation({ summary: 'Revoke refresh token' })
   async logout(@Body('refreshToken') refreshToken: string) {
     if (refreshToken) {
