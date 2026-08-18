@@ -77,6 +77,14 @@ jobs:
           JWT_SECRET: test-secret-min-32-chars-long
           JWT_REFRESH_SECRET: test-refresh-min-32-chars-long
       
+      - name: Detect schema drift
+        run: npm run schema:drift
+        env:
+          NODE_ENV: test
+          DATABASE_URL: postgresql://aatos:aatos_test@localhost:5432/aatos_test
+          JWT_SECRET: test-secret-min-32-chars-long
+          JWT_REFRESH_SECRET: test-refresh-min-32-chars-long
+
       - name: Run e2e tests
         run: npm run test:e2e
         env:

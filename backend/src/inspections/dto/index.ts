@@ -4,7 +4,15 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { InspectionType } from '../entities/inspection.entity';
 
 const INSPECTION_TYPES: InspectionType[] = ['pre_shipment', 'loading', 'discharge', 'destination', 'quality', 'quantity', 'packaging'];
-const INSPECTION_STATUSES = ['requested', 'scheduled', 'in_progress', 'completed', 'failed', 'cancelled'] as const;
+// PATCH /inspections/:id/status writes this straight into Inspection.result,
+// which is the `inspection_result` enum. There is no `status` column on the
+// table. The list here previously held workflow-style states (requested,
+// scheduled, ...), none of which are valid inspection_result values, so every
+// accepted request violated the enum and 500'd — while 'pass' and 'fail', the
+// values inspections.controller checks before firing onInspectionCompleted,
+// were rejected by validation. That left the inspection-to-deal workflow
+// hook unreachable.
+const INSPECTION_STATUSES = ['pending', 'pass', 'fail', 'conditional', 'waiver'] as const;
 
 export class CreateInspectionDto {
   @ApiProperty()

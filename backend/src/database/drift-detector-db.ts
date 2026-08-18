@@ -1,122 +1,131 @@
 /**
- * Proper Schema Drift Detector
- * 
- * Compares actual database schema (after migrations) with TypeORM entities.
- * Uses TypeORM's internal metadata and query runner for accuracy.
+ * Schema Drift Detector
+ *
+ * Runs the migrations against a real database, then asserts that every column
+ * TypeORM will actually query exists in the resulting schema.
+ *
+ * The check is deliberately strict about column names. TypeORM issues SQL
+ * using `column.databaseName`, which is the `name:` given in the @Column
+ * options, or the property name verbatim when none is given — the default
+ * naming strategy does not convert camelCase to snake_case. So an entity
+ * written as
+ *
+ *     @Column({ type: 'text', array: true })
+ *     imageUrls: string[];
+ *
+ * against a migration that created `image_urls` will emit `"imageUrls"` and
+ * fail at runtime with `column "imageUrls" of relation "products" does not
+ * exist`. An earlier version of this detector retried each miss under a
+ * camelCase-to-snake_case conversion and reported no drift, which is why 21
+ * such columns across audit_logs, disputes, messages, products and
+ * refresh_tokens reached main undetected. Comparing against databaseName only
+ * is the entire value of this script; do not add a fallback.
+ *
+ * Usage:
+ *   DATABASE_URL=postgres://... npx ts-node -r tsconfig-paths/register \
+ *     src/database/drift-detector-db.ts
+ *
+ * Exits 0 when the schema matches, 1 on drift or on failure to run.
  */
 
 import { DataSource } from 'typeorm';
 import * as path from 'path';
 
-async function detectDrift() {
+async function detectDrift(): Promise<number> {
+  const url = process.env.DATABASE_URL;
+  if (!url) {
+    console.error('DATABASE_URL is required.');
+    return 1;
+  }
+
   const ds = new DataSource({
     type: 'postgres',
-    host: 'localhost',
-    port: 5432,
-    username: 'postgres',
-    password: 'postgres',
-    database: 'aatos_drift_test',
+    url,
     synchronize: false,
     logging: false,
-    entities: [path.join(__dirname, '..', '**', '*.entity.ts')],
-    migrations: [path.join(__dirname, '..', 'database', 'migrations', '*.ts')],
+    entities: [path.join(__dirname, '..', '**', '*.entity.{ts,js}')],
+    migrations: [path.join(__dirname, 'migrations', '*.{ts,js}')],
   });
 
   await ds.initialize();
 
-  console.log('=== AATOS Schema Drift Detector (Database-backed) ===\n');
+  try {
+    await ds.runMigrations();
 
-  // Run all pending migrations
-  console.log('Running migrations...');
-  await ds.runMigrations();
-  console.log('Migrations complete.\n');
+    const queryRunner = ds.createQueryRunner();
+    const issues: string[] = [];
 
-  // Get actual database schema - filter to public schema only
-  const queryRunner = ds.createQueryRunner();
-  const dbTables = await queryRunner.getTables();
-  const appTables = dbTables.filter(t => t.schema === 'public');
+    try {
+      const tables = (await queryRunner.getTables()).filter((t) => t.schema === 'public');
+      const byName = new Map(tables.map((t) => [t.name, t]));
 
-  // Get entity metadata
-  const entityMetadatas = ds.entityMetadatas;
-
-  const issues: string[] = [];
-
-  for (const entityMeta of entityMetadatas) {
-    const tableName = entityMeta.tableName;
-    const dbTable = appTables.find(t => t.name === tableName);
-
-    if (!dbTable) {
-      issues.push(`Table '${tableName}' (entity: ${entityMeta.name}) NOT FOUND in database`);
-      continue;
-    }
-
-    for (const column of entityMeta.columns) {
-      const dbColumnName = column.databaseName; // TypeORM handles naming strategy
-      const dbColumn = dbTable.columns.find(c => c.name === dbColumnName);
-      if (!dbColumn) {
-        // Try snake_case fallback
-        const snakeName = column.propertyName.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
-        const dbColumnSnake = dbTable.columns.find(c => c.name === snakeName);
-        if (!dbColumnSnake) {
-          issues.push(`Column '${column.propertyName}' (db: ${dbColumnName} or ${snakeName}) in entity ${entityMeta.name} MISSING from table ${tableName}`);
+      for (const entity of ds.entityMetadatas) {
+        const table = byName.get(entity.tableName);
+        if (!table) {
+          issues.push(`${entity.name}: table "${entity.tableName}" does not exist`);
+          continue;
         }
-      }
-    }
 
-    for (const relation of entityMeta.relations) {
-      if (relation.foreignKeys && relation.foreignKeys.length > 0) {
-        for (const fk of relation.foreignKeys) {
-          const dbFk = dbTable.foreignKeys.find(
-            f => f.columnNames.join(',') === fk.columnNames.join(',')
-          );
-          if (!dbFk) {
-            issues.push(`Foreign key on '${fk.columnNames.join(',')}' in entity ${entityMeta.name} MISSING from table ${tableName}`);
+        const columns = new Set(table.columns.map((c) => c.name));
+        for (const column of entity.columns) {
+          if (!columns.has(column.databaseName)) {
+            issues.push(
+              `${entity.tableName}.${column.propertyName}: entity queries ` +
+                `"${column.databaseName}", which does not exist on the table`,
+            );
           }
         }
       }
-    }
-  }
 
-  // Check for tables in DB but not in entities (excluding known partition tables and views)
-  const entityTableNames = new Set(entityMetadatas.map(e => e.tableName));
-  const knownNonEntityTables = new Set([
-    'migrations',
-    'messages_2026_07', 'messages_2026_08', 'messages_2026_09',
-    'audit_logs_2026_07', 'audit_logs_2026_08',
-  ]);
-  
-  for (const dbTable of appTables) {
-    if (dbTable.name === 'migrations') continue;
-    if (knownNonEntityTables.has(dbTable.name)) continue;
-    if (!entityTableNames.has(dbTable.name)) {
-      // Skip views - they don't need entities
-      const tableTypeResult = await queryRunner.query(
-        `SELECT table_type FROM information_schema.tables WHERE table_schema = 'public' AND table_name = $1`,
-        [dbTable.name]
+      // Tables present in the database with no entity behind them. Partitions
+      // and views are legitimate, so resolve them from the catalogue rather
+      // than from a hardcoded list that goes stale as partitions roll forward.
+      const partitions: Array<{ name: string }> = await queryRunner.query(
+        `SELECT c.relname AS name
+           FROM pg_class c
+           JOIN pg_inherits i ON i.inhrelid = c.oid`,
       );
-      const tableType = tableTypeResult[0]?.table_type;
-      if (tableType === 'VIEW') continue;
-      issues.push(`Table '${dbTable.name}' EXISTS in database but NO ENTITY found`);
+      const views: Array<{ table_name: string }> = await queryRunner.query(
+        `SELECT table_name FROM information_schema.tables
+          WHERE table_schema = 'public' AND table_type = 'VIEW'`,
+      );
+
+      const ignored = new Set<string>([
+        'migrations',
+        ...partitions.map((p) => p.name),
+        ...views.map((v) => v.table_name),
+      ]);
+      const entityTables = new Set(ds.entityMetadatas.map((e) => e.tableName));
+
+      for (const table of tables) {
+        if (ignored.has(table.name) || entityTables.has(table.name)) continue;
+        issues.push(`table "${table.name}" exists but no entity maps to it`);
+      }
+    } finally {
+      await queryRunner.release();
     }
-  }
 
-  await queryRunner.release();
-  await ds.destroy();
+    if (issues.length === 0) {
+      console.log(
+        `No schema drift: ${ds.entityMetadatas.length} entities match the migrated schema.`,
+      );
+      return 0;
+    }
 
-  if (issues.length === 0) {
-    console.log('✓ No schema drift detected. Database schema matches entities.\n');
-    process.exit(0);
+    console.error(`Schema drift — ${issues.length} issue(s):\n`);
+    for (const issue of issues) console.error(`  ${issue}`);
+    console.error(
+      '\nEach of these fails at runtime the first time the column is read or written.',
+    );
+    return 1;
+  } finally {
+    await ds.destroy();
   }
-
-  console.log(`Found ${issues.length} issue(s):\n`);
-  for (const issue of issues) {
-    console.log(`  ✗ ${issue}`);
-  }
-  console.log('\n');
-  process.exit(1);
 }
 
-detectDrift().catch(err => {
-  console.error('Drift detection failed:', err);
-  process.exit(1);
-});
+detectDrift()
+  .then((code) => process.exit(code))
+  .catch((err) => {
+    console.error('Drift detection failed to run:', err);
+    process.exit(1);
+  });
