@@ -35,6 +35,8 @@ jobs:
       - run: cd backend && npm ci
       - run: cd backend && npm run lint
       - run: cd backend && npm run build
+      - name: Run schema drift detector
+        run: cd backend && npx ts-node src/database/schema-drift-detector.ts
       - run: cd backend && npm run test
         env:
           NODE_ENV: test
