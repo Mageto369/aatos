@@ -105,7 +105,7 @@ function DealCard({ deal }: { deal: Deal }) {
 export function DealsPage() {
   const [filter, setFilter] = useState('all')
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ['deals', filter],
     queryFn: async () => {
       const res = await api.get('/deals', { params: { status: filter === 'all' ? undefined : filter } })
@@ -143,6 +143,11 @@ export function DealsPage() {
       {isLoading ? (
         <div className="flex items-center justify-center py-20">
           <div className="w-8 h-8 border-2 border-primary-600 border-t-transparent rounded-full animate-spin" />
+        </div>
+      ) : error ? (
+        <div className="text-center py-20 bg-white rounded-xl border border-red-200">
+          <p className="text-red-600 font-medium">Failed to load deals</p>
+          <p className="text-gray-500 text-sm mt-1">Please try again later</p>
         </div>
       ) : deals.length === 0 ? (
         <div className="text-center py-20 bg-white rounded-xl border border-gray-200">

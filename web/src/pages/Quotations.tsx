@@ -23,7 +23,7 @@ export function Quotations() {
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [search, setSearch] = useState('')
 
-  const { data: quotations = [], isLoading } = useQuery({
+  const { data: quotations = [], isLoading, error } = useQuery({
     queryKey: ['quotations', statusFilter],
     queryFn: async () => {
       const res = await api.get('/quotations', {
@@ -90,6 +90,8 @@ export function Quotations() {
 
         {isLoading ? (
           <div className="text-center py-12 text-gray-500">Loading quotations...</div>
+        ) : error ? (
+          <div className="text-center py-12 text-red-600">Failed to load quotations. Please try again later.</div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
             No quotations found. Create your first quotation to get started.
