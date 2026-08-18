@@ -1,0 +1,307 @@
+Proceed in this exact order:
+
+1. Fix schema drift.
+2. Replace JWT refresh tokens with opaque, database-backed rotating refresh tokens.
+3. Build the critical RBAC, authentication, and compliance test suite.
+4. Add production security headers.
+5. Complete pilot hardening.
+6. Clean remaining lint errors.
+
+Do not start a lower-priority item until the exit criteria for the current item pass.
+
+WORK PACKAGE 1: SCHEMA DRIFT
+
+Objective:
+
+Make the TypeORM entities and migration chain match exactly.
+
+Inspect the three entity columns reported as missing from migrations.
+
+For each column document:
+
+Entity
+Table
+Column
+Type
+Nullability
+Default
+Index requirement
+Foreign-key requirement
+Data migration impact
+Rollback impact
+
+Create a new additive TypeORM migration.
+
+Do not modify an already-applied migration unless the repository has never used it outside disposable development environments.
+
+Run the full migration chain against:
+
+An empty database
+A representative existing schema
+A rollback test where safe
+
+Verify:
+
+The application starts with synchronize disabled.
+No TypeORM schema-drift warning remains.
+No column is dropped or recreated unexpectedly.
+No existing data is lost.
+Indexes and constraints match the entities.
+
+Exit criteria:
+
+Migration applies successfully.
+Entity and schema comparison passes.
+Application starts.
+Migration test passes.
+Rollback or recovery procedure exists.
+Real commit created.
+
+WORK PACKAGE 2: REFRESH TOKEN ROTATION
+
+Objective:
+
+Replace stateless JWT refresh tokens with opaque, database-backed, rotating tokens.
+
+Required design:
+
+Generate a cryptographically secure opaque token.
+Store only a hash of the token.
+Associate the token with:
+
+User ID
+Session ID
+Token family
+Created time
+Expiration time
+Last-used time
+Revoked time
+Replacement token ID
+IP address where appropriate
+User agent where appropriate
+
+Required behavior:
+
+Each successful refresh invalidates the current token.
+Each successful refresh issues a new access token and a new refresh token.
+Reusing an already-rotated token revokes the entire token family.
+Logout revokes the active session.
+Password reset revokes all user sessions.
+User suspension revokes all sessions.
+Administrator session revocation works.
+Expired tokens fail.
+Malformed tokens fail.
+Raw refresh tokens never appear in logs or database records.
+
+Add migration for refresh-token or session records.
+
+Add cleanup for expired and revoked tokens.
+
+Use secure cookie settings where the frontend architecture supports cookies:
+
+HttpOnly
+Secure in staging and production
+SameSite based on deployment topology
+Narrow path
+Explicit expiration
+
+Do not store refresh tokens in localStorage.
+
+Exit criteria:
+
+Rotation test passes.
+Reuse-detection test passes.
+Logout revocation test passes.
+Password-reset revocation test passes.
+Suspended-user test passes.
+Concurrent-refresh behavior is defined and tested.
+Real commit created.
+
+WORK PACKAGE 3: CRITICAL TEST SUITE
+
+Objective:
+
+Create tests for the highest-risk controls.
+
+Required authentication tests:
+
+Valid login
+Invalid password
+Locked or suspended user
+Valid refresh
+Expired refresh
+Revoked refresh
+Rotated-token reuse
+Logout
+Session revocation
+Password-reset revocation
+
+Required RBAC tests:
+
+Platform administrator access
+Compliance reviewer access
+Buyer-owner access
+Buyer-procurement access
+Supplier-owner access
+Supplier-sales access
+Inspector access
+Unrelated-organization denial
+Unauthenticated denial
+Object-level authorization
+Internal-note privacy
+Document privacy
+Payment-data privacy
+
+Required compliance tests:
+
+Rule lookup
+Checklist generation
+Conditional requirements
+Not-applicable requirements
+Document upload
+Document approval
+Document rejection
+Document replacement
+Certificate expiration
+Cross-organization denial
+Audit-log creation
+
+Required schema tests:
+
+Full migration from empty database
+Entity-to-schema comparison
+Application startup with synchronize disabled
+
+Do not count test files with no meaningful assertions.
+
+Exit criteria:
+
+Critical test suite runs in CI.
+All critical tests pass.
+Failures are fixed rather than skipped.
+Coverage report identifies remaining critical untested areas.
+Real commit created.
+
+WORK PACKAGE 4: SECURITY HEADERS
+
+Objective:
+
+Add secure HTTP response headers without breaking the frontend or API.
+
+Implement and verify:
+
+HSTS in HTTPS staging and production only
+Content-Security-Policy
+X-Content-Type-Options
+Frame protection using CSP frame-ancestors and X-Frame-Options where appropriate
+Referrer-Policy
+Permissions-Policy
+Cross-Origin-Opener-Policy where compatible
+Cross-Origin-Resource-Policy where compatible
+
+Use Helmet or the framework’s approved middleware.
+
+Do not add a CSP so broad that it provides no protection.
+
+Document every required CSP source for:
+
+Frontend assets
+API calls
+WebSocket connections
+Image storage
+File downloads
+Analytics, if active
+
+Test Swagger, Socket.IO, uploads, and frontend rendering after changes.
+
+Exit criteria:
+
+Headers present in staging-like runtime.
+CSP violations reviewed.
+Swagger still works or has a documented restricted policy.
+Socket.IO works.
+Frontend builds and renders.
+Real commit created.
+
+WORK PACKAGE 5: PILOT HARDENING
+
+Objective:
+
+Prepare the controlled Kenya-to-U.S. green coffee pilot.
+
+Required tasks:
+
+Restrict CORS to approved origins.
+Fail startup when critical environment variables are missing.
+Remove insecure default secrets.
+Confirm HTTPS-only production assumptions.
+Confirm cookie and token settings.
+Confirm upload limits.
+Confirm rate limits.
+Confirm audit-log retention.
+Confirm backup and restore procedures.
+Confirm monitoring and alert ownership.
+Confirm compliance rules are marked internally reviewed, not legally verified.
+Create the external-gate register for:
+
+Attorney review
+Customs-broker review
+Penetration test
+Payment-provider approval
+Git remote push
+Production credentials
+
+Run the full pilot workflow again after hardening.
+
+Exit criteria:
+
+No critical configuration weakness remains.
+Full pilot workflow passes.
+External blockers are recorded with owner and target date.
+Final decision is Pilot conditionally approved or Pilot blocked.
+Real commit created.
+
+WORK PACKAGE 6: LINT CLEANUP
+
+Objective:
+
+Resolve all 57 unused-variable errors without changing behavior.
+
+Rules:
+
+Remove dead code when safe.
+Rename intentionally unused parameters using the repository convention.
+Do not disable lint rules globally.
+Do not add blanket ignore comments.
+Investigate variables that indicate incomplete logic.
+Run build and tests after cleanup.
+
+Exit criteria:
+
+Lint passes.
+Build passes.
+Critical tests pass.
+No behavior regression.
+Real commit created.
+
+REPORTING
+
+After each work package report:
+
+Files changed
+Migration added
+Tests added
+Tests passed
+Tests failed
+Security findings
+Data-integrity findings
+Real commit hash
+Remaining blockers
+Next work package
+
+Do not report percentages.
+
+Use one final status:
+
+Pilot conditionally approved
+Pilot blocked

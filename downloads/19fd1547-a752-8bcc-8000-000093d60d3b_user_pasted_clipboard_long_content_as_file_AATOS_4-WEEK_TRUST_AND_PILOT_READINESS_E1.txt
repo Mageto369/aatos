@@ -1,0 +1,2382 @@
+AATOS 4-WEEK TRUST AND PILOT READINESS EXECUTION DIRECTIVE
+
+Version: 1.0
+Program: AATOS
+Execution Window: Four weeks
+Primary Objective: Convert AATOS from a competent software foundation into a verified, legally bounded, operationally usable pilot platform
+Initial Corridor: Kenya to United States
+Initial Commodity: Green specialty coffee
+Pilot Participants: Five verified Kenyan suppliers, five verified U.S. buyers, maximum twenty organizations
+Final Decision: Pilot approved, Pilot conditionally approved, or Pilot blocked
+
+1. EXECUTIVE MANDATE
+
+Stop all new feature expansion.
+
+Do not add broad enterprise features, additional corridors, additional commodities, native mobile expansion, AI matching, trade finance, insurance marketplaces, government integrations, white-label capabilities, or advanced analytics during this sprint unless required to support the pilot transaction.
+
+The next four weeks focus only on five areas:
+
+Trust infrastructure
+
+Production engineering
+
+Legal foundation
+
+Pilot operations
+
+Evidence
+
+The purpose of this sprint is not to produce more files.
+
+The purpose is to prove that a real buyer and a real supplier can complete a controlled Kenya-to-United States green specialty coffee transaction through AATOS without direct database manipulation, false claims, unsupported compliance assumptions, insecure payment handling, or undocumented liability.
+
+AATOS must become truthful before it becomes larger.
+
+2. OPERATING PRINCIPLE
+
+Use this fixed execution cycle:
+
+Discover
+
+Analyze
+
+Decide
+
+Build
+
+Verify
+
+Document
+
+Discover
+
+Read all relevant code, schema, migrations, documentation, tests, configuration, API specifications, frontend screens, backend modules, and Git history before changing anything.
+
+Analyze
+
+Identify:
+
+Contradictions
+
+Unsupported claims
+
+Missing controls
+
+Broken workflows
+
+Legal exposure
+
+Security weaknesses
+
+Incomplete integrations
+
+Operational dependencies
+
+Manual workarounds
+
+Unverified assumptions
+
+Decide
+
+Make reversible engineering decisions independently.
+
+Escalate only when a decision affects:
+
+Legal jurisdiction
+
+Custody of funds
+
+Regulated activity
+
+Liability allocation
+
+Importer-of-record responsibility
+
+Exporter-of-record responsibility
+
+Sanctions exposure
+
+Production data deletion
+
+Paid vendor commitments
+
+Strategic corridor or commodity changes
+
+Build
+
+Implement complete vertical slices.
+
+Do not build database-only features and mark them complete.
+
+Do not create frontend actions without backend behavior.
+
+Do not create backend endpoints without authorization, validation, logging, and tests.
+
+Verify
+
+A feature is verified only when:
+
+The code compiles.
+
+The migration applies.
+
+The application starts.
+
+The workflow executes.
+
+Authorization works.
+
+Tests pass.
+
+Audit records exist.
+
+Runtime evidence exists.
+
+Document
+
+Update the relevant operating records after every work package.
+
+3. EVIDENCE MODEL
+
+Every requirement must use one of four evidence levels.
+
+L0: No evidence
+
+No reliable decision, implementation, test, runtime proof, or production evidence exists.
+
+L1: Decision documented
+
+The company has made and recorded a decision, but implementation or verification is incomplete.
+
+L2: Implemented in code
+
+Working code exists, but verification is incomplete or limited.
+
+L3: Verified
+
+The feature has passed applicable tests and runtime verification in a clean environment or staging workflow.
+
+Do not upgrade an item to L3 based on code inspection.
+
+Do not upgrade an item to L2 based on documentation alone.
+
+Do not accept screenshots without supporting runtime or database evidence.
+
+Do not accept completion percentages without a supporting evidence table.
+
+4. SPRINT TARGETS
+
+Current baseline:
+
+L0 items: 60
+
+L2 items: 67
+
+L3 items: 0
+
+Four-week target:
+
+L0 items: fewer than 30
+
+L1 items: all major strategic and legal decisions documented
+
+L2 items: at least 85
+
+L3 items: at least 12
+
+The minimum twelve L3 items are:
+
+Authentication
+
+Organization isolation
+
+Supplier verification
+
+Buyer verification
+
+RFQ workflow
+
+Quotation workflow
+
+Deal conversion
+
+Document review
+
+Compliance checklist
+
+Payment webhook handling
+
+Audit logging
+
+Backup restoration
+
+The sprint fails if fewer than twelve minimum L3 items are verified.
+
+5. PRIMARY PROGRESS METRIC
+
+The primary metric is:
+
+Percentage of the pilot transaction completed without direct database intervention.
+
+Weekly targets:
+
+Week 1: 20 percent
+
+Week 2: 45 percent
+
+Week 3: 75 percent
+
+Week 4: 100 percent
+
+A step counts only when a real user action, API action, worker action, or verified operational action completes through the intended workflow.
+
+A developer editing database rows manually does not count.
+
+A seed script does not prove a live workflow.
+
+A mocked success response does not count.
+
+A backend-only action does not count when the user journey requires frontend access.
+
+6. SUPPORTING METRICS
+
+Track daily and weekly:
+
+Unverified claims remaining
+
+Critical risks open
+
+High risks open
+
+Tests passing
+
+Tests failing
+
+Authorization failures found
+
+Authorization failures resolved
+
+Manual interventions per transaction
+
+Offline document steps
+
+Actions completed outside AATOS
+
+Average time per workflow step
+
+Failed payment events
+
+Failed notification events
+
+Failed document uploads
+
+Document rejection rate
+
+Verification turnaround time
+
+Compliance review turnaround time
+
+Audit events missing
+
+Migration failures
+
+Backup failures
+
+Restore failures
+
+Security defects by severity
+
+7. SOURCE-OF-TRUTH ORDER
+
+When information conflicts, use this order:
+
+Verified runtime behavior
+
+Applied database schema
+
+Passing automated tests
+
+Current working code
+
+Approved decision register
+
+Current legal and policy documents
+
+Architecture documentation
+
+README
+
+Status reports
+
+Comments
+
+Historical claims
+
+Code is not the only truth.
+
+Verified runtime behavior is the strongest truth.
+
+8. REQUIRED DOCUMENTS
+
+Maintain and update:
+
+docs/STATUS_REPORT_v2.md
+
+docs/SPRINT_EXECUTION_PLAN.md
+
+docs/SPRINT_TRACKING.md
+
+docs/DAILY_BLOCKER_LOG.md
+
+docs/WEEKLY_EXECUTIVE_SUMMARY.md
+
+docs/DECISION_REGISTER.md
+
+docs/RISK_REGISTER.md
+
+docs/TRUST_LAYER.md
+
+docs/PILOT_SCOPE.md
+
+docs/LEGAL_REVIEW_QUEUE.md
+
+docs/COMPLIANCE_RULE_REGISTER.md
+
+docs/SECURITY_VERIFICATION.md
+
+docs/MIGRATION_VERIFICATION.md
+
+docs/BACKUP_RESTORE_REPORT.md
+
+docs/E2E_PILOT_REPORT.md
+
+docs/PILOT_DECISION.md
+
+9. WORK PACKAGE FORMAT
+
+Every work package must contain:
+
+Work package ID
+
+Title
+
+Week
+
+Track
+
+Owner
+
+Objective
+
+Business reason
+
+User affected
+
+Dependencies
+
+Entry criteria
+
+Implementation scope
+
+Files affected
+
+Database changes
+
+API changes
+
+Frontend changes
+
+Security requirements
+
+Compliance requirements
+
+Legal considerations
+
+Tests required
+
+Runtime verification
+
+Evidence required
+
+Rollback plan
+
+Exit criteria
+
+Status
+
+Commit hash
+
+Open risks
+
+Do not start a work package without entry criteria.
+
+Do not close a work package without evidence.
+
+10. FOUR OPERATING TRACKS
+
+Track A: Trust and Compliance
+
+Owns:
+
+Supplier verification
+
+Buyer verification
+
+KYC
+
+KYB
+
+Sanctions
+
+PEP checks
+
+Document verification
+
+Compliance rules
+
+Inspection evidence
+
+Risk scoring
+
+Track B: Production Engineering
+
+Owns:
+
+Migrations
+
+Tests
+
+Build verification
+
+Authorization
+
+Logging
+
+Monitoring
+
+Backups
+
+Restore
+
+Rate limits
+
+MFA
+
+Webhook security
+
+Track C: Legal and Governance
+
+Owns:
+
+Terms of Service
+
+Privacy Policy
+
+Liability model
+
+Platform role
+
+Dispute framework
+
+Partner boundaries
+
+Decision register
+
+Risk register
+
+Track D: Pilot Product and Operations
+
+Owns:
+
+Supplier onboarding
+
+Buyer onboarding
+
+Product schema
+
+RFQ workflow
+
+Quotation workflow
+
+Deal workflow
+
+Compliance workflow
+
+Inspection workflow
+
+Payment workflow
+
+Pilot playbooks
+
+Support procedures
+
+11. WEEK 1 OBJECTIVE
+
+Week 1 theme:
+
+Truth, legal boundaries, and pilot commitment.
+
+Week 1 goal:
+
+Remove contradictions, stop unsafe behavior, define truthful claims, and establish the legal and technical foundation.
+
+Week 1 primary metric target:
+
+20 percent of the pilot transaction completed without database intervention.
+
+12. WEEK 1 ENTRY CRITERIA
+
+The repository is accessible.
+
+Git history exists.
+
+The active branch is known.
+
+No critical uncommitted work is at risk.
+
+The current status report exists.
+
+The pilot corridor and commodity are recorded.
+
+13. WEEK 1 REQUIRED WORK PACKAGES
+
+WP 1.1 Disable unsafe schema synchronization
+
+Inspect all TypeORM configuration.
+
+Remove synchronize: true from every non-throwaway environment.
+
+Set synchronization to false by default.
+
+Document the migration strategy.
+
+Add a startup safeguard that blocks production startup when synchronization is enabled.
+
+Evidence:
+
+Configuration diff
+
+Build result
+
+Startup result
+
+Production safeguard test
+
+WP 1.2 Claims audit
+
+Search every file and interface for claims involving:
+
+Escrow
+
+Comprehensive tests
+
+OAuth 2.0
+
+Production readiness
+
+AI matching
+
+Government integrations
+
+Trade finance
+
+Insurance
+
+Real-time compliance
+
+Document verification
+
+Sanctions screening
+
+AML
+
+KYC
+
+Monitoring
+
+Mobile readiness
+
+For every claim, classify:
+
+Verified
+
+Implemented but unverified
+
+Documented only
+
+Mock
+
+Stub
+
+False
+
+Remove or correct false claims.
+
+Evidence:
+
+docs/CLAIMS_AUDIT.md
+
+Before-and-after references
+
+Commit hash
+
+WP 1.3 Legal role definition
+
+Document that AATOS acts as:
+
+Technology platform
+
+Marketplace operator
+
+Workflow coordinator
+
+Document manager
+
+Verification coordinator
+
+The platform does not act as:
+
+Buyer
+
+Seller
+
+Importer of record
+
+Exporter of record
+
+Customs broker
+
+Freight forwarder
+
+Carrier
+
+Inspector
+
+Laboratory
+
+Certification authority
+
+Bank
+
+Lender
+
+Insurer
+
+Escrow company
+
+Evidence:
+
+Decision register entry
+
+Terms framework
+
+Platform-role document
+
+WP 1.4 Terms of Service framework
+
+Draft terms covering:
+
+Eligibility
+
+Account registration
+
+Organization authority
+
+Marketplace role
+
+Supplier obligations
+
+Buyer obligations
+
+Product accuracy
+
+Compliance responsibility
+
+Importer and exporter responsibility
+
+Payment-provider role
+
+Inspection-provider role
+
+Document authenticity
+
+Prohibited activity
+
+Sanctions
+
+AML
+
+Disputes
+
+Suspension
+
+Termination
+
+Intellectual property
+
+Data rights
+
+Liability cap
+
+Indemnification
+
+Governing law
+
+Arbitration
+
+Evidence:
+
+Draft marked for counsel review
+
+Open legal issues listed
+
+WP 1.5 Privacy framework
+
+Draft:
+
+Privacy Policy
+
+Data categories
+
+Processing purposes
+
+Retention periods
+
+Data access rights
+
+Correction process
+
+Deletion process
+
+Security controls
+
+Cross-border data issues
+
+Third-party processors
+
+Cookie use
+
+Audit logging
+
+Evidence:
+
+Draft policy
+
+Data inventory
+
+Legal review queue
+
+WP 1.6 Escrow truth correction
+
+Inspect current payment code.
+
+Classify each feature as:
+
+Direct payment
+
+Milestone tracking
+
+Partner-held funds
+
+Simulated escrow
+
+Remove every unsupported escrow claim.
+
+Rename internal statuses where necessary.
+
+Add explicit provider-state separation.
+
+Evidence:
+
+Code changes
+
+Documentation changes
+
+Payment-state table
+
+Tests
+
+WP 1.7 Pilot scope enforcement
+
+Record:
+
+Kenya origin
+
+United States destination
+
+Green specialty coffee
+
+Five suppliers
+
+Five buyers
+
+Maximum twenty organizations
+
+Ninety-day pilot
+
+Add activation states for:
+
+Countries
+
+Commodities
+
+Corridors
+
+Prevent unsupported corridors from appearing trade enabled.
+
+Evidence:
+
+Decision register
+
+Configuration
+
+API response
+
+UI status
+
+WP 1.8 Git and recovery discipline
+
+Confirm:
+
+Real commits
+
+Clean branch
+
+Remote status
+
+Backup bundle
+
+No secrets tracked
+
+Create:
+
+Backup procedure
+
+Recovery procedure
+
+Commit policy
+
+Evidence:
+
+Real commit hashes
+
+Verified bundle
+
+Secret scan
+
+WP 1.9 Week 1 pilot workflow baseline
+
+Run the full intended transaction path.
+
+Record every step that works.
+
+Record every step requiring:
+
+Manual database edits
+
+Manual API calls
+
+Offline documents
+
+Email
+
+WhatsApp
+
+Spreadsheets
+
+Developer intervention
+
+Evidence:
+
+Pilot workflow map
+
+Current percentage
+
+Blocker list
+
+14. WEEK 1 EXIT GATE
+
+Week 1 passes only when:
+
+synchronize: true is disabled.
+
+False claims are removed or corrected.
+
+Escrow language is truthful.
+
+Pilot scope is enforced.
+
+Legal drafts exist.
+
+Platform legal role is documented.
+
+Git backup exists.
+
+The pilot workflow baseline is measured.
+
+Twenty percent of the pilot workflow completes without direct database intervention.
+
+If Week 1 fails:
+
+Do not move dependent work into Week 2.
+
+Continue unrelated Week 2 work only where safe.
+
+Create remediation tasks.
+
+15. WEEK 2 OBJECTIVE
+
+Week 2 theme:
+
+Verification and compliance.
+
+Week 2 goal:
+
+Prove the platform knows who the parties are, what they sell, what documents exist, and what corridor requirements apply.
+
+Week 2 primary metric target:
+
+45 percent of the pilot transaction completed without direct database intervention.
+
+16. WEEK 2 REQUIRED WORK PACKAGES
+
+WP 2.1 Organization ownership model
+
+Review:
+
+User entity
+
+Organization entity
+
+Membership entity
+
+Roles
+
+Permissions
+
+Confirm users may belong to one or more organizations through explicit membership records.
+
+Remove unsafe organization inference.
+
+Evidence:
+
+Entity model
+
+Migration
+
+Authorization tests
+
+WP 2.2 Supplier verification workflow
+
+Implement stages:
+
+Email verified
+
+Identity verified
+
+Business verified
+
+Site or facility verified
+
+Banking verified
+
+Export capability reviewed
+
+Product capability reviewed
+
+Approved
+
+Rejected
+
+Suspended
+
+Required evidence fields:
+
+Document type
+
+Issuer
+
+Document number
+
+Issue date
+
+Expiration date
+
+Reviewer
+
+Review date
+
+Status
+
+Notes
+
+Evidence:
+
+One supplier completes workflow
+
+Audit trail
+
+Authorization test
+
+WP 2.3 Buyer verification workflow
+
+Implement:
+
+Email verification
+
+Business registration verification
+
+Importer status review
+
+Banking review
+
+Trade reference review
+
+Sanctions review
+
+Approval
+
+Rejection
+
+Suspension
+
+Evidence:
+
+One buyer completes workflow
+
+Audit trail
+
+Authorization test
+
+WP 2.4 Sanctions screening workflow
+
+Support:
+
+OFAC
+
+United Nations
+
+European Union
+
+Internal blocklist
+
+Record:
+
+Name screened
+
+Entity type
+
+List source
+
+Match score
+
+Potential match
+
+Reviewer
+
+Decision
+
+Date
+
+Re-screen date
+
+Do not claim automated live screening unless a provider exists.
+
+Allow manual verified screening.
+
+Evidence:
+
+Test cases
+
+False-positive process
+
+Audit records
+
+WP 2.5 PEP and adverse-risk workflow
+
+Implement structured review for:
+
+Politically exposed persons
+
+Adverse media
+
+High-risk jurisdictions
+
+Ownership concerns
+
+Unusual organization structures
+
+Record manual decisions.
+
+Evidence:
+
+Review workflow
+
+Risk flags
+
+Escalation path
+
+WP 2.6 Green coffee product schema
+
+Required fields:
+
+Origin country
+
+Region
+
+Exporter or cooperative
+
+Species
+
+Variety
+
+Grade
+
+Crop year
+
+Processing method
+
+Moisture
+
+Screen size
+
+Defect count
+
+Cup score
+
+Quantity
+
+Unit
+
+Packaging
+
+Bag size
+
+Warehouse
+
+FOB port
+
+Currency
+
+Price
+
+Minimum order
+
+Inspection status
+
+Laboratory status
+
+Certifications
+
+Evidence:
+
+Working product form
+
+Validation
+
+Database record
+
+API response
+
+WP 2.7 Kenya-to-U.S. green coffee compliance rule set
+
+Create verified rules for:
+
+Kenyan exporter requirements
+
+Coffee export documentation
+
+Certificate of origin
+
+Commercial invoice
+
+Packing list
+
+Bill of lading
+
+Quality documentation
+
+U.S. importer responsibility
+
+FDA prior notice assessment
+
+Facility registration assessment
+
+Customs documentation
+
+Country-of-origin requirements
+
+APHIS applicability assessment
+
+Document retention
+
+Every rule must include:
+
+Source
+
+Authority
+
+Last reviewed date
+
+Reviewer
+
+Verification status
+
+Evidence:
+
+Rule register
+
+Compliance checklist generated from product and corridor
+
+WP 2.8 Document review workflow
+
+Support:
+
+Requested
+
+Uploaded
+
+Under review
+
+Approved
+
+Rejected
+
+Expired
+
+Replaced
+
+Required metadata:
+
+Type
+
+Issuer
+
+Reference number
+
+Issue date
+
+Expiration date
+
+Uploaded by
+
+Reviewed by
+
+Review notes
+
+Integrity hash
+
+Evidence:
+
+Supplier upload
+
+Reviewer approval
+
+Reviewer rejection
+
+Audit trail
+
+WP 2.9 Certificate expiration tracking
+
+Implement:
+
+Expiration dates
+
+Reminder windows
+
+Expired status
+
+Replacement workflow
+
+Notification events
+
+Evidence:
+
+Automated test
+
+Runtime notification
+
+WP 2.10 Manual verification playbook
+
+Create an operations guide for:
+
+Supplier review
+
+Buyer review
+
+Document review
+
+Sanctions review
+
+Escalation
+
+Suspension
+
+Appeal
+
+Evidence:
+
+Playbook
+
+Named owner
+
+Response targets
+
+17. WEEK 2 EXIT GATE
+
+Week 2 passes only when:
+
+One supplier completes verification.
+
+One buyer completes verification.
+
+Organization isolation works.
+
+Sanctions review works.
+
+Green coffee product data works.
+
+A compliance checklist generates.
+
+Document review works.
+
+Certificate expiration tracking works.
+
+Forty-five percent of the pilot workflow completes without database intervention.
+
+18. WEEK 3 OBJECTIVE
+
+Week 3 theme:
+
+Production engineering and evidence.
+
+Week 3 goal:
+
+Prove the platform builds, migrates, starts, protects data, records actions, and recovers from failure.
+
+Week 3 primary metric target:
+
+75 percent of the pilot transaction completed without direct database intervention.
+
+19. WEEK 3 REQUIRED WORK PACKAGES
+
+WP 3.1 Clean environment build
+
+Create a clean checkout.
+
+Install dependencies from lock files.
+
+Build:
+
+Backend
+
+Frontend
+
+Mobile static validation
+
+Record:
+
+Commands
+
+Warnings
+
+Errors
+
+Fixes
+
+Evidence:
+
+Build logs
+
+Commit hashes
+
+WP 3.2 Migration verification
+
+Run migrations on:
+
+Empty database
+
+Representative development database
+
+Test rollback where safe.
+
+Confirm:
+
+Enums
+
+Tables
+
+Indexes
+
+Foreign keys
+
+Unique constraints
+
+No schema synchronization
+
+Evidence:
+
+Migration log
+
+Schema report
+
+Rollback plan
+
+WP 3.3 Critical unit tests
+
+Add tests for:
+
+Authentication
+
+Organization permissions
+
+Supplier verification
+
+Buyer verification
+
+RFQ creation
+
+Quotation pricing
+
+Quotation versioning
+
+Deal conversion
+
+Document review
+
+Compliance checklist
+
+Payment states
+
+Audit logging
+
+Evidence:
+
+Test files
+
+Passing output
+
+WP 3.4 Critical integration tests
+
+Test:
+
+Login
+
+Organization access
+
+Supplier verification
+
+Buyer verification
+
+RFQ to quotation
+
+Counteroffer
+
+Revision
+
+Acceptance
+
+Deal conversion
+
+Compliance document review
+
+Payment webhook
+
+Evidence:
+
+Passing integration suite
+
+WP 3.5 Authorization test matrix
+
+Test roles:
+
+Platform administrator
+
+Compliance reviewer
+
+Buyer owner
+
+Buyer procurement user
+
+Supplier owner
+
+Supplier sales user
+
+Inspector
+
+Unrelated organization user
+
+Unauthenticated user
+
+Confirm:
+
+Organization isolation
+
+Object-level access
+
+Internal-note privacy
+
+Document privacy
+
+Payment privacy
+
+Evidence:
+
+Matrix
+
+Failures found
+
+Fixes
+
+WP 3.6 Payment webhook verification
+
+Confirm:
+
+Signature verification
+
+Idempotency
+
+Duplicate handling
+
+Invalid signature rejection
+
+Unknown transaction rejection
+
+Provider status mapping
+
+Audit records
+
+Do not use fake provider confirmation in production code.
+
+Evidence:
+
+Tests
+
+Runtime logs
+
+Database state
+
+WP 3.7 Audit logging
+
+Record sensitive actions:
+
+Login
+
+Failed login
+
+Organization changes
+
+Verification decisions
+
+RFQ actions
+
+Quotation actions
+
+Deal conversion
+
+Document approval
+
+Document rejection
+
+Payment events
+
+Disputes
+
+Administrative changes
+
+Evidence:
+
+Audit query
+
+Retention decision
+
+Authorization test
+
+WP 3.8 Rate limiting
+
+Apply limits to:
+
+Login
+
+Password reset
+
+Registration
+
+Uploads
+
+Messaging
+
+RFQs
+
+Quotations
+
+Payment endpoints
+
+Public APIs
+
+Evidence:
+
+Rate-limit tests
+
+WP 3.9 MFA for privileged users
+
+Require MFA for:
+
+Platform administrators
+
+Compliance reviewers
+
+Risk reviewers
+
+Finance administrators
+
+Evidence:
+
+Enrollment
+
+Login challenge
+
+Recovery process
+
+Tests
+
+WP 3.10 Upload security
+
+Implement:
+
+Extension checks
+
+MIME checks
+
+Size limits
+
+File-name sanitation
+
+Storage isolation
+
+Malware-scanning integration point
+
+Rejected file logging
+
+Evidence:
+
+Malicious-file test
+
+Invalid-file test
+
+WP 3.11 Monitoring
+
+Track:
+
+Application health
+
+Database health
+
+API latency
+
+Error rate
+
+Failed jobs
+
+Webhook failures
+
+Email failures
+
+Authentication failures
+
+Storage use
+
+Evidence:
+
+Dashboard
+
+Controlled alert
+
+Owner notification
+
+WP 3.12 Backup and restore
+
+Create:
+
+Database backup
+
+File backup
+
+Configuration backup
+
+Restore procedure
+
+Perform a real restore test.
+
+Evidence:
+
+Backup artifact
+
+Restore logs
+
+Restored record comparison
+
+WP 3.13 CI pipeline
+
+Run automatically:
+
+Install
+
+Build
+
+Lint
+
+Unit tests
+
+Integration tests
+
+Migration validation
+
+Secret scan
+
+Evidence:
+
+Passing CI run
+
+20. WEEK 3 EXIT GATE
+
+Week 3 passes only when:
+
+Clean build succeeds.
+
+Migrations apply.
+
+Critical tests pass.
+
+Authorization matrix passes.
+
+Payment webhooks verify.
+
+Audit logs work.
+
+MFA works for privileged users.
+
+Rate limits work.
+
+Upload security works.
+
+Monitoring sends an alert.
+
+Backup restoration succeeds.
+
+Seventy-five percent of the pilot workflow completes without database intervention.
+
+21. WEEK 4 OBJECTIVE
+
+Week 4 theme:
+
+Full pilot simulation and launch decision.
+
+Week 4 goal:
+
+Run the complete Kenya-to-U.S. green specialty coffee transaction with operational, legal, security, compliance, and recovery evidence.
+
+Week 4 primary metric target:
+
+100 percent of the pilot workflow completed without direct database intervention.
+
+22. WEEK 4 PILOT DATA
+
+Create:
+
+Five Kenyan supplier organizations
+
+Five U.S. buyer organizations
+
+Platform administrator
+
+Compliance reviewer
+
+Risk reviewer
+
+Inspector account
+
+Green coffee taxonomy
+
+Compliance rules
+
+Document types
+
+Inspection types
+
+Payment test provider configuration
+
+23. WEEK 4 REQUIRED PILOT SCENARIO
+
+Step 1
+
+Buyer registers.
+
+Step 2
+
+Buyer organization is created.
+
+Step 3
+
+Buyer completes verification.
+
+Step 4
+
+Supplier registers.
+
+Step 5
+
+Supplier organization is created.
+
+Step 6
+
+Supplier completes verification.
+
+Step 7
+
+Supplier creates green specialty coffee product listing.
+
+Step 8
+
+Buyer creates an RFQ for eighteen metric tons.
+
+Step 9
+
+Three suppliers receive access.
+
+Step 10
+
+Two suppliers submit quotations.
+
+Step 11
+
+Buyer reviews both quotations.
+
+Step 12
+
+Buyer counters one quotation.
+
+Step 13
+
+Supplier creates a revised quotation.
+
+Step 14
+
+Buyer accepts the latest revision.
+
+Step 15
+
+System creates exactly one deal.
+
+Step 16
+
+System generates a contract.
+
+Step 17
+
+Buyer accepts the contract.
+
+Step 18
+
+Supplier accepts the contract.
+
+Step 19
+
+System generates the Kenya-to-U.S. compliance checklist.
+
+Step 20
+
+Supplier uploads required documents.
+
+Step 21
+
+Compliance reviewer approves or rejects documents.
+
+Step 22
+
+Supplier replaces rejected documents.
+
+Step 23
+
+Inspection is requested.
+
+Step 24
+
+Inspector records the result.
+
+Step 25
+
+Payment milestone is created.
+
+Step 26
+
+Provider webhook confirms payment test status.
+
+Step 27
+
+Shipment preparation begins.
+
+Step 28
+
+Shipment status advances.
+
+Step 29
+
+Delivery or transaction completion is recorded.
+
+Step 30
+
+Buyer and supplier submit ratings.
+
+Step 31
+
+A separate test transaction opens a dispute.
+
+Step 32
+
+Evidence is uploaded.
+
+Step 33
+
+Reviewer mediates.
+
+Step 34
+
+Resolution is recorded.
+
+Step 35
+
+Payment hold, refund, or closure status is recorded according to the test scenario.
+
+24. WEEK 4 REQUIRED FAILURE SCENARIOS
+
+Test:
+
+Unauthorized organization access
+
+Expired quotation acceptance
+
+Duplicate deal conversion
+
+Invalid payment webhook
+
+Duplicate payment webhook
+
+Rejected document replacement
+
+Expired certificate
+
+Sanctions potential match
+
+Failed inspection
+
+Supplier withdrawal
+
+Buyer cancellation
+
+Refund request
+
+Dispute escalation
+
+Notification failure
+
+Queue failure
+
+Database restart
+
+Backup restoration
+
+25. WEEK 4 EXIT GATE
+
+Week 4 passes only when:
+
+The full workflow reaches 100 percent without direct database intervention.
+
+The twelve minimum L3 items are verified.
+
+No critical security issue remains.
+
+No critical legal contradiction remains.
+
+No false escrow claim remains.
+
+Compliance rules have verified sources.
+
+Pilot operations playbooks exist.
+
+Audit events cover every sensitive action.
+
+Backup restoration succeeds.
+
+The final evidence package exists.
+
+26. FINAL EVIDENCE PACKAGE
+
+Create:
+
+docs/E2E_PILOT_REPORT.md
+
+docs/PILOT_EVIDENCE_MATRIX.md
+
+docs/SECURITY_VERIFICATION.md
+
+docs/COMPLIANCE_VERIFICATION.md
+
+docs/LEGAL_READINESS.md
+
+docs/BACKUP_RESTORE_REPORT.md
+
+docs/OPEN_BLOCKERS.md
+
+docs/PILOT_DECISION.md
+
+For every L3 item include:
+
+Requirement
+
+Test
+
+Runtime action
+
+Expected result
+
+Received result
+
+Evidence location
+
+Date
+
+Reviewer
+
+Commit hash
+
+27. DAILY EXECUTION RULES
+
+At the start of each day:
+
+Review blockers.
+
+Review dependencies.
+
+Review Git status.
+
+Review open critical risks.
+
+Choose the highest-priority eligible work package.
+
+At the end of each day:
+
+Commit verified work.
+
+Update the blocker log.
+
+Update sprint metrics.
+
+Update risks.
+
+Update decisions.
+
+Record tomorrow’s eligible work.
+
+Do not leave completed work uncommitted.
+
+28. DAILY BLOCKER LOG
+
+Every blocker must contain:
+
+Blocker ID
+
+Date opened
+
+Description
+
+Affected work package
+
+Severity
+
+Owner
+
+Dependency
+
+Workaround
+
+Decision required
+
+Expected next action
+
+Status
+
+Date closed
+
+Raise immediately:
+
+Secret exposure
+
+Data loss
+
+Unauthorized access
+
+Migration corruption
+
+Payment discrepancy
+
+Sanctions concern
+
+False regulatory claim
+
+False escrow claim
+
+Production outage
+
+29. WEEKLY EXECUTIVE SUMMARY
+
+At the end of each week report:
+
+Week objective
+
+Gate status
+
+Work packages completed
+
+Evidence levels changed
+
+Primary metric result
+
+Supporting metrics
+
+Critical risks opened
+
+Critical risks closed
+
+Decisions made
+
+Decisions needed
+
+Build status
+
+Migration status
+
+Test status
+
+Security status
+
+Compliance status
+
+Legal status
+
+Pilot workflow percentage
+
+Next-week entry decision
+
+Use one gate status:
+
+Passed
+
+Conditionally passed
+
+Failed
+
+Blocked
+
+30. ROLLBACK REQUIREMENTS
+
+Every production-affecting change must include:
+
+Rollback command
+
+Rollback migration
+
+Data impact
+
+Expected downtime
+
+Recovery validation
+
+Owner
+
+Trigger conditions
+
+Never deploy a migration without a rollback or documented recovery route.
+
+Never delete production data without explicit approval and backup.
+
+31. COMPLETION RULES
+
+A task is not complete because:
+
+A file exists.
+
+A developer says it works.
+
+A route registers.
+
+A database table exists.
+
+A page renders.
+
+A mock succeeds.
+
+A percentage increases.
+
+A task is complete only when the required evidence exists.
+
+32. FINAL DECISION FRAMEWORK
+
+The final decision must use one of three outcomes.
+
+PILOT APPROVED
+
+Use only when:
+
+The complete pilot workflow works.
+
+The twelve L3 items pass.
+
+No critical legal, compliance, security, payment, migration, or data-integrity blocker remains.
+
+The pilot scope is enforced.
+
+Operational owners exist.
+
+PILOT CONDITIONALLY APPROVED
+
+Use only when:
+
+The complete workflow works.
+
+No critical blocker remains.
+
+Limited high-risk items have documented mitigations.
+
+Pilot participation is restricted.
+
+Manual oversight exists.
+
+Conditions are listed with deadlines and owners.
+
+PILOT BLOCKED
+
+Use when:
+
+The workflow is incomplete.
+
+A critical blocker remains.
+
+Payments are misrepresented.
+
+Compliance rules are unsupported.
+
+Authorization fails.
+
+Migrations fail.
+
+Backup restoration fails.
+
+Legal boundaries remain materially unclear.
+
+Do not use “sprint complete” as the final decision.
+
+33. AUTONOMOUS EXECUTION AUTHORITY
+
+Continue working automatically across the four weeks.
+
+Do not stop after creating plans.
+
+Do not ask for approval for routine engineering decisions.
+
+Do not pause when the next eligible work package is clear.
+
+When one track is blocked, continue other tracks.
+
+Escalate only decisions involving:
+
+Legal jurisdiction
+
+Custody of funds
+
+Regulated lending
+
+Insurance underwriting
+
+Importer-of-record status
+
+Exporter-of-record status
+
+Sanctions acceptance
+
+Production-data deletion
+
+Large paid vendor commitments
+
+Pilot corridor changes
+
+Pilot commodity changes
+
+34. FIRST ACTION
+
+Before changing code:
+
+Read:
+
+docs/STATUS_REPORT_v2.md
+
+docs/REMEDIATION_PLAN.md
+
+docs/REMEDIATION_TRACKING.md
+
+docs/DECISION_REGISTER.md
+
+docs/RISK_REGISTER.md
+
+docs/MASTER_QUESTIONER.md
+
+README.md
+
+Inspect:
+
+Git status
+
+Current branch
+
+Real commit history
+
+Remote state
+
+Build scripts
+
+Migration scripts
+
+Test scripts
+
+Environment files
+
+Then create:
+
+docs/SPRINT_EXECUTION_PLAN.md
+
+docs/SPRINT_TRACKING.md
+
+docs/DAILY_BLOCKER_LOG.md
+
+docs/PILOT_EVIDENCE_MATRIX.md
+
+Start immediately with Week 1, WP 1.1.
+
+35. FINAL OPERATING STANDARD
+
+The objective is not to make AATOS appear complete.
+
+The objective is to make AATOS safe, truthful, usable, and verifiable for a controlled Kenya-to-United States green specialty coffee pilot.
+
+Trust is the product.
+
+Every workflow must reduce buyer and supplier risk.
+
+Every claim must match evidence.
+
+Every sensitive action must leave an audit trail.
+
+Every production-affecting change must have a rollback path.
+
+Every phase gate must be earned.

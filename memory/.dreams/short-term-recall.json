@@ -1,0 +1,223 @@
+{
+  "version": 1,
+  "updatedAt": "2026-08-09T07:16:18.487Z",
+  "entries": {
+    "memory:memory/2026-08-06.md:1:51": {
+      "key": "memory:memory/2026-08-06.md:1:51",
+      "path": "memory/2026-08-06.md",
+      "startLine": 1,
+      "endLine": 51,
+      "source": "memory",
+      "snippet": "# Memory - 2026-08-06 ## AATOS Verification & Recovery Session ### Completed Tasks - Verified all 7 commits on `phase-3/production-scale` branch - Created verified Git bundle backup at `/workspace/aatos-verification-backup.bundle` - Inspected and repaired inspections controller (was correct, no issues found) - Created clean verification checkout at `/workspace/verification/aatos` - Installed dependencies for backend, web, and mobile packages - Fixed TypeScript errors in integration-test.ts and mobile DealsScreen.tsx - Added missing RBAC `@Roles` guards to: - products controller - rfqs controller - referrals controller - messages controller - notifications controller - workflo",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.40717093050479886,
+      "maxScore": 0.40717093050479886,
+      "firstRecalledAt": "2026-08-07T03:20:22.539Z",
+      "lastRecalledAt": "2026-08-07T03:20:22.539Z",
+      "queryHashes": [
+        "7ef4d7f8d8a8"
+      ],
+      "recallDays": [
+        "2026-08-07"
+      ],
+      "conceptTags": [
+        "backup",
+        "phase-3/production-scale",
+        "workspace/verification/aatos",
+        "integration-test.ts",
+        "dealsscreen.tsx",
+        "aatos",
+        "verification",
+        "recovery"
+      ]
+    },
+    "memory:memory/2026-08-04.md:164:195": {
+      "key": "memory:memory/2026-08-04.md:164:195",
+      "path": "memory/2026-08-04.md",
+      "startLine": 164,
+      "endLine": 195,
+      "source": "memory",
+      "snippet": "- `src/common/entities/audit-log.entity.ts` — created - Plus 54 existing files with compilation fixes **Frontend (20+ files):** - `vite.config.ts` — added `@` alias - `src/vite-env.d.ts` — created - `src/stores/authStore.ts` — added orgId to User - Plus 17 files with import/unused variable fixes **Documentation:** - `docs/SYSTEM_ARCHITECTURE_REPORT.md` — created - `docs/VERIFICATION_REPORT.md` — created (in verification clone, not merged) ### Verification Clone vs Main Workspace All fixes were first developed in `/workspace/verification/aatos` (a clone), then merged into `/root/.openclaw/workspace/aatos` (main workspace) using `rsync -av --exclude=.git`. Git history in main workspace pre",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.384995773434639,
+      "maxScore": 0.384995773434639,
+      "firstRecalledAt": "2026-08-07T03:20:22.539Z",
+      "lastRecalledAt": "2026-08-07T03:20:22.539Z",
+      "queryHashes": [
+        "7ef4d7f8d8a8"
+      ],
+      "recallDays": [
+        "2026-08-07"
+      ],
+      "conceptTags": [
+        "vite.config.ts",
+        "src/vite-env.d.ts",
+        "src/stores/authstore.ts",
+        "import/unused",
+        "docs/verification-report.md",
+        "workspace/verification/aatos",
+        "openclaw/workspace/aatos",
+        "src"
+      ]
+    },
+    "memory:memory/2026-08-04.md:113:151": {
+      "key": "memory:memory/2026-08-04.md:113:151",
+      "path": "memory/2026-08-04.md",
+      "startLine": 113,
+      "endLine": 151,
+      "source": "memory",
+      "snippet": "- Added `@` alias to `vite.config.ts` - Installed `socket.io-client` dependency ### CommonModule Entity Registration **Problem:** `AuditLogger` uses `@InjectRepository(AuditLog)` but `AuditLog` was not registered in `CommonModule`. **Fix:** Added `TypeOrmModule.forFeature([AuditLog])` to `CommonModule` imports (commit `7620fdf`). Verified Phase 4 entities (`CarbonFootprint`, `FeatureFlag`, `Subscription`, `Webhook`, `Dispute`) use in-memory Maps in services — no `TypeOrmModule.forFeature` needed for them. ### System Architecture Report Created `docs/SYSTEM_ARCHITECTURE_REPORT.md` with: - Module dependency graph - Database schema entity relationships - **23 critical system questions** a",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.37633542418479915,
+      "maxScore": 0.37633542418479915,
+      "firstRecalledAt": "2026-08-07T03:20:22.539Z",
+      "lastRecalledAt": "2026-08-07T03:20:22.539Z",
+      "queryHashes": [
+        "7ef4d7f8d8a8"
+      ],
+      "recallDays": [
+        "2026-08-07"
+      ],
+      "conceptTags": [
+        "vite.config.ts",
+        "socket.io-client",
+        "typeormmodule.forfeature",
+        "in-memory",
+        "added",
+        "alias",
+        "installed",
+        "socket.io"
+      ]
+    },
+    "memory:memory/2026-08-04.md:38:73": {
+      "key": "memory:memory/2026-08-04.md:38:73",
+      "path": "memory/2026-08-04.md",
+      "startLine": 38,
+      "endLine": 73,
+      "source": "memory",
+      "snippet": "- **MonitoringService** (`common/monitoring.service.ts`) — health checks, alert rules, alert history - **AdvancedSearchService** (`common/advanced-search.service.ts`) — faceted search, relevance scoring, autocomplete - **ComplianceRuleUpdaterService** (`compliance/compliance-rule-updater.service.ts`) — regulatory source monitoring stubs - **CustomsTariffService** (`compliance/customs-tariff.service.ts`) — HS code lookup, duty calculation, landed cost - **WarehouseInventoryService** (`products/warehouse-inventory.service.ts`) — multi-warehouse inventory tracking ### Module Updates - `CommonModule` — now exports `CurrencyConversionService`, `FeatureFlagService`, `MonitoringService`, `Advance",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.37499581575393676,
+      "maxScore": 0.37499581575393676,
+      "firstRecalledAt": "2026-08-07T03:20:22.539Z",
+      "lastRecalledAt": "2026-08-07T03:20:22.539Z",
+      "queryHashes": [
+        "7ef4d7f8d8a8"
+      ],
+      "recallDays": [
+        "2026-08-07"
+      ],
+      "conceptTags": [
+        "common/monitoring.service.ts",
+        "multi-warehouse",
+        "monitoringservice",
+        "common",
+        "monitoring.service.ts",
+        "health",
+        "checks",
+        "alert"
+      ]
+    },
+    "memory:memory/2026-08-04.md:142:174": {
+      "key": "memory:memory/2026-08-04.md:142:174",
+      "path": "memory/2026-08-04.md",
+      "startLine": 142,
+      "endLine": 174,
+      "source": "memory",
+      "snippet": "- `backend/Dockerfile`: Changed `CMD` from `dist/main.js` to `dist/src/main.js` (NestJS build output structure) ### GitHub Push Blocked User wants to push to `https://github.com/Mageto369/aatos.git` but HTTPS auth not configured in this environment. No SSH key or personal access token available. User needs to provide credentials or configure SSH. ### Key Decisions Made | Decision | Rationale | |----------|-----------| | Use `import io from 'socket.io-client'` (default import) | Satisfies TS `moduleResolution: \"bundler\"` with v4.8.3 | | Use `useRef<any>(null)` for Socket | Avoids TS2749 value-vs-type conflict | | Remove `deletedAt: null` from queries | TypeORM 0.3 `FindOptionsWhere` rejec",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.3678801447153091,
+      "maxScore": 0.3678801447153091,
+      "firstRecalledAt": "2026-08-07T03:20:22.539Z",
+      "lastRecalledAt": "2026-08-07T03:20:22.539Z",
+      "queryHashes": [
+        "7ef4d7f8d8a8"
+      ],
+      "recallDays": [
+        "2026-08-07"
+      ],
+      "conceptTags": [
+        "backend/dockerfile",
+        "dist/main.js",
+        "dist/src/main.js",
+        "github.com/mageto369/aatos.git",
+        "socket.io-client",
+        "v4.8.3",
+        "value-vs-type",
+        "0.3"
+      ]
+    },
+    "memory:memory/2026-08-06.md:64:95": {
+      "key": "memory:memory/2026-08-06.md:64:95",
+      "path": "memory/2026-08-06.md",
+      "startLine": 64,
+      "endLine": 95,
+      "source": "memory",
+      "snippet": "- Created database-backed drift detector (`backend/src/database/drift-detector-db.ts`) **Verification:** - Zero drift confirmed on fresh database - Rollback test passed - Build passes ### Work Package 2: Refresh Token Rotation - RESOLVED (commit `fc9c234`) **Implementation:** - Created RefreshToken entity with user_id, token, ip, user_agent, expires_at, revoked_at - Created RefreshTokenService with create, validateAndRotate, revoke, cleanup methods - Updated AuthController to generate refresh tokens on login/register - Updated RefreshController to use opaque tokens with rotation - Updated AuthModule to include RefreshToken entity and service - Created migration 1722800000003-CreateRefresh",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.36729167997837064,
+      "maxScore": 0.36729167997837064,
+      "firstRecalledAt": "2026-08-07T03:20:22.539Z",
+      "lastRecalledAt": "2026-08-07T03:20:22.539Z",
+      "queryHashes": [
+        "7ef4d7f8d8a8"
+      ],
+      "recallDays": [
+        "2026-08-07"
+      ],
+      "conceptTags": [
+        "database-backed",
+        "user-id",
+        "user-agent",
+        "expires-at",
+        "revoked-at",
+        "login/register",
+        "1722800000003-createrefresh",
+        "created"
+      ]
+    },
+    "memory:memory/2026-08-04.md:1:27": {
+      "key": "memory:memory/2026-08-04.md:1:27",
+      "path": "memory/2026-08-04.md",
+      "startLine": 1,
+      "endLine": 27,
+      "source": "memory",
+      "snippet": "# 2026-08-04 — Session Log ## Phase 2: Commercial MVP — Completed All 12 work packages for Phase 2 backend are now COMPLETE. Branch: `phase-2/commercial-mvp`. ### Work Packages Implemented | WP | Deliverable | Status | |---|---|---| | 2.1 | Document verification API (CertificateValidationService) | COMPLETE | | 2.2 | Analytics dashboard (AnalyticsService + controller) | COMPLETE | | 2.3 | Dispute resolution workflow (DisputeResolutionService) | COMPLETE | | 2.4 | Payment methods — bank transfer + mobile money | COMPLETE | | 2.5 | Fraud detection rules (FraudDetectionService) | COMPLETE | | 2.6 | Logistics partner referral (LogisticsReferralService) | COMPLETE | | 2.7 | Insurance partner",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.3537207335233688,
+      "maxScore": 0.3537207335233688,
+      "firstRecalledAt": "2026-08-09T07:16:18.487Z",
+      "lastRecalledAt": "2026-08-09T07:16:18.487Z",
+      "queryHashes": [
+        "c01d47b95bdd"
+      ],
+      "recallDays": [
+        "2026-08-09"
+      ],
+      "conceptTags": [
+        "phase-2/commercial-mvp",
+        "2.1",
+        "2.2",
+        "2.3",
+        "2.4",
+        "2.5",
+        "2.6",
+        "2.7"
+      ]
+    }
+  }
+}

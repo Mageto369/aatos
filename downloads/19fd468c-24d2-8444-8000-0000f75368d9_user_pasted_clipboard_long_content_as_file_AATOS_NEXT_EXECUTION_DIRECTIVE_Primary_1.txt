@@ -1,0 +1,590 @@
+AATOS NEXT EXECUTION DIRECTIVE
+
+Primary Objective
+
+Populate and verify the Kenya to United States green specialty coffee compliance rule set, while the legal documents move through counsel review.
+
+Do not expand to new corridors or commodities.
+
+Do not build trade finance, insurance, mobile, AI, or enterprise features during this cycle.
+
+Execution Scope
+
+Origin: Kenya
+
+Destination: United States
+
+Commodity: Green, unroasted specialty coffee
+
+Primary users:
+
+Kenyan exporter or cooperative
+
+U.S. importer
+
+Compliance reviewer
+
+Platform administrator
+
+Required Outcomes
+
+1. A verified compliance source register
+2. A machine-readable rule set
+3. A user-facing compliance checklist
+4. A document request workflow
+5. A reviewer approval workflow
+6. Expiration tracking
+7. Clear responsibility assignment
+8. Manual fallback procedures
+9. Audit evidence
+10. Automated tests
+
+Work Package 1: Source Register
+
+Create:
+
+docs/compliance/KE_US_GREEN_COFFEE_SOURCE_REGISTER.md
+
+For every source record:
+
+Source ID
+
+Authority
+
+Country
+
+Agency
+
+Title
+
+Official source location
+
+Requirement category
+
+Products covered
+
+Effective date
+
+Last reviewed date
+
+Reviewer
+
+Verification status
+
+Notes
+
+Use official authorities wherever possible.
+
+Potential authorities include:
+
+Kenyan agriculture and coffee authorities
+
+Kenyan customs and export authorities
+
+U.S. Food and Drug Administration
+
+U.S. Customs and Border Protection
+
+USDA APHIS
+
+Relevant port, inspection, and importer authorities
+
+Do not rely on blogs, marketplace articles, AI output, or unsourced summaries.
+
+Work Package 2: Responsibility Matrix
+
+Create:
+
+docs/compliance/KE_US_GREEN_COFFEE_RESPONSIBILITY_MATRIX.md
+
+Assign each requirement to one of:
+
+Seller
+
+Exporter of record
+
+Buyer
+
+Importer of record
+
+Customs broker
+
+Inspection provider
+
+Laboratory
+
+Carrier
+
+Platform reviewer
+
+Platform system
+
+For every item, state:
+
+Who prepares it
+
+Who submits it
+
+Who verifies it
+
+Who retains it
+
+Who bears the risk if missing
+
+Work Package 3: Rule Taxonomy
+
+Classify every rule as:
+
+Supplier-level
+
+Facility-level
+
+Product-level
+
+Shipment-level
+
+Buyer-level
+
+Importer-level
+
+Destination-level
+
+Optional commercial standard
+
+Buyer-specific requirement
+
+For each rule store:
+
+Rule ID
+
+Origin country
+
+Destination country
+
+Commodity
+
+Product subtype
+
+Requirement type
+
+Requirement title
+
+Description
+
+Responsible party
+
+Authority
+
+Source reference
+
+Required or conditional
+
+Trigger condition
+
+Document type
+
+Inspection type
+
+Laboratory test
+
+Lead time
+
+Estimated cost range
+
+Expiration period
+
+Review cycle
+
+Verification status
+
+Reviewer
+
+Last reviewed date
+
+Work Package 4: Core Compliance Categories
+
+At minimum, assess and document:
+
+Kenyan business and exporter registration
+
+Coffee-specific exporter authorization
+
+Commercial invoice
+
+Packing list
+
+Certificate of origin
+
+Bill of lading
+
+Quality certificate
+
+Inspection evidence
+
+Phytosanitary requirement or non-requirement determination
+
+FDA Prior Notice applicability
+
+FDA food-facility registration applicability
+
+Importer-of-record responsibilities
+
+U.S. customs entry requirements
+
+Country-of-origin marking
+
+APHIS admissibility requirements
+
+Packaging and bag-marking requirements
+
+Pest and contamination controls
+
+Document retention requirements
+
+Buyer-specific quality standards
+
+Organic claims
+
+Fair-trade claims
+
+Sustainability claims
+
+Do not assume every item is mandatory.
+
+Record when a requirement is:
+
+Required
+
+Conditional
+
+Not applicable
+
+Buyer-specific
+
+Pending legal or professional review
+
+Work Package 5: Machine-Readable Rules
+
+Implement the rule set in the existing compliance schema.
+
+If the schema is insufficient, add a migration.
+
+Do not use synchronize: true.
+
+Each rule must support:
+
+Country
+
+Commodity
+
+Trigger conditions
+
+Responsible party
+
+Required document
+
+Status
+
+Source
+
+Review date
+
+Reviewer
+
+Activation state
+
+Create seed data for the verified pilot rules.
+
+Work Package 6: Compliance Checklist Generation
+
+Generate a checklist using:
+
+Origin country
+
+Destination country
+
+Commodity
+
+Product form
+
+Supplier type
+
+Buyer type
+
+Shipment method
+
+Claims
+
+Certifications
+
+The checklist must show:
+
+Requirement
+
+Status
+
+Responsible party
+
+Due date
+
+Source authority
+
+Why required
+
+Required evidence
+
+Reviewer status
+
+User action
+
+Possible statuses:
+
+Not started
+
+Required
+
+Conditional
+
+Uploaded
+
+Under review
+
+Approved
+
+Rejected
+
+Expired
+
+Waived with reason
+
+Not applicable
+
+Work Package 7: Document Workflow
+
+Support:
+
+Document request
+
+Upload
+
+Version replacement
+
+Reviewer assignment
+
+Approval
+
+Rejection
+
+Rejection reason
+
+Expiration
+
+Reminder
+
+Audit trail
+
+Required metadata:
+
+Document type
+
+Issuer
+
+Reference number
+
+Issue date
+
+Expiration date
+
+Related rule
+
+Related organization
+
+Related shipment or deal
+
+Uploaded by
+
+Reviewed by
+
+Integrity hash
+
+Visibility level
+
+Work Package 8: Reviewer Controls
+
+Compliance reviewers must be able to:
+
+View source authority
+
+View rule version
+
+Review evidence
+
+Approve
+
+Reject
+
+Request replacement
+
+Mark conditional applicability
+
+Record professional-review requirement
+
+Escalate uncertainty
+
+Reviewers must not silently edit verified rules.
+
+Rule changes must create version history.
+
+Work Package 9: Expiration and Change Management
+
+Track:
+
+Certificate expiration
+
+License expiration
+
+Rule review date
+
+Authority update date
+
+Rule supersession
+
+Document replacement
+
+Notify users before expiration.
+
+Suggested reminders:
+
+60 days
+
+30 days
+
+14 days
+
+7 days
+
+Expired
+
+Work Package 10: Manual Fallback Playbook
+
+Create:
+
+docs/operations/KE_US_GREEN_COFFEE_COMPLIANCE_PLAYBOOK.md
+
+Cover:
+
+How to verify a supplier
+
+How to review each document
+
+How to handle uncertain requirements
+
+How to escalate to a customs broker
+
+How to escalate to legal counsel
+
+How to handle rejected documents
+
+How to record conditional requirements
+
+How to pause a transaction
+
+How to resume a transaction
+
+How to preserve evidence
+
+Work Package 11: Testing
+
+Add tests for:
+
+Rule lookup
+
+Checklist generation
+
+Conditional rules
+
+Not-applicable rules
+
+Document request creation
+
+Document upload
+
+Approval
+
+Rejection
+
+Replacement
+
+Expiration
+
+Reminder generation
+
+Unauthorized access
+
+Cross-organization isolation
+
+Rule versioning
+
+Audit logging
+
+Tests must use the Kenya to U.S. green coffee pilot scenario.
+
+Work Package 12: Runtime Verification
+
+Run a full compliance workflow:
+
+Create a Kenyan supplier.
+
+Create a U.S. buyer.
+
+Create a green coffee product.
+
+Create the pilot RFQ.
+
+Convert an accepted quotation into a deal.
+
+Generate the compliance checklist.
+
+Upload required documents.
+
+Reject one document.
+
+Replace it.
+
+Approve all required documents.
+
+Confirm the transaction reaches compliance-ready status.
+
+Do not edit database records manually.
+
+Required Deliverables
+
+docs/compliance/KE_US_GREEN_COFFEE_SOURCE_REGISTER.md
+
+docs/compliance/KE_US_GREEN_COFFEE_RESPONSIBILITY_MATRIX.md
+
+docs/compliance/KE_US_GREEN_COFFEE_RULESET.md
+
+docs/operations/KE_US_GREEN_COFFEE_COMPLIANCE_PLAYBOOK.md
+
+docs/COMPLIANCE_VERIFICATION_REPORT.md
+
+Database migration if required
+
+Compliance seed data
+
+Automated tests
+
+Runtime evidence
+
+Final Status
+
+Use one:
+
+Compliance rules verified
+
+Compliance rules partially verified
+
+Compliance rules blocked
+
+Do not claim completion if official-source verification, checklist generation, document review, tests, or runtime verification remain incomplete.

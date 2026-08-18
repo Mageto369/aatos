@@ -1,0 +1,22 @@
+{
+  "stm": {
+    "count": 1,
+    "last_ts": "2026-08-04T03:33:54.269490",
+    "last_sessions": 2,
+    "last_messages": 17,
+    "last_chars": 5325
+  },
+  "diary": {
+    "count": 29,
+    "last_ts": "2026-08-18T03:42:52.928824",
+    "last_error": "HTTP Error 429: Too Many Requests",
+    "last_day": 9,
+    "last_skip": "no_sessions_today"
+  },
+  "compact": {
+    "count": 29,
+    "last_ts": "2026-08-18T03:43:30.880009",
+    "last_error": "HTTP Error 429: Too Many Requests",
+    "last_invoke": 1
+  }
+}
