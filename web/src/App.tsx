@@ -4,12 +4,12 @@ import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { Dashboard } from './pages/Dashboard'
-import { RFQs } from './pages/RFQs'
+import { RfqsPage } from './pages/RfqsPage'
 import { Quotations } from './pages/Quotations'
-import { Deals } from './pages/Deals'
+import { DealsPage } from './pages/DealsPage'
 import { DealRoomPage } from './pages/DealRoomPage'
 import { ComplianceDashboard } from './pages/ComplianceDashboard'
-import { Documents } from './pages/Documents'
+import { DocumentsPage } from './pages/DocumentsPage'
 import { Inspections } from './pages/Inspections'
 import { ProductsPage } from './pages/ProductsPage'
 import { OrganizationPage } from './pages/OrganizationPage'
@@ -25,12 +25,12 @@ function App() {
       <Route element={<ProtectedRoute><AppShell /></ProtectedRoute>}>
         <Route path="/" element={<Dashboard />} />
         <Route path="/products" element={<ProductsPage />} />
-        <Route path="/rfqs" element={<RFQs />} />
+        <Route path="/rfqs" element={<RfqsPage />} />
         <Route path="/quotations" element={<Quotations />} />
-        <Route path="/deals" element={<Deals />} />
+        <Route path="/deals" element={<DealsPage />} />
         <Route path="/deals/:id/room" element={<DealRoomPage />} />
         <Route path="/compliance" element={<ComplianceDashboard />} />
-        <Route path="/documents" element={<Documents />} />
+        <Route path="/documents" element={<DocumentsPage />} />
         <Route path="/inspections" element={<Inspections />} />
         <Route path="/payments" element={<PaymentsPage />} />
         <Route path="/organization" element={<OrganizationPage />} />
