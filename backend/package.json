@@ -22,7 +22,8 @@
     "migration:generate": "typeorm-ts-node-commonjs migration:generate -d ./src/database/data-source.ts",
     "migration:run": "typeorm-ts-node-commonjs migration:run -d ./src/database/data-source.ts",
     "migration:revert": "typeorm-ts-node-commonjs migration:revert -d ./src/database/data-source.ts",
-    "schema:drift": "ts-node -r tsconfig-paths/register src/database/drift-detector-db.ts"
+    "schema:drift": "ts-node -r tsconfig-paths/register src/database/drift-detector-db.ts",
+    "audit:routes": "ts-node -r tsconfig-paths/register src/database/route-guard-audit.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.3.0",
