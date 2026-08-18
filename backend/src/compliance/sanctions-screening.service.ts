@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 export interface SanctionsCheckResult {
   clean: boolean;
@@ -27,7 +28,10 @@ export class SanctionsScreeningService {
   // Simulated sanctions lists for development
   private readonly sanctionsLists = new Map<string, Set<string>>();
 
-  constructor() {
+  constructor(private readonly config: ConfigService) {
+    if (this.config.get('NODE_ENV') === 'production') {
+      throw new Error('Sanctions screening is simulated. Connect live OFAC/UN/EU lists before production.');
+    }
     this.initializeLists();
   }
 

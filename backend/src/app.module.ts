@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './auth/auth.module';
 import { OrganizationsModule } from './organizations/organizations.module';
@@ -40,6 +41,7 @@ import * as Joi from 'joi';
         AWS_SECRET_ACCESS_KEY: Joi.string().optional(),
       }),
     }),
+    ScheduleModule.forRoot(),
     DatabaseModule,
     CommonModule,
     EmailModule,

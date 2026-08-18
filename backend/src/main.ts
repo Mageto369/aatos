@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
 import compression from 'compression';
@@ -32,11 +32,12 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Idempotency-Key'],
   });
 
-  // API Versioning (disabled - all routes are unversioned for v1)
-  // app.enableVersioning({
-  //   type: VersioningType.URI,
-  //   defaultVersion: '1',
-  // });
+  // API Versioning
+  app.enableVersioning({
+    type: VersioningType.URI,
+    defaultVersion: '1',
+    prefix: 'api/v',
+  });
 
   // Global validation
   app.useGlobalPipes(new ValidationPipe({

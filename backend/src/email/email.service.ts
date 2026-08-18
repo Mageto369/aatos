@@ -27,6 +27,10 @@ export class EmailService {
     this.fromName = this.config.get<string>('EMAIL_FROM_NAME', 'AATOS Platform');
     this.isConfigured = !!this.apiKey;
 
+    if (!this.isConfigured && this.config.get('NODE_ENV') === 'production') {
+      throw new Error('SENDGRID_API_KEY is required in production. Set it or disable email notifications.');
+    }
+
     if (!this.isConfigured) {
       this.logger.warn('SENDGRID_API_KEY not configured. Emails will be logged only.');
     }

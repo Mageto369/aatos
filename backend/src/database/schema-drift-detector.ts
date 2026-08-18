@@ -40,7 +40,7 @@ function findEntityFiles(dir: string): string[] {
 function extractEntityName(filePath: string): string {
   const content = fs.readFileSync(filePath, 'utf-8');
   // Look for @Entity('table_name') or @Entity()
-  const entityMatch = content.match(/@Entity\(['"]?([^'")]*)['"]?\)/);
+  const entityMatch = content.match(/@Entity\(['"]?([^'"]*)['"]?\)/);
   if (entityMatch && entityMatch[1]) return entityMatch[1];
   // Fallback: class name
   const classMatch = content.match(/export class (\w+)/);

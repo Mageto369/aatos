@@ -14,6 +14,10 @@ export class MfaService {
 
   constructor(private readonly config: ConfigService) {
     this.issuer = this.config.get('MFA_ISSUER', 'AATOS');
+
+    if (this.config.get('NODE_ENV') === 'production') {
+      throw new Error('MFA is simulated. Install otplib and wire real TOTP before production.');
+    }
   }
 
   /**

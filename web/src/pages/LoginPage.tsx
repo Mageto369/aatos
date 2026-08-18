@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
 import { Eye, EyeOff, Mail, Lock, ArrowRight } from 'lucide-react'
 
@@ -12,13 +13,15 @@ export function LoginPage() {
   const [formData, setFormData] = useState<LoginFormData>({ email: '', password: '' })
   const [error, setError] = useState('')
   const { login, isLoading } = useAuthStore()
+  const [searchParams] = useSearchParams()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     try {
       await login(formData.email, formData.password)
-      window.location.href = '/'
+      const returnTo = searchParams.get('returnTo')
+      window.location.href = returnTo ? decodeURIComponent(returnTo) : '/'
     } catch (err: any) {
       setError(err.response?.data?.message || 'Invalid email or password.')
     }
