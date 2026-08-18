@@ -53,3 +53,5 @@ redis-data/
 # Uploads
 uploads/
 public/uploads/
+.vercel
+.env*
