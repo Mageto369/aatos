@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, Index } from 'typeorm';
+import { Entity, UpdateDateColumn, PrimaryGeneratedColumn, Column, CreateDateColumn, Index } from 'typeorm';
 
 export type NotificationType = 'rfq_match' | 'quote_received' | 'milestone_due' | 'inspection_complete' | 'message_received' | 'deal_update' | 'compliance_alert' | 'system';
 
@@ -51,4 +51,7 @@ export class Notification {
 
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
   createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz', name: 'updated_at' })
+  updatedAt: Date;
 }

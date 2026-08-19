@@ -1,4 +1,4 @@
-import { Controller, Post, Param, Body, UseGuards } from '@nestjs/common';
+import { Controller, Post, Param, Body, UseGuards, Request, ForbiddenException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -22,8 +22,14 @@ export class WorkflowsController {
   @Post('quote/:id/accept')
   @ApiOperation({ summary: 'Manually trigger quote acceptance workflow' })
   @Roles('owner', 'admin', 'operator')
-  async triggerQuoteAccept(@Param('id') quoteId: string) {
-    const deal = await this.workflowService.onQuoteAccepted(quoteId);
+  async triggerQuoteAccept(@Param('id') quoteId: string, @Request() req: any) {
+    // Same rule as POST /rfqs/:id/quotes/:quoteId/accept: only the buying
+    // organization may award. This route bypassed that check entirely, so
+    // fixing the other one alone would have left the hole open next door.
+    if (!req.user?.orgId) {
+      throw new ForbiddenException('User must belong to an organization');
+    }
+    const deal = await this.workflowService.onQuoteAccepted(quoteId, req.user.orgId);
     return { success: true, dealId: deal.id, message: `Quote ${quoteId} accepted. Deal created.` };
   }
 

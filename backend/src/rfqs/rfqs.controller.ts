@@ -43,8 +43,8 @@ export class RfqsController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get RFQ details' })
-  findOne(@Param('id') id: string) {
-    return this.rfqsService.findOne(id);
+  findOne(@Param('id') id: string, @Request() req: any) {
+    return this.rfqsService.findOne(id, req.user?.orgId);
   }
 
   @Post(':id/quotes')
@@ -68,13 +68,13 @@ export class RfqsController {
     if (!req.user.orgId) {
       throw new ForbiddenException('User must belong to an organization');
     }
-    const deal = await this.workflowService.onQuoteAccepted(quoteId);
+    const deal = await this.workflowService.onQuoteAccepted(quoteId, req.user.orgId, rfqId);
     return { success: true, dealId: deal.id, message: 'Quotation accepted. Deal created.' };
   }
 
   @Get(':id/quotes')
   @ApiOperation({ summary: 'Get quotations for an RFQ' })
-  getQuotations(@Param('id') id: string) {
-    return this.rfqsService.getQuotations(id);
+  getQuotations(@Param('id') id: string, @Request() req: any) {
+    return this.rfqsService.getQuotations(id, req.user?.orgId);
   }
 }

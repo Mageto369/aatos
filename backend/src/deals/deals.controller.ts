@@ -26,6 +26,12 @@ export class DealsController {
     if (!req.user.orgId) {
       throw new ForbiddenException('User must belong to an organization');
     }
+    // buyerOrgId and supplierOrgId arrive from the client. Without this check a
+    // caller could write a binding deal — with milestones and a platform fee —
+    // between two organizations it has nothing to do with.
+    if (dto.buyerOrgId !== req.user.orgId && dto.supplierOrgId !== req.user.orgId) {
+      throw new ForbiddenException('A deal must name your organization as buyer or supplier');
+    }
     this.pilotGuard.validateCorridor(dto.originCountry, dto.destinationCountry);
     return this.dealsService.create(dto);
   }

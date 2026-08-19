@@ -32,11 +32,10 @@ import { satisfyMfaEnrolment } from './mfa-fixture';
  * Registration is rate limited (5 per 15 min, in memory, per app instance), so
  * the three tenants are created once in beforeAll and shared by every block.
  *
- * Four assertions are marked `it.failing`. Each states the isolation the route
- * ought to enforce, and each currently throws because the route does not — so
- * the expectation is recorded in code without the suite going red for defects
- * it only reports. When one is fixed, `it.failing` inverts and that line turns
- * red, which is the prompt to delete the marker. They are:
+ * The four holes this suite originally recorded as `it.failing` — cross-tenant
+ * deal creation, draft-RFQ disclosure, competitor price disclosure, and
+ * cross-tenant quote acceptance — have since been fixed, and their
+ * assertions now run as ordinary guards.
  *
  *   - GET  /rfqs/:id                      any tenant reads any RFQ, drafts too
  *   - GET  /rfqs/:id/quotes               any tenant reads competitors' prices
@@ -388,7 +387,7 @@ describe('Tenant isolation (e2e)', () => {
      * supplied and never compared against `req.user.orgId`, so A can write a
      * binding deal — with milestones and a platform fee — between B and C.
      */
-    it.failing('A cannot create a deal between B and C', async () => {
+    it('A cannot create a deal between B and C', async () => {
       const res = await request(app.getHttpServer())
         .post('/deals')
         .set('Authorization', `Bearer ${tokenA}`)
@@ -455,9 +454,9 @@ describe('Tenant isolation (e2e)', () => {
      *
      * Marked `it.failing` so the correct expectation stays on the record
      * without the suite going red for a defect it only reports. When someone
-     * scopes the read, this line turns red and the marker comes off.
+     * scopes the read, this line turns red and the marker came off (fixed).
      */
-    it.failing("A cannot read B's unpublished, non-public draft RFQ", async () => {
+    it("A cannot read B's unpublished, non-public draft RFQ", async () => {
       const res = await request(app.getHttpServer())
         .get(`/rfqs/${draftRfqOfB}`)
         .set('Authorization', `Bearer ${tokenA}`);
@@ -518,7 +517,7 @@ describe('Tenant isolation (e2e)', () => {
      * leaks is a competitor's unit price on a live tender — the single most
      * sensitive number in the system.
      */
-    it.failing("A cannot read C's quoted price on B's RFQ", async () => {
+    it("A cannot read C's quoted price on B's RFQ", async () => {
       const res = await request(app.getHttpServer())
         .get(`/rfqs/${rfqOfB}/quotes`)
         .set('Authorization', `Bearer ${tokenA}`);
@@ -540,7 +539,7 @@ describe('Tenant isolation (e2e)', () => {
      * quotation to `accepted` and minting a deal between two organizations it
      * has nothing to do with.
      */
-    it.failing("A cannot accept C's quotation on B's RFQ", async () => {
+    it("A cannot accept C's quotation on B's RFQ", async () => {
       const res = await request(app.getHttpServer())
         .post(`/rfqs/${rfqOfB}/quotes/${quoteOfCOnBsRfq}/accept`)
         .set('Authorization', `Bearer ${tokenA}`)

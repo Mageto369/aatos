@@ -54,11 +54,27 @@ export class RfqsService {
     return { items, total };
   }
 
-  async findOne(id: string): Promise<RFQ> {
+  /**
+   * Read one RFQ, applying marketplace visibility.
+   *
+   * This is a marketplace, so a published public RFQ is meant to be
+   * discoverable — suppliers cannot quote on tenders they cannot see. What was
+   * wrong is that the where clause was `where: { id,  }` (the same vestigial
+   * trailing comma as the inspections incident) and the controller passed no
+   * acting organization, so an unpublished draft was readable by anyone.
+   *
+   * Visible when: you are the buyer who raised it; or it is published, and
+   * either public or you are on its invited list.
+   */
+  async findOne(id: string, actingOrgId?: string): Promise<RFQ> {
     const rfq = await this.rfqRepo.findOne({
-      where: { id,  },
+      where: { id },
     });
     if (!rfq) {
+      throw new NotFoundException('RFQ not found');
+    }
+
+    if (actingOrgId && !this.isVisibleTo(rfq, actingOrgId)) {
       throw new NotFoundException('RFQ not found');
     }
     return rfq;
@@ -92,9 +108,33 @@ export class RfqsService {
     return saved;
   }
 
-  async getQuotations(rfqId: string) {
+  /** Marketplace visibility for a single RFQ. */
+  private isVisibleTo(rfq: RFQ, orgId: string): boolean {
+    if (rfq.buyerOrgId === orgId) return true;
+    if (rfq.status === 'draft') return false;
+    if (rfq.isPublic) return true;
+    return (rfq.invitedSupplierIds ?? []).includes(orgId);
+  }
+
+  /**
+   * Quotations on an RFQ.
+   *
+   * The buyer who raised the RFQ sees every quote — that is the point of a
+   * tender. A supplier sees only its own. Previously this was
+   * `where: { rfqId,  }` with no scoping at all, so any tenant could read
+   * competitors' unit prices on a live tender.
+   */
+  async getQuotations(rfqId: string, actingOrgId?: string) {
+    if (actingOrgId) {
+      const rfq = await this.findOne(rfqId, actingOrgId);
+      const where =
+        rfq.buyerOrgId === actingOrgId
+          ? { rfqId }
+          : { rfqId, supplierOrgId: actingOrgId };
+      return this.quotationRepo.find({ where, order: { createdAt: 'DESC' } });
+    }
     return this.quotationRepo.find({
-      where: { rfqId,  },
+      where: { rfqId },
       order: { createdAt: 'DESC' },
     });
   }

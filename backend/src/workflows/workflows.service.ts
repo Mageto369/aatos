@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource, Not } from 'typeorm';
 import { RFQ } from '../rfqs/entities/rfq.entity';
@@ -92,7 +92,17 @@ export class WorkflowService {
    * Triggered when a quotation is accepted.
    * Creates a deal, milestones, compliance checklist, and initial payment.
    */
-  async onQuoteAccepted(quoteId: string): Promise<Deal> {
+  /**
+   * Convert an accepted quotation into a deal.
+   *
+   * actingOrgId is the organization performing the acceptance and is required:
+   * only the buyer who raised the RFQ may award it. Without it this method
+   * would happily award any RFQ to any quotation on behalf of anyone —
+   * RfqsController.acceptQuote checked only that the caller belonged to *some*
+   * organization, so any tenant could mint a binding deal, with milestones and
+   * a platform fee, between two companies it had nothing to do with.
+   */
+  async onQuoteAccepted(quoteId: string, actingOrgId: string, expectedRfqId?: string): Promise<Deal> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -105,6 +115,17 @@ export class WorkflowService {
 
       const rfq = await this.rfqRepo.findOne({ where: { id: quote.rfqId } });
       if (!rfq) throw new Error('RFQ not found');
+
+      // The quote must belong to the RFQ named in the request, so a caller
+      // cannot pair someone else's quotation with their own RFQ.
+      if (expectedRfqId && rfq.id !== expectedRfqId) {
+        throw new ForbiddenException('Quotation does not belong to this RFQ');
+      }
+
+      // Only the buyer who raised the RFQ may award it.
+      if (rfq.buyerOrgId !== actingOrgId) {
+        throw new ForbiddenException('Only the buying organization can accept a quotation');
+      }
 
       // Create Deal
       const deal = this.dealRepo.create({
