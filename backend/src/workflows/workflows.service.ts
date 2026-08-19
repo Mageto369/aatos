@@ -177,7 +177,10 @@ export class WorkflowService {
           payeeOrgId: quote.supplierOrgId,
           amount: Number((quote.totalPrice * 0.3).toFixed(2)),
           currency: quote.priceCurrency,
-          paymentMethod: 'escrow',
+          // Not 'escrow': AATOS does not custody funds and no escrow partner is
+          // integrated (supportsEscrow is false on every provider). This record
+          // is the 30% advance the quote's terms describe.
+          paymentMethod: 'advance_payment',
           status: 'pending',
           releaseCondition: 'contract_signed',
         });

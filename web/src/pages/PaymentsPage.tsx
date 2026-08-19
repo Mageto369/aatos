@@ -31,7 +31,7 @@ interface Payment {
 
 const statusConfig: Record<string, { icon: any; color: string; bg: string; label: string }> = {
   pending: { icon: Clock, color: 'text-yellow-600', bg: 'bg-yellow-100', label: 'Pending' },
-  held: { icon: Shield, color: 'text-blue-600', bg: 'bg-blue-100', label: 'In Escrow' },
+  held: { icon: Shield, color: 'text-blue-600', bg: 'bg-blue-100', label: 'Held by provider' },
   released: { icon: CheckCircle2, color: 'text-green-600', bg: 'bg-green-100', label: 'Released' },
   refunded: { icon: ArrowDownRight, color: 'text-gray-600', bg: 'bg-gray-100', label: 'Refunded' },
   failed: { icon: XCircle, color: 'text-red-600', bg: 'bg-red-100', label: 'Failed' },
@@ -154,7 +154,7 @@ export function PaymentsPage() {
 
   const stats = {
     totalPaid: displayPayments.filter(p => p.status === 'released').reduce((a, p) => a + (p.amountUsd || p.amount), 0),
-    inEscrow: displayPayments.filter(p => p.status === 'held').reduce((a, p) => a + (p.amountUsd || p.amount), 0),
+    heldByProvider: displayPayments.filter(p => p.status === 'held').reduce((a, p) => a + (p.amountUsd || p.amount), 0),
     pending: displayPayments.filter(p => p.status === 'pending').reduce((a, p) => a + (p.amountUsd || p.amount), 0),
     failed: displayPayments.filter(p => p.status === 'failed').length,
   }
@@ -163,12 +163,21 @@ export function PaymentsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Payments</h1>
-        <p className="text-gray-600 mt-1">Manage trade payments and escrow releases</p>
+        <p className="text-gray-600 mt-1">Track payment milestones across your trades</p>
+      </div>
+
+      <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3">
+        <p className="text-sm text-amber-900">
+          <span className="font-semibold">AATOS does not hold your money.</span>{' '}
+          These are milestone records. Funds are held and transferred by your licensed
+          payment provider, and a status here reflects what that provider reported — it
+          is not a guarantee of payment or a protection against non-delivery.
+        </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard title="Total Paid" value={`$${stats.totalPaid.toLocaleString()}`} icon={Wallet} trend="up" />
-        <StatCard title="In Escrow" value={`$${stats.inEscrow.toLocaleString()}`} icon={Shield} />
+        <StatCard title="Held by provider" value={`$${stats.heldByProvider.toLocaleString()}`} icon={Shield} />
         <StatCard title="Pending" value={`$${stats.pending.toLocaleString()}`} icon={Clock} />
         <StatCard title="Failed" value={stats.failed.toString()} icon={XCircle} trend="down" />
       </div>

@@ -2,6 +2,7 @@ import { Controller, Get, Post, Put, Body, Param, Query, UseGuards } from '@nest
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { WarehouseInventoryService } from './warehouse-inventory.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 @ApiTags('Inventory')
 @Controller('inventory')
@@ -18,6 +19,7 @@ export class InventoryController {
 
   @Post('warehouses')
   @ApiOperation({ summary: 'Add a warehouse' })
+  @Roles('owner', 'admin', 'operator')
   async addWarehouse(@Body() data: Parameters<WarehouseInventoryService['addWarehouse']>[0]) {
     return this.inventoryService.addWarehouse(data);
   }
@@ -42,18 +44,21 @@ export class InventoryController {
 
   @Post('items')
   @ApiOperation({ summary: 'Add inventory item' })
+  @Roles('owner', 'admin', 'operator', 'logistics_officer')
   async addItem(@Body() data: Parameters<WarehouseInventoryService['addInventory']>[0]) {
     return this.inventoryService.addInventory(data);
   }
 
   @Put('items/:id/quantity')
   @ApiOperation({ summary: 'Update inventory quantity' })
+  @Roles('owner', 'admin', 'operator', 'logistics_officer')
   async updateQuantity(@Param('id') id: string, @Body('quantity') quantity: number) {
     return this.inventoryService.updateInventoryQuantity(id, quantity);
   }
 
   @Put('items/:id/status')
   @ApiOperation({ summary: 'Update inventory status' })
+  @Roles('owner', 'admin', 'operator', 'logistics_officer')
   async updateStatus(@Param('id') id: string, @Body('status') status: 'available' | 'reserved' | 'in_transit' | 'quarantine' | 'sold') {
     return this.inventoryService.updateInventoryStatus(id, status);
   }

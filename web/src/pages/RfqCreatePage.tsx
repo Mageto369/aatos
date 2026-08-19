@@ -207,7 +207,6 @@ export function RfqCreatePage() {
               <option value="advance_payment">Advance Payment</option>
               <option value="open_account">Open Account</option>
               <option value="documentary_collection">Documentary Collection</option>
-              <option value="escrow">Escrow</option>
             </select>
           </div>
         </div>

@@ -1,5 +1,13 @@
 # AATOS — Sequence Diagrams
 
+> **Status of these diagrams.** These describe intended flows, not all of which are
+> built. In particular, **no escrow partner is integrated and AATOS does not custody
+> funds** — `supportsEscrow` is false on every payment provider in the codebase, and
+> `PaymentsService.releasePayment` records an audit milestone while a licensed
+> provider moves the money. Read the escrow sequence below as a design for a future
+> partner integration, not as a description of current behaviour. See
+> `docs/PLATFORM_ROLE.md` for the binding statement of what AATOS is and is not.
+
 ## 1. Executive Summary
 
 These sequence diagrams define the critical trade workflows in the AATOS platform. Each diagram represents a complete business process from initiation to completion, showing interactions between users, the platform, external services, and partner systems.

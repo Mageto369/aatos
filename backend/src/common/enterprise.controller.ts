@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { EnterprisePricingService } from './enterprise-pricing.service';
 import { ESGReportingService } from './esg-reporting.service';
 import { WhiteLabelService } from './white-label.service';
@@ -31,6 +32,7 @@ export class EnterpriseController {
 
   @Post('subscriptions')
   @ApiOperation({ summary: 'Create subscription' })
+  @Roles('owner', 'admin')
   async createSubscription(@Body() data: { orgId: string; tierId: string; billingCycle?: 'monthly' | 'annual' }) {
     return this.pricingService.createSubscription(data.orgId, data.tierId, data.billingCycle);
   }
@@ -44,6 +46,7 @@ export class EnterpriseController {
   // ESG
   @Post('esg/carbon')
   @ApiOperation({ summary: 'Calculate carbon footprint' })
+  @Roles('owner', 'admin', 'operator', 'compliance_officer')
   async calculateCarbon(@Body() data: Parameters<ESGReportingService['calculateCarbonFootprint']>[0]) {
     return this.esgService.calculateCarbonFootprint(data);
   }
@@ -63,6 +66,7 @@ export class EnterpriseController {
   // White Label
   @Post('white-label')
   @ApiOperation({ summary: 'Create white-label config' })
+  @Roles('owner', 'admin')
   async createWhiteLabel(@Body() data: { orgId: string; config: Parameters<WhiteLabelService['createConfig']>[1] }) {
     return this.whiteLabelService.createConfig(data.orgId, data.config);
   }
@@ -76,6 +80,7 @@ export class EnterpriseController {
   // Partner API
   @Post('api-keys')
   @ApiOperation({ summary: 'Create API key' })
+  @Roles('owner', 'admin')
   async createApiKey(@Body() data: { orgId: string; name: string; scopes: string[] }) {
     return this.partnerApiService.createApiKey(data.orgId, data.name, data.scopes);
   }
@@ -88,6 +93,7 @@ export class EnterpriseController {
 
   @Post('webhooks')
   @ApiOperation({ summary: 'Create webhook' })
+  @Roles('owner', 'admin')
   async createWebhook(@Body() data: { orgId: string; url: string; events: string[] }) {
     return this.partnerApiService.createWebhook(data.orgId, data);
   }
@@ -101,6 +107,7 @@ export class EnterpriseController {
 
   @Post('filings')
   @ApiOperation({ summary: 'Submit trade filing' })
+  @Roles('owner', 'admin', 'compliance_officer')
   async submitFiling(@Body() data: { orgId: string; dealId: string; systemId: string; filingType: string; data: Record<string, unknown> }) {
     return this.govTradeService.submitFiling(data.orgId, data.dealId, data.systemId, data.filingType, data.data);
   }
@@ -114,12 +121,14 @@ export class EnterpriseController {
 
   @Post('matching/index-supplier')
   @ApiOperation({ summary: 'Index supplier profile' })
+  @Roles('owner', 'admin', 'operator')
   async indexSupplier(@Body() profile: Parameters<MatchingEngineService['indexSupplier']>[0]) {
     return this.matchingService.indexSupplier(profile);
   }
 
   @Post('matching/index-buyer')
   @ApiOperation({ summary: 'Index buyer profile' })
+  @Roles('owner', 'admin', 'operator')
   async indexBuyer(@Body() profile: Parameters<MatchingEngineService['indexBuyer']>[0]) {
     return this.matchingService.indexBuyer(profile);
   }

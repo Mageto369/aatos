@@ -22,7 +22,7 @@ This document defines the enterprise-grade architecture for the platform. It sup
 | **One Canonical Identity** | Single organization/user model across all roles (supplier, buyer, service provider, platform admin) |
 | **Immutable Audit Trail** | Every verification, payment, inspection, document review, dispute event is append-only |
 | **Compliance as Data** | Rules are configurable data, not hard-coded logic. Versioned, source-linked, review-dated |
-| **Licensed Partner Integration** | Payments, escrow, identity, finance, insurance via regulated partner APIs — never build what requires a license |
+| **Licensed Partner Integration** | Payments, identity, finance, insurance via regulated partner APIs — never build what requires a license. AATOS does not custody funds and provides no escrow. |
 | **Cloud-Native, Containerized** | Kubernetes, horizontal pod autoscaling, multi-region deployment |
 | **Zero Trust** | Every request authenticated, every action authorized, every resource scoped |
 
@@ -39,7 +39,7 @@ This document defines the enterprise-grade architecture for the platform. It sup
 │  - Roles & Permissions      │  - Media & Documents    │  - Alerts       │
 ├─────────────────────────────────────────────────────────────────────────┤
 │  Trade Operations           │  Financial Services     │  Logistics      │
-│  - RFQ & Matching           │  - Escrow               │  - Freight      │
+│  - RFQ & Matching           │  - Milestones           │  - Freight      │
 │  - Messaging                │  - Payments             │  - Tracking     │
 │  - Quotations               │  - Trade Finance        │  - Customs      │
 │  - Contracts                │  - Insurance            │  - Warehousing  │
@@ -149,7 +149,7 @@ This document defines the enterprise-grade architecture for the platform. It sup
 
 5. Inspection & Payment
    → Inspection booked → Inspector assigned → Evidence collected
-   → Inspection report → Payment milestone released (escrow)
+   → Inspection report → Payment milestone recorded as released (the licensed provider moves the funds)
 
 6. Shipment & Delivery
    → Freight booked → Tracking active → Customs coordinated
@@ -202,7 +202,7 @@ The Compliance Engine is the strategic moat. It must:
 |---|---|---|---|
 | **1** | Months 1-6 | Verified Marketplace | Modular monolith, single DB, single region |
 | **2** | Months 7-12 | Compliance & Transactions | Introduce event bus, compliance rule engine |
-| **3** | Months 13-18 | Payments & Logistics | Partner integrations, deal room, escrow |
+| **3** | Months 13-18 | Payments & Logistics | Partner integrations, deal room, milestone tracking |
 | **4** | Months 19-24 | Finance & Intelligence | Separate analytics DB, ML pipelines |
 | **5** | Months 25-36 | Global Scale | Microservice extraction, multi-region, government APIs |
 

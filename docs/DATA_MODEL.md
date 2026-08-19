@@ -51,7 +51,7 @@ This document provides a comprehensive reference for the AATOS data model. It de
 │                   └─────────────┘            ┌─────▼─────┐                      │
 │                                              │  payments │                      │
 │  ┌─────────────┐       ┌─────────────┐      │           │                      │
-│  │ inspections │◄──────┤   deals     │◄─────┤ • escrow  │                      │
+│  │ inspections │◄──────┤   deals     │◄─────┤ • payouts │                      │
 │  │             │       │             │      │ • milestones                     │
 │  │ • booking   │       │ • quality   │      └───────────┘                      │
 │  │ • evidence  │       │ • evidence  │                                       │
@@ -336,7 +336,7 @@ This document provides a comprehensive reference for the AATOS data model. It de
 ---
 
 ### 3.9 payments
-**Purpose:** Financial transaction records linked to escrow/partner systems
+**Purpose:** Payment milestone records linked to licensed provider systems. AATOS does not custody funds — a status here reflects what the provider reported.
 
 | Attribute | Type | Cardinality | Description |
 |---|---|---|---|

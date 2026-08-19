@@ -7,11 +7,13 @@ import { FlutterwaveService } from './flutterwave.service';
 import { BankTransferProvider, MobileMoneyProvider } from './bank-transfer.provider';
 import { PaymentProviderRegistry } from './payment-provider.registry';
 import { Payment } from './entities/payment.entity';
+import { PaymentWebhookEvent } from './entities/payment-webhook-event.entity';
+import { WebhookEventsService } from './webhook-events.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Payment])],
+  imports: [TypeOrmModule.forFeature([Payment, PaymentWebhookEvent])],
   controllers: [PaymentsController, WebhooksController],
-  providers: [PaymentsService, FlutterwaveService, BankTransferProvider, MobileMoneyProvider, PaymentProviderRegistry],
-  exports: [PaymentsService, FlutterwaveService, BankTransferProvider, MobileMoneyProvider, PaymentProviderRegistry],
+  providers: [PaymentsService, WebhookEventsService, FlutterwaveService, BankTransferProvider, MobileMoneyProvider, PaymentProviderRegistry],
+  exports: [PaymentsService, WebhookEventsService, FlutterwaveService, BankTransferProvider, MobileMoneyProvider, PaymentProviderRegistry],
 })
 export class PaymentsModule {}

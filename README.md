@@ -43,7 +43,7 @@ aatos/
                                    # - Supplier onboarding & verification
                                    # - RFQ creation & supplier matching
                                    # - Deal creation & contract signing
-                                   # - Escrow payments
+                                   # - Payment milestones
                                    # - Inspection workflow
                                    # - Real-time messaging
                                    # - Compliance rule updates
@@ -161,7 +161,7 @@ To continue building AATOS, the following workstreams are ready to begin:
 - Transaction reporting and analytics
 
 ### Phase 3: Payments & Logistics (Months 13-18)
-- Escrow partner integrations
+- Payment partner integrations (AATOS does not custody funds; escrow would require a licensed partner and is not currently offered)
 - Payment milestone automation
 - Freight booking and tracking
 - Customs documentation workflow

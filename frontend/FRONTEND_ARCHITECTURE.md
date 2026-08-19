@@ -432,7 +432,7 @@ const productSchema = z.object({
 - `MilestoneTracker` — Visual pipeline with status indicators
 - `MessageThread` — Real-time messaging with file sharing, translation
 - `DocumentSidebar` — Shared document repository for the deal
-- `PaymentWidget` — Escrow status, payment timeline, release triggers
+- `PaymentWidget` — Payment milestone status, timeline, release triggers (AATOS does not custody funds)
 - `InspectionWidget` — Inspector booking, report viewer, acceptance flow
 - `LogisticsWidget` — Freight tracking, route map, ETA updates
 - `ComplianceWidget` — Checklist progress, missing items, document links

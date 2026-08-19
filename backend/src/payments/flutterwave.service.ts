@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { request as httpsRequest } from 'node:https';
+import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 import {
   PaymentProvider,
   InitiatePaymentParams,
@@ -47,6 +48,16 @@ export interface FlutterwaveVerifyResponse {
   };
 }
 
+/** Why a webhook signature check failed. Safe to log — none of these name the secret. */
+export type WebhookRejectionReason =
+  | 'secret_not_configured'
+  | 'missing_signature'
+  | 'signature_mismatch';
+
+export type WebhookSignatureCheck =
+  | { valid: true }
+  | { valid: false; reason: WebhookRejectionReason };
+
 @Injectable()
 export class FlutterwaveService implements PaymentProvider {
   readonly name = 'flutterwave';
@@ -58,23 +69,108 @@ export class FlutterwaveService implements PaymentProvider {
   private readonly secretKey: string;
   private readonly publicKey: string;
   private readonly isTestMode: boolean;
+  /**
+   * The shared secret Flutterwave echoes back in the `verif-hash` header.
+   * Private and never logged: it is the only thing standing between the public
+   * webhook route and arbitrary payment-state changes.
+   */
+  private readonly webhookHash: string;
 
   constructor(private readonly config: ConfigService) {
     this.secretKey = this.config.get<string>('FLUTTERWAVE_SECRET_KEY', '');
     this.publicKey = this.config.get<string>('FLUTTERWAVE_PUBLIC_KEY', '');
     this.isTestMode = this.config.get<string>('FLUTTERWAVE_ENV', 'test') === 'test';
+    this.webhookHash = this.config.get<string>('FLUTTERWAVE_WEBHOOK_HASH', '');
 
-    if (!this.secretKey && this.config.get('NODE_ENV') === 'production') {
+    const isProduction = this.config.get('NODE_ENV') === 'production';
+
+    if (!this.secretKey && isProduction) {
       throw new Error('FLUTTERWAVE_SECRET_KEY is required in production. Set it or disable payments.');
+    }
+
+    // POST /webhooks/flutterwave is @Public() by necessity — a provider cannot
+    // present a JWT — so the signature is its only authentication. Booting
+    // without the hash would leave an unauthenticated route that advances
+    // payment state, so refuse to start rather than serve it.
+    if (!this.webhookHash && isProduction) {
+      throw new Error(
+        'FLUTTERWAVE_WEBHOOK_HASH is required in production. Without it the public ' +
+          'webhook route cannot be authenticated. Set it or disable payments.',
+      );
     }
 
     if (!this.secretKey) {
       this.logger.warn('FLUTTERWAVE_SECRET_KEY not configured. Payments will be simulated.');
     }
+
+    if (!this.webhookHash) {
+      this.logger.warn(
+        'FLUTTERWAVE_WEBHOOK_HASH not configured. Flutterwave webhooks cannot be ' +
+          'verified and will be refused.',
+      );
+    }
   }
 
   get isConfigured(): boolean {
     return !!this.secretKey;
+  }
+
+  /** Whether the endpoint has a secret to verify deliveries against. */
+  get isWebhookVerificationConfigured(): boolean {
+    return !!this.webhookHash;
+  }
+
+  /**
+   * Check the `verif-hash` header Flutterwave sends against the configured
+   * secret hash.
+   *
+   * The comparison runs over SHA-256 digests of both values rather than the
+   * raw strings: `timingSafeEqual` throws on length mismatch (which would leak
+   * the secret's length), and digests are always 32 bytes. A plain `===` would
+   * leak the secret one byte at a time to anyone able to time the endpoint.
+   */
+  verifyWebhookSignature(signature?: string | null): WebhookSignatureCheck {
+    if (!this.webhookHash) {
+      return { valid: false, reason: 'secret_not_configured' };
+    }
+    if (!signature) {
+      return { valid: false, reason: 'missing_signature' };
+    }
+    if (!this.timingSafeEquals(signature, this.webhookHash)) {
+      return { valid: false, reason: 'signature_mismatch' };
+    }
+    return { valid: true };
+  }
+
+  private timingSafeEquals(a: string, b: string): boolean {
+    const left = createHash('sha256').update(a, 'utf8').digest();
+    const right = createHash('sha256').update(b, 'utf8').digest();
+    return timingSafeEqual(left, right);
+  }
+
+  /**
+   * Stable identifier for a delivery, used as the idempotency key.
+   *
+   * Flutterwave has no dedicated delivery-id header, so this keys on the
+   * transaction id the payload carries, scoped by event type (the same
+   * transaction legitimately produces both a charge and a transfer event).
+   * A payload with no usable id falls back to a digest of its own content, so
+   * a byte-identical retry still collides with the original.
+   */
+  resolveWebhookEventId(payload: Record<string, any> | null | undefined): string {
+    const body = payload ?? {};
+    const data = (body.data ?? {}) as Record<string, any>;
+    const event = String(body.event ?? body['event.type'] ?? 'unknown');
+
+    const candidates = [body.id, data.id, data.flw_ref, data.tx_ref];
+    for (const candidate of candidates) {
+      if (candidate === undefined || candidate === null) continue;
+      const value = String(candidate);
+      if (value.length > 0) return `${event}:${value}`.slice(0, 255);
+    }
+
+    const digest = createHash('sha256').update(JSON.stringify(body)).digest('hex');
+    return `${event}:sha256:${digest}`.slice(0, 255);
   }
 
   async initiatePayment(params: InitiatePaymentParams): Promise<PaymentInitiationResult> {
@@ -168,8 +264,7 @@ export class FlutterwaveService implements PaymentProvider {
   async handleWebhook(payload: unknown, signature?: string): Promise<WebhookResult> {
     // Verify webhook signature if provided
     if (signature && this.secretKey) {
-      const crypto = await import('node:crypto');
-      const expected = crypto.createHmac('sha256', this.secretKey)
+      const expected = createHmac('sha256', this.secretKey)
         .update(JSON.stringify(payload))
         .digest('hex');
       if (expected !== signature) {

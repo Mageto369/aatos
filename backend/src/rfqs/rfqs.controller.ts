@@ -4,6 +4,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RfqsService } from './rfqs.service';
 import { WorkflowService } from '../workflows/workflows.service';
+import { CreateQuotationDto } from './dto';
 
 @ApiTags('RFQs')
 @Controller('rfqs')
@@ -49,7 +50,7 @@ export class RfqsController {
   @Post(':id/quotes')
   @ApiOperation({ summary: 'Submit a quotation' })
   @Roles('owner', 'admin', 'operator')
-  createQuotation(@Param('id') id: string, @Body() data: any, @Request() req: any) {
+  createQuotation(@Param('id') id: string, @Body() data: CreateQuotationDto, @Request() req: any) {
     if (!req.user.orgId) {
       throw new ForbiddenException('User must belong to an organization');
     }
