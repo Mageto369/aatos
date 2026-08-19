@@ -3,6 +3,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { DataSource } from 'typeorm';
 import { AppModule } from '../src/app.module';
+import { satisfyMfaEnrolment } from './mfa-fixture';
 
 describe('Critical Path — Authentication (e2e)', () => {
   let app: INestApplication;
@@ -83,6 +84,7 @@ describe('Critical Path — Authentication (e2e)', () => {
 describe('Critical Path — Organization (e2e)', () => {
   let app: INestApplication;
   let authToken: string;
+  let userId: string;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -102,6 +104,15 @@ describe('Critical Path — Organization (e2e)', () => {
         lastName: 'Test',
       });
     authToken = res.body.data.accessToken;
+    userId = res.body.data.user.id;
+  });
+
+  // The organization is created by the first test in this block, which is what
+  // makes this user an owner — and MfaEnrolmentGuard refuses every route for an
+  // owner who has not enrolled. Satisfying it between tests covers the routes
+  // that run after that point without affecting the ones that run before.
+  beforeEach(async () => {
+    await satisfyMfaEnrolment(app.get(DataSource), [userId]);
   });
 
   afterAll(async () => {
@@ -171,6 +182,8 @@ describe('Critical Path — Product (e2e)', () => {
         type: 'cooperative',
         countryCode: 'KE',
       });
+    // Becoming an owner triggers MfaEnrolmentGuard; the fixture satisfies it.
+    await satisfyMfaEnrolment(app.get(DataSource), [authRes.body.data.user.id]);
     // The organization is created so the registered user becomes its owner —
     // POST /products requires an owner/admin/operator role. Its id is not
     // needed: the controller derives the acting org from the JWT.
@@ -245,6 +258,8 @@ describe('Critical Path — RFQ to Deal (e2e)', () => {
         type: 'cooperative',
         countryCode: 'KE',
       });
+    // Becoming an owner triggers MfaEnrolmentGuard; the fixture satisfies it.
+    await satisfyMfaEnrolment(app.get(DataSource), [authRes.body.data.user.id]);
     // Creating the organization makes the registered user its owner, which
     // POST /rfqs requires. The id itself is not needed: the controller takes
     // the buyer org from the token.

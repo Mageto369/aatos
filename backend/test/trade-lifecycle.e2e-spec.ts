@@ -3,6 +3,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { DataSource } from 'typeorm';
 import { AppModule } from '../src/app.module';
+import { satisfyMfaEnrolment } from './mfa-fixture';
 
 /**
  * The trade lifecycle, end to end.
@@ -45,6 +46,7 @@ describe('Trade lifecycle — Kenya to U.S. green coffee (e2e)', () => {
       })
       .expect(201);
     const token = reg.body.data.accessToken;
+    const userId = reg.body.data.user.id as string;
 
     const org = await request(app.getHttpServer())
       .post('/organizations')
@@ -52,7 +54,7 @@ describe('Trade lifecycle — Kenya to U.S. green coffee (e2e)', () => {
       .send({ name: `${label} ${uniq()}`, type: 'cooperative', countryCode })
       .expect(201);
 
-    return { token, orgId: org.body.data.id as string };
+    return { token, userId, orgId: org.body.data.id as string };
   }
 
   beforeAll(async () => {
@@ -65,9 +67,19 @@ describe('Trade lifecycle — Kenya to U.S. green coffee (e2e)', () => {
     await app.init();
     dataSource = app.get(DataSource);
 
-    ({ token: buyerToken, orgId: buyerOrg } = await tenant('US Importer', 'US'));
-    ({ token: supplierAToken, orgId: supplierAOrg } = await tenant('Nyeri Cooperative', 'KE'));
-    ({ token: supplierBToken } = await tenant('Kirinyaga Estate', 'KE'));
+    let buyerUser: string;
+    let supplierAUser: string;
+    let supplierBUser: string;
+    ({ token: buyerToken, orgId: buyerOrg, userId: buyerUser } = await tenant('US Importer', 'US'));
+    ({ token: supplierAToken, orgId: supplierAOrg, userId: supplierAUser } = await tenant(
+      'Nyeri Cooperative',
+      'KE',
+    ));
+    ({ token: supplierBToken, userId: supplierBUser } = await tenant('Kirinyaga Estate', 'KE'));
+
+    // Creating an organization makes the creator its owner, and MfaEnrolmentGuard
+    // refuses every other route for an owner who has not enrolled.
+    await satisfyMfaEnrolment(dataSource, [buyerUser, supplierAUser, supplierBUser]);
 
     const s = uniq();
     const [category] = await dataSource.query(
