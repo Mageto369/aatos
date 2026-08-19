@@ -6,6 +6,7 @@ import { RegisterDto, LoginDto } from './dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RateLimitGuard, Throttle } from '../common/rate-limit.guard';
 import { Public } from './decorators/public.decorator';
+import { AllowsPendingMfaEnrolment } from './decorators/mfa-enrolment.decorator';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -51,6 +52,9 @@ export class AuthController {
   }
 
   @Get('me')
+  // Readable while enrolment is outstanding: a client that has just been told
+  // "403 mfa_enrolment_required" still needs to render who is signed in.
+  @AllowsPendingMfaEnrolment()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Get current authenticated user' })
@@ -67,6 +71,8 @@ export class AuthController {
       lastName: user.lastName,
       displayName: `${user.firstName} ${user.lastName}`,
       status: user.status,
+      mfaEnabled: user.mfaEnabled,
+      mfaEnrolmentRequired: req.user.mfaEnrolmentRequired === true,
     };
   }
 }

@@ -11,6 +11,13 @@ export interface UserPayload {
   email: string;
   orgId: string | null;
   role: string | null;
+  /** Whether the account has a confirmed second factor. */
+  mfaEnabled: boolean;
+  /**
+   * True when the user holds a role that requires MFA but has not enrolled.
+   * MfaEnrolmentGuard refuses every route except the enrolment ones while set.
+   */
+  mfaEnrolmentRequired: boolean;
 }
 
 export const CurrentUser = createParamDecorator(

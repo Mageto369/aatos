@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from '../auth.service';
 import { RefreshTokenService } from '../services/refresh-token.service';
+import { MfaService } from '../mfa.service';
 import { JwtService } from '@nestjs/jwt';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
@@ -21,6 +22,7 @@ describe('AuthService', () => {
       firstName: 'Test',
       lastName: 'User',
       status: 'active',
+      mfaEnabled: false,
       failedLoginCount: 0,
       lockedUntil: null,
       loginCount: 0,
@@ -43,6 +45,16 @@ describe('AuthService', () => {
           provide: RefreshTokenService,
           useValue: {
             createToken: jest.fn(),
+          },
+        },
+        {
+          // These cases cover accounts without MFA. The second factor has its
+          // own suites in mfa.service.spec.ts and auth-mfa-login.spec.ts.
+          provide: MfaService,
+          useValue: {
+            isEnrolmentRequiredForUser: jest.fn().mockResolvedValue(false),
+            verifyUserToken: jest.fn().mockResolvedValue(false),
+            consumeRecoveryCode: jest.fn().mockResolvedValue(false),
           },
         },
         {

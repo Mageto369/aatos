@@ -43,8 +43,33 @@ export class User {
   @Column({ name: 'mfa_enabled', default: false })
   mfaEnabled: boolean;
 
+  /** AES-256-GCM envelope around the base32 TOTP secret; never plaintext. */
   @Column({ type: 'varchar', name: 'mfa_secret', length: 255, nullable: true })
   mfaSecret: string | null;
+
+  /**
+   * Secret for an enrolment that has been started but not yet proven. Kept
+   * apart from mfaSecret so opening the enrolment screen cannot break the
+   * authenticator that currently works.
+   */
+  @Column({ type: 'varchar', name: 'mfa_pending_secret', length: 255, nullable: true })
+  mfaPendingSecret: string | null;
+
+  @Column({ name: 'mfa_enrolled_at', type: 'timestamptz', nullable: true })
+  mfaEnrolledAt: Date | null;
+
+  /**
+   * TOTP counter of the last code accepted for this account. Verification
+   * refuses anything at or below it, which makes each code single-use instead
+   * of replayable for the length of its step plus the drift window.
+   *
+   * bigint, so TypeORM hands it back as a string.
+   */
+  @Column({ name: 'mfa_last_verified_counter', type: 'bigint', nullable: true })
+  mfaLastVerifiedCounter: string | null;
+
+  @Column({ name: 'mfa_recovery_codes_issued_at', type: 'timestamptz', nullable: true })
+  mfaRecoveryCodesIssuedAt: Date | null;
 
   @Column({ name: 'last_login_at', type: 'timestamptz', nullable: true })
   lastLoginAt: Date | null;

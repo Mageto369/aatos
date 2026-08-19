@@ -8,17 +8,21 @@ import { AuthController } from './auth.controller';
 import { RefreshController } from './refresh.controller';
 import { JwtStrategy } from './jwt.strategy';
 import { MfaService } from './mfa.service';
+import { MfaController } from './mfa.controller';
+import { MfaCryptoService } from './services/mfa-crypto.service';
 import { RefreshTokenService } from './services/refresh-token.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { RefreshToken } from './entities/refresh-token.entity';
+import { MfaRecoveryCode } from './entities/mfa-recovery-code.entity';
 import { OrganizationMember } from '../organizations/entities/organization-member.entity';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
+import { MfaEnrolmentGuard } from './guards/mfa-enrolment.guard';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, OrganizationMember, RefreshToken]),
+    TypeOrmModule.forFeature([User, OrganizationMember, RefreshToken, MfaRecoveryCode]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -36,6 +40,7 @@ import { RolesGuard } from './guards/roles.guard';
   providers: [
     AuthService,
     JwtStrategy,
+    MfaCryptoService,
     MfaService,
     RefreshTokenService,
     {
@@ -46,8 +51,14 @@ import { RolesGuard } from './guards/roles.guard';
       provide: APP_GUARD,
       useClass: RolesGuard,
     },
+    // Order matters: global guards run in registration order, and this one
+    // reads req.user, which JwtAuthGuard above is what populates.
+    {
+      provide: APP_GUARD,
+      useClass: MfaEnrolmentGuard,
+    },
   ],
-  controllers: [AuthController, RefreshController],
-  exports: [AuthService, JwtModule, MfaService, RefreshTokenService],
+  controllers: [AuthController, RefreshController, MfaController],
+  exports: [AuthService, JwtModule, MfaService, MfaCryptoService, RefreshTokenService],
 })
 export class AuthModule {}
