@@ -1,4 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import { decimalTransformer } from '../../common/decimal.transformer';
 
 @Entity('carbon_footprints')
 export class CarbonFootprintEntity {
@@ -23,13 +24,13 @@ export class CarbonFootprintEntity {
   @Column({ type: 'varchar', length: 10 })
   destination: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, name: 'distance_km' })
+  @Column({ type: 'decimal', precision: 10, scale: 2, name: 'distance_km' , transformer: decimalTransformer })
   distanceKm: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, name: 'weight_kg' })
+  @Column({ type: 'decimal', precision: 10, scale: 2, name: 'weight_kg' , transformer: decimalTransformer })
   weightKg: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 4, name: 'carbon_kg' })
+  @Column({ type: 'decimal', precision: 10, scale: 4, name: 'carbon_kg' , transformer: decimalTransformer })
   carbonKg: number;
 
   @Column({ type: 'varchar', length: 100, name: 'calculation_method' })

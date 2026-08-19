@@ -2,6 +2,7 @@ import {
   Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn,
   DeleteDateColumn, Index,
 } from 'typeorm';
+import { decimalTransformer } from '../../common/decimal.transformer';
 
 @Entity('quotations')
 @Index(['rfqId'], { where: '"deleted_at" IS NULL' })
@@ -23,7 +24,7 @@ export class Quotation {
   @Column({ name: 'created_by_user_id' })
   createdByUserId: string;
 
-  @Column({ name: 'unit_price', type: 'decimal', precision: 18, scale: 4 })
+  @Column({ name: 'unit_price', type: 'decimal', precision: 18, scale: 4 , transformer: decimalTransformer })
   unitPrice: number;
 
   @Column({ name: 'price_currency', type: 'enum', enum: ['USD', 'EUR', 'GBP', 'KES', 'NGN', 'ETB', 'GHS'], default: 'USD' })
@@ -32,10 +33,10 @@ export class Quotation {
   @Column({ name: 'price_per_unit', type: 'enum', enum: ['kg', 'mt', 'lb', 'ton', 'bag', 'box', 'carton', 'container_20ft', 'container_40ft', 'liter', 'gallon', 'piece', 'dozen', 'pallet'] })
   pricePerUnit: string;
 
-  @Column({ name: 'total_price', type: 'decimal', precision: 18, scale: 4 })
+  @Column({ name: 'total_price', type: 'decimal', precision: 18, scale: 4 , transformer: decimalTransformer })
   totalPrice: number;
 
-  @Column({ name: 'quantity_offered', type: 'decimal', precision: 18, scale: 4 })
+  @Column({ name: 'quantity_offered', type: 'decimal', precision: 18, scale: 4 , transformer: decimalTransformer })
   quantityOffered: number;
 
   @Column({ name: 'quantity_unit', type: 'enum', enum: ['kg', 'mt', 'lb', 'ton', 'bag', 'box', 'carton', 'container_20ft', 'container_40ft', 'liter', 'gallon', 'piece', 'dozen', 'pallet'] })

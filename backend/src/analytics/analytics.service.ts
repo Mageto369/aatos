@@ -1,9 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Not, In } from 'typeorm';
 import { Deal } from '../deals/entities/deal.entity';
 import { Organization } from '../organizations/entities/organization.entity';
 import { RFQ } from '../rfqs/entities/rfq.entity';
+import { ProductCategory } from '../products/entities/product-category.entity';
 
 export interface DashboardStats {
   totalOrganizations: number;
@@ -38,6 +39,14 @@ export interface OrganizationAnalytics {
  * Analytics Service
  * Provides business intelligence and dashboard metrics for AATOS.
  */
+/**
+ * A deal counts as active until it reaches a terminal state. There is no
+ * 'active' value in the deal_status enum — querying for one raised
+ * `invalid input value for enum deal_status: "active"` and 500'd the whole
+ * dashboard.
+ */
+const TERMINAL_DEAL_STATUSES = ['completed', 'cancelled', 'disputed'];
+
 @Injectable()
 export class AnalyticsService {
   private readonly logger = new Logger(AnalyticsService.name);
@@ -65,13 +74,13 @@ export class AnalyticsService {
       this.orgRepo.count(),
       this.orgRepo.count({ where: { verificationLevel: 'fully_verified' } }),
       this.dealRepo.count(),
-      this.dealRepo.count({ where: { status: 'active' } }),
+      this.dealRepo.count({ where: { status: Not(In(TERMINAL_DEAL_STATUSES)) } }),
       this.dealRepo.count({ where: { status: 'completed' } }),
       this.rfqRepo.count(),
-      this.rfqRepo.count({ where: { status: 'open' } }),
+      this.rfqRepo.count({ where: { status: 'published' } }),
       this.dealRepo
         .createQueryBuilder('d')
-        .select('COALESCE(SUM(d.total_value), 0)', 'total')
+        .select('COALESCE(SUM(d.total_value_usd), 0)', 'total')
         .where('d.status = :status', { status: 'completed' })
         .getRawOne(),
     ]);
@@ -115,7 +124,7 @@ export class AnalyticsService {
       this.rfqRepo.count({ where: { buyerOrgId: orgId } }),
       this.dealRepo
         .createQueryBuilder('d')
-        .select('COALESCE(SUM(d.total_value), 0)', 'total')
+        .select('COALESCE(SUM(d.total_value_usd), 0)', 'total')
         .where('d.buyer_id = :orgId', { orgId })
         .andWhere('d.status = :status', { status: 'completed' })
         .getRawOne(),
@@ -139,13 +148,13 @@ export class AnalyticsService {
     const results = await this.dealRepo
       .createQueryBuilder('d')
       .leftJoin('d.buyer', 'buyer')
-      .leftJoin('d.seller', 'seller')
-      .select('seller.country_code', 'origin')
+      .leftJoin('d.supplier', 'supplier')
+      .select('supplier.country_code', 'origin')
       .addSelect('buyer.country_code', 'destination')
       .addSelect('COUNT(*)', 'count')
-      .addSelect('COALESCE(SUM(d.total_value), 0)', 'volume')
+      .addSelect('COALESCE(SUM(d.total_value_usd), 0)', 'volume')
       .where('d.status = :status', { status: 'completed' })
-      .groupBy('seller.country_code')
+      .groupBy('supplier.country_code')
       .addGroupBy('buyer.country_code')
       .orderBy('count', 'DESC')
       .limit(limit)
@@ -160,14 +169,18 @@ export class AnalyticsService {
   }
 
   async getTopProducts(limit: number = 5): Promise<DashboardStats['topProducts']> {
+    // Deal has no product relation — it records productCategoryId, not a
+    // specific listing — so this aggregates by category. Joining 'd.product'
+    // raised "Relation with property path product in entity was not found"
+    // and 500'd the dashboard.
     const results = await this.dealRepo
       .createQueryBuilder('d')
-      .leftJoin('d.product', 'p')
-      .select('p.title', 'name')
+      .leftJoin(ProductCategory, 'pc', 'pc.id = d.product_category_id')
+      .select('pc.name', 'name')
       .addSelect('COUNT(*)', 'count')
-      .addSelect('COALESCE(SUM(d.total_value), 0)', 'volume')
+      .addSelect('COALESCE(SUM(d.total_value_usd), 0)', 'volume')
       .where('d.status = :status', { status: 'completed' })
-      .groupBy('p.title')
+      .groupBy('pc.name')
       .orderBy('count', 'DESC')
       .limit(limit)
       .getRawMany();
@@ -187,7 +200,7 @@ export class AnalyticsService {
       .createQueryBuilder('d')
       .select("TO_CHAR(d.created_at, 'YYYY-MM')", 'month')
       .addSelect('COUNT(*)', 'deals')
-      .addSelect('COALESCE(SUM(d.total_value), 0)', 'volume')
+      .addSelect('COALESCE(SUM(d.total_value_usd), 0)', 'volume')
       .where('d.created_at >= :startDate', { startDate })
       .groupBy("TO_CHAR(d.created_at, 'YYYY-MM')")
       .orderBy('month', 'ASC')

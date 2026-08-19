@@ -119,4 +119,53 @@ export class ComplianceService {
 
     return this.itemRepo.save(item);
   }
+
+  /**
+   * Checklists across the caller's organization, newest first.
+   *
+   * The compliance dashboard has always requested GET /compliance/checklists;
+   * the endpoint did not exist, so the page rendered an empty state whatever
+   * the data said.
+   */
+  async findChecklists(limit = 50) {
+    const checklists = await this.checklistRepo.find({
+      order: { createdAt: 'DESC' },
+      take: limit,
+    });
+
+    const withCounts = await Promise.all(
+      checklists.map(async (checklist) => {
+        const items = await this.itemRepo.find({ where: { checklistId: checklist.id } });
+        return {
+          ...checklist,
+          totalItems: items.length,
+          completedItems: items.filter((i) => i.status === 'completed' || i.status === 'verified').length,
+        };
+      }),
+    );
+
+    return { items: withCounts, total: withCounts.length };
+  }
+
+  /** Headline counts for the compliance dashboard. */
+  async getStats() {
+    const [checklists, rules] = await Promise.all([
+      this.checklistRepo.find(),
+      this.ruleRepo.count(),
+    ]);
+
+    const completed = checklists.filter((c) => c.overallStatus === 'complete').length;
+    const pending = checklists.filter((c) => c.overallStatus === 'pending').length;
+    const blocked = checklists.filter((c) => c.overallStatus === 'blocked').length;
+
+    return {
+      totalChecklists: checklists.length,
+      completedChecklists: completed,
+      pendingReview: pending,
+      flaggedIssues: blocked,
+      totalRules: rules,
+      complianceScore: checklists.length ? Math.round((completed / checklists.length) * 100) : 0,
+    };
+  }
+
 }

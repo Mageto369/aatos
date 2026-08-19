@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { Deal } from './deal.entity';
+import { decimalTransformer } from '../../common/decimal.transformer';
 
 @Entity('deal_milestones')
 export class DealMilestone {
@@ -46,10 +47,10 @@ export class DealMilestone {
   @Column({ type: 'text', nullable: true })
   notes: string | null;
 
-  @Column({ name: 'payment_percentage', type: 'decimal', precision: 5, scale: 2, nullable: true })
+  @Column({ name: 'payment_percentage', type: 'decimal', precision: 5, scale: 2, nullable: true , transformer: decimalTransformer })
   paymentPercentage: number | null;
 
-  @Column({ name: 'payment_amount', type: 'decimal', precision: 18, scale: 4, nullable: true })
+  @Column({ name: 'payment_amount', type: 'decimal', precision: 18, scale: 4, nullable: true , transformer: decimalTransformer })
   paymentAmount: number | null;
 
   @Column({ name: 'payment_currency', type: 'enum', enum: ['USD', 'EUR', 'GBP', 'KES', 'NGN', 'ETB', 'GHS'], nullable: true })

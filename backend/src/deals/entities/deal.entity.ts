@@ -4,6 +4,7 @@ import {
 } from 'typeorm';
 import { Organization } from '../../organizations/entities/organization.entity';
 import { DealMilestone } from './deal-milestone.entity';
+import { decimalTransformer } from '../../common/decimal.transformer';
 
 @Entity('deals')
 @Index(['buyerOrgId'], { where: '"deleted_at" IS NULL' })
@@ -34,13 +35,13 @@ export class Deal {
   @Column({ name: 'product_category_id' })
   productCategoryId: string;
 
-  @Column({ name: 'agreed_quantity', type: 'decimal', precision: 18, scale: 4 })
+  @Column({ name: 'agreed_quantity', type: 'decimal', precision: 18, scale: 4 , transformer: decimalTransformer })
   agreedQuantity: number;
 
   @Column({ name: 'quantity_unit', type: 'enum', enum: ['kg', 'mt', 'lb', 'ton', 'bag', 'box', 'carton', 'container_20ft', 'container_40ft', 'liter', 'gallon', 'piece', 'dozen', 'pallet'] })
   quantityUnit: string;
 
-  @Column({ name: 'agreed_price', type: 'decimal', precision: 18, scale: 4 })
+  @Column({ name: 'agreed_price', type: 'decimal', precision: 18, scale: 4 , transformer: decimalTransformer })
   agreedPrice: number;
 
   @Column({ name: 'price_currency', type: 'enum', enum: ['USD', 'EUR', 'GBP', 'KES', 'NGN', 'ETB', 'GHS'], default: 'USD' })
@@ -83,10 +84,10 @@ export class Deal {
   @Column({ type: 'varchar', name: 'contract_document_id', nullable: true })
   contractDocumentId: string | null;
 
-  @Column({ name: 'total_value_usd', type: 'decimal', precision: 18, scale: 4, nullable: true })
+  @Column({ name: 'total_value_usd', type: 'decimal', precision: 18, scale: 4, nullable: true , transformer: decimalTransformer })
   totalValueUsd: number | null;
 
-  @Column({ name: 'platform_fee_usd', type: 'decimal', precision: 12, scale: 2, nullable: true })
+  @Column({ name: 'platform_fee_usd', type: 'decimal', precision: 12, scale: 2, nullable: true , transformer: decimalTransformer })
   platformFeeUsd: number | null;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })

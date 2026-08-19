@@ -8,13 +8,15 @@ import { api } from '@/lib/api'
 interface RFQ {
   id: string
   title: string
-  productCategory: string
-  quantity: number
-  quantityUnit: string
-  deliveryCountry: string
+  requiredQuantity: number
+  requiredUnit: string
+  destinationCountry: string
   status: string
-  publishedAt: string
+  publishedAt: string | null
   quoteReceivedCount: number
+  // GET /rfqs returns productCategoryId only; the category is not joined, so
+  // there is no name to show until the endpoint includes the relation.
+  productCategoryId: string
 }
 
 export function RfqsPage() {
@@ -31,9 +33,10 @@ export function RfqsPage() {
 
   const rfqs: RFQ[] = data?.items || []
 
+  const term = search.toLowerCase()
   const filtered = rfqs.filter((r) =>
-    r.title.toLowerCase().includes(search.toLowerCase()) ||
-    r.productCategory.toLowerCase().includes(search.toLowerCase())
+    r.title.toLowerCase().includes(term) ||
+    (r.destinationCountry ?? '').toLowerCase().includes(term)
   )
 
   return (
@@ -110,11 +113,11 @@ export function RfqsPage() {
                   <div className="flex flex-wrap gap-4 text-sm text-gray-600">
                     <span className="flex items-center gap-1">
                       <Tag className="w-4 h-4" />
-                      {rfq.productCategory}
+                      {rfq.status}
                     </span>
                     <span className="flex items-center gap-1">
                       <MapPin className="w-4 h-4" />
-                      {rfq.deliveryCountry}
+                      {rfq.destinationCountry}
                     </span>
                     <span className="flex items-center gap-1">
                       <Calendar className="w-4 h-4" />
@@ -124,7 +127,7 @@ export function RfqsPage() {
                 </div>
                 <div className="text-right">
                   <p className="text-2xl font-bold text-gray-900">
-                    {rfq.quantity.toLocaleString()} <span className="text-sm font-normal text-gray-500">{rfq.quantityUnit}</span>
+                    {Number(rfq.requiredQuantity ?? 0).toLocaleString()} <span className="text-sm font-normal text-gray-500">{rfq.requiredUnit}</span>
                   </p>
                   <p className="text-sm text-gray-500 mt-1">
                     {rfq.quoteReceivedCount} quotes received

@@ -3,6 +3,7 @@ import {
   DeleteDateColumn, Index, ManyToOne, JoinColumn,
 } from 'typeorm';
 import { Organization } from '../../organizations/entities/organization.entity';
+import { decimalTransformer } from '../../common/decimal.transformer';
 
 @Entity('products')
 @Index(['organizationId'], { where: '"deleted_at" IS NULL' })
@@ -40,19 +41,19 @@ export class Product {
   @Column({ type: 'varchar', name: 'origin_region', length: 100, nullable: true })
   originRegion: string | null;
 
-  @Column({ name: 'available_quantity', type: 'decimal', precision: 18, scale: 4 })
+  @Column({ name: 'available_quantity', type: 'decimal', precision: 18, scale: 4 , transformer: decimalTransformer })
   availableQuantity: number;
 
   @Column({ name: 'available_unit', type: 'enum', enum: ['kg', 'mt', 'lb', 'ton', 'bag', 'box', 'carton', 'container_20ft', 'container_40ft', 'liter', 'gallon', 'piece', 'dozen', 'pallet'] })
   availableUnit: string;
 
-  @Column({ name: 'moq', type: 'decimal', precision: 18, scale: 4, nullable: true })
+  @Column({ name: 'moq', type: 'decimal', precision: 18, scale: 4, nullable: true , transformer: decimalTransformer })
   moq: number | null;
 
-  @Column({ name: 'price_fob', type: 'decimal', precision: 18, scale: 4, nullable: true })
+  @Column({ name: 'price_fob', type: 'decimal', precision: 18, scale: 4, nullable: true , transformer: decimalTransformer })
   priceFob: number | null;
 
-  @Column({ name: 'price_cif', type: 'decimal', precision: 18, scale: 4, nullable: true })
+  @Column({ name: 'price_cif', type: 'decimal', precision: 18, scale: 4, nullable: true , transformer: decimalTransformer })
   priceCif: number | null;
 
   @Column({ name: 'price_unit', type: 'enum', enum: ['kg', 'mt', 'lb', 'ton', 'bag', 'box', 'carton', 'container_20ft', 'container_40ft', 'liter', 'gallon', 'piece', 'dozen', 'pallet'], nullable: true })

@@ -11,6 +11,18 @@ import { ComplianceService } from './compliance.service';
 export class ComplianceController {
   constructor(private readonly complianceService: ComplianceService) {}
 
+  @Get('stats')
+  @ApiOperation({ summary: 'Compliance headline counts' })
+  getStats() {
+    return this.complianceService.getStats();
+  }
+
+  @Get('checklists')
+  @ApiOperation({ summary: 'List compliance checklists' })
+  findChecklists(@Query('limit') limit?: number) {
+    return this.complianceService.findChecklists(limit ? Number(limit) : undefined);
+  }
+
   @Get('rules')
   @ApiOperation({ summary: 'Get compliance rules' })
   findRules(@Query() filters: any) {

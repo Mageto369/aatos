@@ -2,6 +2,7 @@ import {
   Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn,
   DeleteDateColumn, Index,
 } from 'typeorm';
+import { decimalTransformer } from '../../common/decimal.transformer';
 
 @Entity('rfqs')
 @Index(['buyerOrgId'], { where: '"deleted_at" IS NULL' })
@@ -29,7 +30,7 @@ export class RFQ {
   @Column({ type: 'jsonb', default: {} })
   specifications: Record<string, any>;
 
-  @Column({ name: 'required_quantity', type: 'decimal', precision: 18, scale: 4 })
+  @Column({ name: 'required_quantity', type: 'decimal', precision: 18, scale: 4 , transformer: decimalTransformer })
   requiredQuantity: number;
 
   @Column({ name: 'required_unit', type: 'enum', enum: ['kg', 'mt', 'lb', 'ton', 'bag', 'box', 'carton', 'container_20ft', 'container_40ft', 'liter', 'gallon', 'piece', 'dozen', 'pallet'] })
@@ -53,7 +54,7 @@ export class RFQ {
   @Column({ name: 'response_deadline', type: 'timestamptz' })
   responseDeadline: Date;
 
-  @Column({ name: 'target_price', type: 'decimal', precision: 18, scale: 4, nullable: true })
+  @Column({ name: 'target_price', type: 'decimal', precision: 18, scale: 4, nullable: true , transformer: decimalTransformer })
   targetPrice: number | null;
 
   @Column({ name: 'target_price_currency', type: 'enum', enum: ['USD', 'EUR', 'GBP', 'KES', 'NGN', 'ETB', 'GHS'], default: 'USD' })

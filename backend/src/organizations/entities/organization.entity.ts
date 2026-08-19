@@ -3,6 +3,7 @@ import {
   DeleteDateColumn, Index, OneToMany,
 } from 'typeorm';
 import { OrganizationMember } from './organization-member.entity';
+import { decimalTransformer } from '../../common/decimal.transformer';
 
 @Entity('organizations')
 @Index(['slug'], { unique: true, where: '"deleted_at" IS NULL' })
@@ -81,7 +82,7 @@ export class Organization {
   @Column({ type: 'text', nullable: true })
   description: string | null;
 
-  @Column({ name: 'annual_capacity', type: 'decimal', precision: 18, scale: 4, nullable: true })
+  @Column({ name: 'annual_capacity', type: 'decimal', precision: 18, scale: 4, nullable: true , transformer: decimalTransformer })
   annualCapacity: number | null;
 
   @Column({ name: 'profile_completeness', type: 'smallint', default: 0 })

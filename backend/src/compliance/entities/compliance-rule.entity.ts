@@ -1,6 +1,7 @@
 import {
   Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn,
 } from 'typeorm';
+import { decimalTransformer } from '../../common/decimal.transformer';
 
 @Entity('compliance_rules')
 export class ComplianceRule {
@@ -34,7 +35,7 @@ export class ComplianceRule {
   @Column({ name: 'estimated_time_days', type: 'int', nullable: true })
   estimatedTimeDays: number | null;
 
-  @Column({ name: 'estimated_cost_usd', type: 'decimal', precision: 12, scale: 2, nullable: true })
+  @Column({ name: 'estimated_cost_usd', type: 'decimal', precision: 12, scale: 2, nullable: true , transformer: decimalTransformer })
   estimatedCostUsd: number | null;
 
   @Column({ type: 'varchar', name: 'validity_period', length: 50, nullable: true })

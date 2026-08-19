@@ -1,4 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { decimalTransformer } from '../../common/decimal.transformer';
 
 export interface DisputeEvidence {
   id: string;
@@ -32,7 +33,7 @@ export class DisputeEntity {
   @Column({ type: 'varchar', length: 50 })
   type: 'quality' | 'quantity' | 'delivery' | 'payment' | 'other';
 
-  @Column({ name: 'claimed_amount', type: 'decimal', precision: 14, scale: 2, nullable: true })
+  @Column({ name: 'claimed_amount', type: 'decimal', precision: 14, scale: 2, nullable: true , transformer: decimalTransformer })
   claimedAmount: number;
 
   @Column({ type: 'varchar', length: 10, nullable: true })

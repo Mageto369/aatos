@@ -1,4 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { decimalTransformer } from '../../common/decimal.transformer';
 
 @Entity('compliance_checklist_items')
 export class ComplianceChecklistItem {
@@ -38,7 +39,7 @@ export class ComplianceChecklistItem {
   @Column({ name: 'completed_at', type: 'timestamptz', nullable: true })
   completedAt: Date | null;
 
-  @Column({ name: 'actual_cost_usd', type: 'decimal', precision: 12, scale: 2, nullable: true })
+  @Column({ name: 'actual_cost_usd', type: 'decimal', precision: 12, scale: 2, nullable: true , transformer: decimalTransformer })
   actualCostUsd: number | null;
 
   @Column({ name: 'actual_time_days', type: 'int', nullable: true })

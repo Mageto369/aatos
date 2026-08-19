@@ -7,7 +7,7 @@ export function Dashboard() {
   const { data: stats } = useQuery({
     queryKey: ['dashboard-stats'],
     queryFn: async () => {
-      const res = await api.get('/dashboard/stats')
+      const res = await api.get('/analytics/dashboard')
       return res.data
     },
   })

@@ -1,4 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, Index } from 'typeorm';
+import { decimalTransformer } from '../../common/decimal.transformer';
 
 export type PaymentMethod = 'bank_transfer' | 'escrow' | 'letter_of_credit' | 'documentary_collection' | 'advance_payment' | 'installment' | 'trade_finance';
 export type PaymentStatus = 'pending' | 'held' | 'released' | 'refunded' | 'failed' | 'disputed';
@@ -25,7 +26,7 @@ export class Payment {
   @Column({ type: 'uuid', name: 'payee_org_id' })
   payeeOrgId: string;
 
-  @Column({ type: 'decimal', precision: 18, scale: 4, name: 'amount' })
+  @Column({ type: 'decimal', precision: 18, scale: 4, name: 'amount' , transformer: decimalTransformer })
   amount: number;
 
   @Column({
@@ -36,10 +37,10 @@ export class Payment {
   })
   currency: string;
 
-  @Column({ type: 'decimal', precision: 18, scale: 4, nullable: true, name: 'amount_usd' })
+  @Column({ type: 'decimal', precision: 18, scale: 4, nullable: true, name: 'amount_usd' , transformer: decimalTransformer })
   amountUsd: number;
 
-  @Column({ type: 'decimal', precision: 18, scale: 8, nullable: true, name: 'exchange_rate' })
+  @Column({ type: 'decimal', precision: 18, scale: 8, nullable: true, name: 'exchange_rate' , transformer: decimalTransformer })
   exchangeRate: number;
 
   @Column({
@@ -75,7 +76,7 @@ export class Payment {
   @Column({ type: 'uuid', nullable: true, name: 'released_by' })
   releasedBy: string;
 
-  @Column({ type: 'decimal', precision: 12, scale: 4, nullable: true, name: 'platform_fee_amount' })
+  @Column({ type: 'decimal', precision: 12, scale: 4, nullable: true, name: 'platform_fee_amount' , transformer: decimalTransformer })
   platformFeeAmount: number;
 
   @Column({
@@ -86,7 +87,7 @@ export class Payment {
   })
   platformFeeCurrency: string;
 
-  @Column({ type: 'decimal', precision: 12, scale: 4, nullable: true, name: 'provider_fee_amount' })
+  @Column({ type: 'decimal', precision: 12, scale: 4, nullable: true, name: 'provider_fee_amount' , transformer: decimalTransformer })
   providerFeeAmount: number;
 
   @Column({

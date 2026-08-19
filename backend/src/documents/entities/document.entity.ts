@@ -1,4 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, Index } from 'typeorm';
+import { decimalTransformer } from '../../common/decimal.transformer';
 
 export type DocumentType = 'business_registration' | 'export_license' | 'import_license' | 'phytosanitary_certificate' | 'certificate_of_origin' | 'quality_certificate' | 'organic_certificate' | 'fair_trade_certificate' | 'bank_statement' | 'tax_certificate' | 'identity_document' | 'inspection_report' | 'lab_report' | 'contract' | 'invoice' | 'bill_of_lading' | 'insurance_policy' | 'customs_declaration' | 'packing_list' | 'other';
 export type DocumentStatus = 'uploaded' | 'pending_review' | 'verified' | 'rejected' | 'expired' | 'revoked';
@@ -57,7 +58,7 @@ export class Document {
   @Column({ type: 'jsonb', nullable: true, name: 'extracted_data' })
   extractedData: Record<string, any>;
 
-  @Column({ type: 'decimal', precision: 4, scale: 3, nullable: true, name: 'extraction_confidence' })
+  @Column({ type: 'decimal', precision: 4, scale: 3, nullable: true, name: 'extraction_confidence' , transformer: decimalTransformer })
   extractionConfidence: number;
 
   @Column({ type: 'text', nullable: true, name: 'extracted_text' })

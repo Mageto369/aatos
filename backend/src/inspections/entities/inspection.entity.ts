@@ -1,4 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, Index } from 'typeorm';
+import { decimalTransformer } from '../../common/decimal.transformer';
 
 export type InspectionType = 'farm' | 'facility' | 'warehouse' | 'packing' | 'port' | 'pre_shipment' | 'destination' | 'loading' | 'discharge' | 'quality' | 'quantity' | 'packaging';
 export type InspectionResult = 'pending' | 'pass' | 'fail' | 'conditional' | 'waiver';
@@ -57,13 +58,13 @@ export class Inspection {
   @Column({ type: 'text', nullable: true, name: 'corrective_actions' })
   correctiveActions: string;
 
-  @Column({ type: 'decimal', precision: 18, scale: 4, nullable: true, name: 'quantity_verified' })
+  @Column({ type: 'decimal', precision: 18, scale: 4, nullable: true, name: 'quantity_verified' , transformer: decimalTransformer })
   quantityVerified: number;
 
   @Column({ type: 'varchar', length: 50, nullable: true, name: 'quality_grade' })
   qualityGrade: string;
 
-  @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true, name: 'moisture_content' })
+  @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true, name: 'moisture_content' , transformer: decimalTransformer })
   moistureContent: number;
 
   @Column({ type: 'int', nullable: true, name: 'defect_count' })
@@ -72,7 +73,7 @@ export class Inspection {
   @Column({ type: 'boolean', default: false, name: 'contamination_found' })
   contaminationFound: boolean;
 
-  @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true, name: 'temperature_celsius' })
+  @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true, name: 'temperature_celsius' , transformer: decimalTransformer })
   temperatureCelsius: number;
 
   @Column({ type: 'text', array: true, nullable: true, name: 'photos' })
@@ -93,7 +94,7 @@ export class Inspection {
   @Column({ type: 'text', nullable: true, name: 'buyer_notes' })
   buyerNotes: string;
 
-  @Column({ type: 'decimal', precision: 12, scale: 2, nullable: true, name: 'cost_usd' })
+  @Column({ type: 'decimal', precision: 12, scale: 2, nullable: true, name: 'cost_usd' , transformer: decimalTransformer })
   costUsd: number;
 
   @Column({ type: 'varchar', length: 50, nullable: true, name: 'paid_by' })
