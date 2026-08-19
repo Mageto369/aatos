@@ -1,0 +1,3 @@
+-- THESE SCHEMA FILES ARE HISTORICAL AND NOT EXECUTED
+-- The active schema is managed by TypeORM migrations in backend/src/database/migrations/
+-- Do not modify these files expecting changes to the database.

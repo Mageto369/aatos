@@ -21,7 +21,7 @@ export function ProductsPage() {
   const [search, setSearch] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('')
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ['products', categoryFilter],
     queryFn: async () => {
       const res = await api.get('/products', {
@@ -79,6 +79,11 @@ export function ProductsPage() {
       {isLoading ? (
         <div className="flex items-center justify-center py-20">
           <div className="w-8 h-8 border-2 border-primary-600 border-t-transparent rounded-full animate-spin" />
+        </div>
+      ) : error ? (
+        <div className="text-center py-20 bg-white rounded-xl border border-red-200">
+          <p className="text-red-600 font-medium">Failed to load products</p>
+          <p className="text-gray-500 text-sm mt-1">Please try again later</p>
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-20 bg-white rounded-xl border border-gray-200">

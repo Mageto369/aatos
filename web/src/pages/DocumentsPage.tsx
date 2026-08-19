@@ -55,7 +55,7 @@ export function DocumentsPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const queryClient = useQueryClient()
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ['documents', typeFilter, statusFilter],
     queryFn: async () => {
       const res = await api.get('/documents', {
@@ -176,6 +176,11 @@ export function DocumentsPage() {
       {isLoading ? (
         <div className="flex items-center justify-center py-20">
           <div className="w-8 h-8 border-2 border-primary-600 border-t-transparent rounded-full animate-spin" />
+        </div>
+      ) : error ? (
+        <div className="text-center py-20 bg-white rounded-xl border border-red-200">
+          <p className="text-red-600 font-medium">Failed to load documents</p>
+          <p className="text-gray-500 text-sm mt-1">Please try again later</p>
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-20 bg-white rounded-xl border border-gray-200">

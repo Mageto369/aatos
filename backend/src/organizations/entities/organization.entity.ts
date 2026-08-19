@@ -109,6 +109,9 @@ export class Organization {
   @Column({ name: 'currency_preference', type: 'enum', enum: ['USD', 'EUR', 'GBP', 'KES', 'NGN', 'ETB', 'GHS'], default: 'USD' })
   currencyPreference: string;
 
+  @Column({ type: 'jsonb', default: {} })
+  metadata: Record<string, any>;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 

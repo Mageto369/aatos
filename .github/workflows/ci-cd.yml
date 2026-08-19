@@ -35,6 +35,15 @@ jobs:
       - run: cd backend && npm ci
       - run: cd backend && npm run lint
       - run: cd backend && npm run build
+      - name: Run schema drift detector
+        run: cd backend && npx ts-node src/database/schema-drift-detector.ts
+      - name: Verify migrations run clean from empty database
+        run: cd backend && npx typeorm migration:run -d dist/database/data-source.js
+        env:
+          NODE_ENV: test
+          DATABASE_URL: postgresql://aatos:aatos_test@localhost:5432/aatos_test
+          JWT_SECRET: test-secret-key-32-chars-long!!
+          JWT_REFRESH_SECRET: test-refresh-secret-key-32!!
       - run: cd backend && npm run test
         env:
           NODE_ENV: test
@@ -54,6 +63,14 @@ jobs:
       - run: cd web && npm ci
       - run: cd web && npm run lint
       - run: cd web && npm run build
+      - name: Check CSS budget
+        run: |
+          CSS_SIZE=$(stat -c%s web/dist/assets/*.css | sort -n | tail -1)
+          if [ "$CSS_SIZE" -lt 5120 ]; then
+            echo "CSS budget check failed: ${CSS_SIZE} bytes (min: 5120 bytes)"
+            exit 1
+          fi
+          echo "CSS budget OK: ${CSS_SIZE} bytes"
 
   deploy-staging:
     needs: [test-backend, test-frontend]

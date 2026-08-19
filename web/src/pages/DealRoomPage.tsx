@@ -74,6 +74,11 @@ export function DealRoomPage() {
       socket.emit('join_deal_room', { dealId: id })
     })
 
+    socket.on('reconnect', () => {
+      socket.emit('authenticate', { token, userId: user?.id, orgId: user?.orgId })
+      socket.emit('join_deal_room', { dealId: id })
+    })
+
     socket.on('disconnect', () => {
       setIsConnected(false)
     })

@@ -90,6 +90,9 @@ export class Deal {
   @Column({ name: 'platform_fee_usd', type: 'decimal', precision: 12, scale: 2, nullable: true , transformer: decimalTransformer })
   platformFeeUsd: number | null;
 
+  @Column({ type: 'jsonb', default: {} })
+  metadata: Record<string, any>;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 

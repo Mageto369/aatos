@@ -2,9 +2,11 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DealsService } from './deals.service';
 import { DealsController } from './deals.controller';
+import { DisputesController } from './disputes.controller';
 import { ReferralsController } from './referrals.controller';
 import { ContractService } from './contract.service';
 import { DisputeResolutionService } from './dispute-resolution.service';
+import { DisputeService } from './dispute.service';
 import { RefundCancellationService } from './refund-cancellation.service';
 import { LogisticsReferralService } from './logistics-referral.service';
 import { InsuranceReferralService } from './insurance-referral.service';
@@ -24,16 +26,18 @@ import { WorkflowsModule } from '../workflows/workflows.module';
     DealsService,
     ContractService,
     DisputeResolutionService,
+    DisputeService,
     RefundCancellationService,
     LogisticsReferralService,
     InsuranceReferralService,
     TradeFinanceService,
   ],
-  controllers: [DealsController, ReferralsController],
+  controllers: [DealsController, DisputesController, ReferralsController],
   exports: [
     DealsService,
     ContractService,
     DisputeResolutionService,
+    DisputeService,
     RefundCancellationService,
     LogisticsReferralService,
     InsuranceReferralService,

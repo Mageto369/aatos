@@ -19,7 +19,7 @@ interface Inspection {
 export function Inspections() {
   const [statusFilter, setStatusFilter] = useState('all')
 
-  const { data: inspections = [], isLoading } = useQuery({
+  const { data: inspections = [], isLoading, error } = useQuery({
     queryKey: ['inspections', statusFilter],
     queryFn: async () => {
       const res = await api.get('/inspections', {
@@ -66,6 +66,8 @@ export function Inspections() {
 
         {isLoading ? (
           <div className="text-center py-12 text-gray-500">Loading inspections...</div>
+        ) : error ? (
+          <div className="text-center py-12 text-red-600">Failed to load inspections. Please try again later.</div>
         ) : inspections.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
             No inspections scheduled. Create your first inspection to get started.

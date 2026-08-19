@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './auth/auth.module';
 import { OrganizationsModule } from './organizations/organizations.module';
@@ -20,6 +21,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
 import { AdminModule } from './admin/admin.module';
 import { HealthModule } from './health/health.module';
 import { EmailModule } from './email/email.module';
+import { RLSContextInterceptor } from './common/interceptors/rls-context.interceptor';
 import * as Joi from 'joi';
 
 @Module({
@@ -61,6 +63,12 @@ import * as Joi from 'joi';
     PaymentsModule,
     WorkflowsModule,
     AnalyticsModule,
+  ],
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: RLSContextInterceptor,
+    },
   ],
 })
 export class AppModule {}

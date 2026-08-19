@@ -212,3 +212,115 @@ describe('Critical Path — Product (e2e)', () => {
       .expect(201);
   });
 });
+
+describe('Critical Path — RFQ to Deal (e2e)', () => {
+  let app: INestApplication;
+  let authToken: string;
+  let orgId: string;
+
+  beforeAll(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+    await app.init();
+
+    const authRes = await request(app.getHttpServer())
+      .post('/auth/register')
+      .send({
+        email: `rfq-deal-test-${Date.now()}@aatos.trade`,
+        password: 'SecurePass123!',
+        firstName: 'RFQ',
+        lastName: 'Test',
+      });
+    authToken = authRes.body.access_token;
+
+    const orgRes = await request(app.getHttpServer())
+      .post('/organizations')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        name: 'RFQ Deal Test Org',
+        type: 'cooperative',
+        countryCode: 'KE',
+      });
+    orgId = orgRes.body.id;
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  it('POST /rfqs — should create an RFQ', () => {
+    return request(app.getHttpServer())
+      .post('/rfqs')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        buyerOrgId: orgId,
+        title: 'Green Coffee RFQ',
+        productCategoryId: '00000000-0000-0000-0000-000000000001',
+        quantity: 10000,
+        quantityUnit: 'kg',
+        deliveryCountry: 'US',
+        deliveryPort: 'New York',
+        preferredIncoterm: 'CIF',
+      })
+      .expect(201)
+      .expect((res) => {
+        expect(res.body).toHaveProperty('id');
+        expect(res.body.status).toBe('draft');
+      });
+  });
+
+  it('GET /rfqs — should list RFQs', () => {
+    return request(app.getHttpServer())
+      .get('/rfqs')
+      .set('Authorization', `Bearer ${authToken}`)
+      .expect(200)
+      .expect((res) => {
+        expect(res.body).toHaveProperty('items');
+        expect(Array.isArray(res.body.items)).toBe(true);
+      });
+  });
+});
+
+describe('Critical Path — Compliance (e2e)', () => {
+  let app: INestApplication;
+  let authToken: string;
+
+  beforeAll(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+    await app.init();
+
+    const authRes = await request(app.getHttpServer())
+      .post('/auth/register')
+      .send({
+        email: `compliance-test-${Date.now()}@aatos.trade`,
+        password: 'SecurePass123!',
+        firstName: 'Compliance',
+        lastName: 'Test',
+      });
+    authToken = authRes.body.access_token;
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  it('GET /compliance/rules — should list compliance rules', () => {
+    return request(app.getHttpServer())
+      .get('/compliance/rules')
+      .set('Authorization', `Bearer ${authToken}`)
+      .expect(200)
+      .expect((res) => {
+        expect(res.body).toHaveProperty('items');
+        expect(Array.isArray(res.body.items)).toBe(true);
+      });
+  });
+});
