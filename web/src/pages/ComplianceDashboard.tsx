@@ -34,6 +34,21 @@ export function ComplianceDashboard() {
         <p className="text-sm text-gray-500 mt-1">Monitor verification status and compliance across all organizations</p>
       </div>
 
+      {/* PLATFORM_ROLE.md is binding: AATOS is not a customs broker, inspector,
+          certifier or guarantor. Stating that only in the terms is not enough —
+          this screen is where a user forms the belief that the platform has
+          checked something. */}
+      <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3">
+        <p className="text-sm text-amber-900">
+          <span className="font-semibold">These checklists are guidance, not clearance.</span>{' '}
+          AATOS is not a customs broker, inspector or certifying authority. Requirements
+          are compiled from published sources and may be incomplete or out of date, and
+          uploaded certificates are stored and tracked but <span className="font-semibold">not
+          verified with the issuing body</span>. Confirm every requirement with your licensed
+          broker before shipping.
+        </p>
+      </div>
+
       <div className="grid grid-cols-4 gap-4">
         {statsCards.map((stat) => {
           const Icon = stat.icon
