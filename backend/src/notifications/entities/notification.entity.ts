@@ -37,7 +37,7 @@ export class Notification {
   @Column({ type: 'uuid', nullable: true, name: 'entity_id' })
   entityId: string;
 
-  @Column({ type: 'simple-array', nullable: true, name: 'channels' })
+  @Column({ type: 'text', array: true, nullable: true, name: 'channels' })
   channels: string[];
 
   @Column({ type: 'boolean', default: false, name: 'is_read' })

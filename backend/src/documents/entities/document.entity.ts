@@ -90,7 +90,7 @@ export class Document {
   @Column({ type: 'uuid', nullable: true, name: 'related_entity_id' })
   relatedEntityId: string;
 
-  @Column({ type: 'simple-array', nullable: true, name: 'tags' })
+  @Column({ type: 'text', array: true, nullable: true, name: 'tags' })
   tags: string[];
 
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })

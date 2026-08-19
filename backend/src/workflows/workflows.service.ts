@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource } from 'typeorm';
+import { Repository, DataSource, Not } from 'typeorm';
 import { RFQ } from '../rfqs/entities/rfq.entity';
 import { Quotation } from '../rfqs/entities/quotation.entity';
 import { Deal } from '../deals/entities/deal.entity';
@@ -132,10 +132,17 @@ export class WorkflowService {
       await queryRunner.manager.save(milestones);
 
       // Create Compliance Checklist placeholder
+      // Origin selects which corridor's compliance rules apply, so an empty
+      // string resolves to no rule set at all. It comes from the supplying
+      // organization's registered country.
+      const supplierOrg = await queryRunner.manager.findOne(Organization, {
+        where: { id: quote.supplierOrgId },
+      });
+
       const checklist = this.checklistRepo.create({
         entityType: 'deal',
         entityId: savedDeal.id,
-        originCountry: '', // Would be derived from supplier
+        originCountry: supplierOrg?.countryCode ?? '',
         destinationCountry: rfq.destinationCountry,
         overallStatus: 'pending',
       });
@@ -153,10 +160,12 @@ export class WorkflowService {
       quote.status = 'accepted';
       await queryRunner.manager.save(quote);
 
-      // Reject other quotes
+      // Reject the losing quotes. This filtered on `id: quoteId` — the quote
+      // just accepted — so it matched nothing and every losing quote stayed
+      // 'sent', live in its supplier's pipeline against an awarded RFQ.
       await queryRunner.manager.update(
         Quotation,
-        { rfqId: rfq.id, id: quoteId, status: 'sent' },
+        { rfqId: rfq.id, id: Not(quoteId), status: 'sent' },
         { status: 'rejected' },
       );
 

@@ -75,10 +75,10 @@ export class Inspection {
   @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true, name: 'temperature_celsius' })
   temperatureCelsius: number;
 
-  @Column({ type: 'simple-array', nullable: true, name: 'photos' })
+  @Column({ type: 'text', array: true, nullable: true, name: 'photos' })
   photos: string[];
 
-  @Column({ type: 'simple-array', nullable: true, name: 'videos' })
+  @Column({ type: 'text', array: true, nullable: true, name: 'videos' })
   videos: string[];
 
   @Column({ type: 'uuid', nullable: true, name: 'report_document_id' })

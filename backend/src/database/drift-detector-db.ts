@@ -66,12 +66,33 @@ async function detectDrift(): Promise<number> {
           continue;
         }
 
-        const columns = new Set(table.columns.map((c) => c.name));
+        const columns = new Map(table.columns.map((c) => [c.name, c]));
         for (const column of entity.columns) {
-          if (!columns.has(column.databaseName)) {
+          const dbColumn = columns.get(column.databaseName);
+          if (!dbColumn) {
             issues.push(
               `${entity.tableName}.${column.propertyName}: entity queries ` +
                 `"${column.databaseName}", which does not exist on the table`,
+            );
+            continue;
+          }
+
+          // Array-ness has to match too. A column declared `simple-array` is
+          // serialised by TypeORM as a comma-joined string, so writing it to a
+          // native Postgres text[] fails with `malformed array literal`. That
+          // shape of bug is invisible to a name-only check: it broke
+          // notifications.channels, inspections.photos, inspections.videos and
+          // documents.tags, and because notifyDealCreated runs inside the
+          // onQuoteAccepted transaction it rolled back every deal the platform
+          // ever tried to create.
+          if (dbColumn.isArray !== column.isArray) {
+            issues.push(
+              `${entity.tableName}.${column.propertyName}: entity declares ` +
+                `${column.isArray ? 'an array' : 'a scalar'} but the column is ` +
+                `${dbColumn.isArray ? 'an array' : 'a scalar'}` +
+                (column.type === 'simple-array'
+                  ? " — 'simple-array' writes a comma-joined string; use { type: 'text', array: true }"
+                  : ''),
             );
           }
         }
