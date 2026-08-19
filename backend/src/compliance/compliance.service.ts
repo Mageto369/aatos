@@ -38,7 +38,10 @@ export class ComplianceService {
       qb.andWhere('r.requirementType = :type', { type: filters.requirementType });
     }
 
-    return qb.getMany();
+    // Every other list endpoint returns { items, total }; this one returned a
+    // bare array, so callers written against the house convention got nothing.
+    const items = await qb.getMany();
+    return { items, total: items.length };
   }
 
   async generateChecklist(data: {

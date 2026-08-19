@@ -216,7 +216,7 @@ describe('Critical Path — Product (e2e)', () => {
 describe('Critical Path — RFQ to Deal (e2e)', () => {
   let app: INestApplication;
   let authToken: string;
-  let orgId: string;
+  let categoryId: string;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -235,17 +235,30 @@ describe('Critical Path — RFQ to Deal (e2e)', () => {
         firstName: 'RFQ',
         lastName: 'Test',
       });
-    authToken = authRes.body.access_token;
+    authToken = authRes.body.data.accessToken;
 
     const orgRes = await request(app.getHttpServer())
       .post('/organizations')
       .set('Authorization', `Bearer ${authToken}`)
       .send({
-        name: 'RFQ Deal Test Org',
+        name: `RFQ Deal Test Org ${Date.now()}`,
         type: 'cooperative',
         countryCode: 'KE',
       });
-    orgId = orgRes.body.id;
+    // Creating the organization makes the registered user its owner, which
+    // POST /rfqs requires. The id itself is not needed: the controller takes
+    // the buyer org from the token.
+    expect(orgRes.status).toBe(201);
+
+    // The RFQ references a real product category; migrations seed none.
+    const ds = app.get(DataSource);
+    const suffix = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const [category] = await ds.query(
+      `INSERT INTO product_categories (group_type, name, slug, code)
+       VALUES ('beverage_crops', $1, $2, $3) RETURNING id`,
+      [`RFQ Coffee ${suffix}`, `rfq-coffee-${suffix}`, `RC${Date.now()}`],
+    );
+    categoryId = category.id;
   });
 
   afterAll(async () => {
@@ -257,19 +270,20 @@ describe('Critical Path — RFQ to Deal (e2e)', () => {
       .post('/rfqs')
       .set('Authorization', `Bearer ${authToken}`)
       .send({
-        buyerOrgId: orgId,
         title: 'Green Coffee RFQ',
-        productCategoryId: '00000000-0000-0000-0000-000000000001',
-        quantity: 10000,
-        quantityUnit: 'kg',
-        deliveryCountry: 'US',
-        deliveryPort: 'New York',
+        productCategoryId: categoryId,
+        specifications: { grade: 'AA' },
+        requiredQuantity: 10000,
+        requiredUnit: 'kg',
+        destinationCountry: 'US',
+        destinationCity: 'New York',
+        responseDeadline: new Date(Date.now() + 14 * 864e5).toISOString(),
         preferredIncoterm: 'CIF',
       })
       .expect(201)
       .expect((res) => {
-        expect(res.body).toHaveProperty('id');
-        expect(res.body.status).toBe('draft');
+        expect(res.body.data).toHaveProperty('id');
+        expect(res.body.data.status).toBe('draft');
       });
   });
 
@@ -279,8 +293,8 @@ describe('Critical Path — RFQ to Deal (e2e)', () => {
       .set('Authorization', `Bearer ${authToken}`)
       .expect(200)
       .expect((res) => {
-        expect(res.body).toHaveProperty('items');
-        expect(Array.isArray(res.body.items)).toBe(true);
+        expect(res.body.data).toHaveProperty('items');
+        expect(Array.isArray(res.body.data.items)).toBe(true);
       });
   });
 });
@@ -306,7 +320,7 @@ describe('Critical Path — Compliance (e2e)', () => {
         firstName: 'Compliance',
         lastName: 'Test',
       });
-    authToken = authRes.body.access_token;
+    authToken = authRes.body.data.accessToken;
   });
 
   afterAll(async () => {
@@ -319,8 +333,8 @@ describe('Critical Path — Compliance (e2e)', () => {
       .set('Authorization', `Bearer ${authToken}`)
       .expect(200)
       .expect((res) => {
-        expect(res.body).toHaveProperty('items');
-        expect(Array.isArray(res.body.items)).toBe(true);
+        expect(res.body.data).toHaveProperty('items');
+        expect(Array.isArray(res.body.data.items)).toBe(true);
       });
   });
 });

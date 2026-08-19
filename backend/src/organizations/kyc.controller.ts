@@ -1,8 +1,21 @@
-import { Controller, Post, Get, Body, Param, UseGuards, Request, Query } from '@nestjs/common';
+import { Controller, Post, Get, Body, Param, UseGuards, Request, ForbiddenException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { KycService } from './kyc.service';
+
+/**
+ * KYC routes take the organization from the URL path. Without a check, any
+ * authenticated user could submit verification documents for — or read the
+ * verification state of — an organization they have nothing to do with.
+ * Platform admins are exempt so they can service any tenant.
+ */
+function assertActsFor(req: any, orgId: string): void {
+  if (req.user?.role === 'platform_admin' || req.user?.role === 'admin') return;
+  if (req.user?.orgId !== orgId) {
+    throw new ForbiddenException('You do not have access to this organization');
+  }
+}
 
 @ApiTags('KYC / Verification')
 @Controller('kyc')
@@ -18,13 +31,14 @@ export class KycController {
     @Body() body: { documents: Array<{ type: 'business_registration' | 'tax_certificate' | 'bank_statement' | 'identity_document' | 'physical_site_proof' | 'trade_reference'; documentUrl: string }> },
     @Request() req: any,
   ) {
-    // TODO: Verify user belongs to org
+    assertActsFor(req, orgId);
     return this.kycService.submitDocuments(orgId, body.documents);
   }
 
   @Get('status/:orgId')
   @ApiOperation({ summary: 'Get KYC submission status' })
-  async getStatus(@Param('orgId') orgId: string) {
+  async getStatus(@Param('orgId') orgId: string, @Request() req: any) {
+    assertActsFor(req, orgId);
     return this.kycService.getSubmission(orgId);
   }
 

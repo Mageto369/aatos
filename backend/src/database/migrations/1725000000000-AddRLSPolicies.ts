@@ -54,8 +54,8 @@ export class AddRLSPolicies1725000000000 implements MigrationInterface {
         FOR ALL
         TO PUBLIC
         USING (
-          buyer_org_id = current_app_org_id()
-          OR supplier_org_id = current_app_org_id()
+          buyer_org_id::text = current_app_org_id()
+          OR supplier_org_id::text = current_app_org_id()
           OR is_platform_admin()
         );
     `);
@@ -67,7 +67,7 @@ export class AddRLSPolicies1725000000000 implements MigrationInterface {
         FOR ALL
         TO PUBLIC
         USING (
-          buyer_org_id = current_app_org_id()
+          buyer_org_id::text = current_app_org_id()
           OR is_platform_admin()
         );
     `);
@@ -79,7 +79,7 @@ export class AddRLSPolicies1725000000000 implements MigrationInterface {
         FOR ALL
         TO PUBLIC
         USING (
-          organization_id = current_app_org_id()
+          organization_id::text = current_app_org_id()
           OR is_platform_admin()
         );
     `);
@@ -91,7 +91,7 @@ export class AddRLSPolicies1725000000000 implements MigrationInterface {
         FOR ALL
         TO PUBLIC
         USING (
-          organization_id = current_app_org_id()
+          organization_id::text = current_app_org_id()
           OR is_platform_admin()
         );
     `);
@@ -103,8 +103,8 @@ export class AddRLSPolicies1725000000000 implements MigrationInterface {
         FOR ALL
         TO PUBLIC
         USING (
-          organization_id = current_app_org_id()
-          OR inspector_org_id = current_app_org_id()
+          organization_id::text = current_app_org_id()
+          OR inspector_org_id::text = current_app_org_id()
           OR is_platform_admin()
         );
     `);
@@ -118,7 +118,7 @@ export class AddRLSPolicies1725000000000 implements MigrationInterface {
         FOR ALL
         TO PUBLIC
         USING (
-          sender_org_id = current_app_org_id()
+          sender_org_id::text = current_app_org_id()
           OR is_platform_admin()
         );
     `);
@@ -130,7 +130,7 @@ export class AddRLSPolicies1725000000000 implements MigrationInterface {
         FOR ALL
         TO PUBLIC
         USING (
-          recipient_org_id = current_app_org_id()
+          recipient_org_id::text = current_app_org_id()
           OR is_platform_admin()
         );
     `);
@@ -142,8 +142,8 @@ export class AddRLSPolicies1725000000000 implements MigrationInterface {
         FOR ALL
         TO PUBLIC
         USING (
-          payer_org_id = current_app_org_id()
-          OR payee_org_id = current_app_org_id()
+          payer_org_id::text = current_app_org_id()
+          OR payee_org_id::text = current_app_org_id()
           OR is_platform_admin()
         );
     `);
@@ -155,7 +155,7 @@ export class AddRLSPolicies1725000000000 implements MigrationInterface {
         FOR ALL
         TO PUBLIC
         USING (
-          id = current_app_org_id()
+          id::text = current_app_org_id()
           OR is_platform_admin()
         );
     `);
@@ -167,7 +167,7 @@ export class AddRLSPolicies1725000000000 implements MigrationInterface {
         FOR ALL
         TO PUBLIC
         USING (
-          organization_id = current_app_org_id()
+          organization_id::text = current_app_org_id()
           OR is_platform_admin()
         );
     `);
