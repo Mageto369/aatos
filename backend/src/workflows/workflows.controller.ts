@@ -4,6 +4,21 @@ import { AuthGuard } from '@nestjs/passport';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { WorkflowService } from './workflows.service';
 
+/**
+ * Manual workflow triggers.
+ *
+ * These fire real state transitions — publishing an RFQ, completing a
+ * milestone, recording an inspection result — against an entity named only by
+ * a path id. They carried @Roles('owner', 'admin', 'operator'), which asserts
+ * the caller holds that role in *some* organization, so any org owner could
+ * advance another company's trade. They are described in the documentation as
+ * admin and debug tooling, so they are now restricted to platform_admin rather
+ * than having ownership threaded through three different entity types.
+ *
+ * POST quote/:id/accept is the exception: it takes the acting organization and
+ * enforces that only the RFQ's buyer may award, matching the equivalent route
+ * on the RFQ controller.
+ */
 @ApiTags('Workflows')
 @Controller('workflows')
 @UseGuards(AuthGuard('jwt'))
@@ -13,7 +28,7 @@ export class WorkflowsController {
 
   @Post('rfq/:id/publish')
   @ApiOperation({ summary: 'Manually trigger RFQ published workflow' })
-  @Roles('owner', 'admin', 'operator')
+  @Roles('platform_admin')
   async triggerRfqPublish(@Param('id') rfqId: string) {
     await this.workflowService.onRfqPublished(rfqId);
     return { success: true, message: `RFQ ${rfqId} publish workflow triggered` };
@@ -35,7 +50,7 @@ export class WorkflowsController {
 
   @Post('milestone/:id/complete')
   @ApiOperation({ summary: 'Manually trigger milestone completion workflow' })
-  @Roles('owner', 'admin', 'operator')
+  @Roles('platform_admin')
   async triggerMilestoneComplete(@Param('id') milestoneId: string) {
     await this.workflowService.onMilestoneCompleted(milestoneId);
     return { success: true, message: `Milestone ${milestoneId} completion workflow triggered` };
@@ -43,7 +58,7 @@ export class WorkflowsController {
 
   @Post('inspection/:id/result')
   @ApiOperation({ summary: 'Manually trigger inspection result workflow' })
-  @Roles('owner', 'admin', 'operator', 'logistics_officer')
+  @Roles('platform_admin')
   async triggerInspectionResult(
     @Param('id') inspectionId: string,
     @Body() body: { result: string },

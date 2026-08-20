@@ -872,6 +872,86 @@ describe('Tenant isolation (e2e)', () => {
     });
   });
 
+  describe('payments', () => {
+    /**
+     * A payment belongs to the payer and the payee and nobody else. All four
+     * of these handlers took an id from the path with no request: a stranger
+     * could read another company's payment, list every payment on someone
+     * else's deal, read its totals, and — on PATCH :id/status — move it
+     * between states. @Roles asserted only that the caller held a finance role
+     * within their own organization.
+     */
+    let paymentOfBC: string;
+
+    beforeAll(async () => {
+      const [row] = await dataSource.query(
+        `INSERT INTO payments
+           (deal_id, payer_org_id, payee_org_id, amount, currency, payment_method, status)
+         VALUES ($1, $2, $3, 25000, 'USD', 'bank_transfer', 'pending') RETURNING id`,
+        [dealOfBC, orgB, orgC],
+      );
+      paymentOfBC = row.id;
+    });
+
+    it("A cannot read B and C's payment", async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/payments/${paymentOfBC}`)
+        .set('Authorization', `Bearer ${tokenA}`);
+      expect([403, 404]).toContain(res.status);
+    });
+
+    it('B, the payer, can read it — the control', async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/payments/${paymentOfBC}`)
+        .set('Authorization', `Bearer ${tokenB}`);
+      expect(res.status).toBe(200);
+      expect(res.body.data.id).toBe(paymentOfBC);
+    });
+
+    it('C, the payee, can read it too', async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/payments/${paymentOfBC}`)
+        .set('Authorization', `Bearer ${tokenC}`);
+      expect(res.status).toBe(200);
+    });
+
+    it("A cannot mark B and C's payment as paid", async () => {
+      const res = await request(app.getHttpServer())
+        .patch(`/payments/${paymentOfBC}/status`)
+        .set('Authorization', `Bearer ${tokenA}`)
+        .send({ status: 'completed' });
+      expect([403, 404]).toContain(res.status);
+
+      // The denial has to have prevented the write, not merely returned an
+      // error after making it.
+      const [row] = await dataSource.query('SELECT status FROM payments WHERE id = $1', [
+        paymentOfBC,
+      ]);
+      expect(row.status).toBe('pending');
+    });
+
+    it("A cannot list the payments on B and C's deal", async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/payments/deal/${dealOfBC}`)
+        .set('Authorization', `Bearer ${tokenA}`);
+      expect([403, 404]).toContain(res.status);
+    });
+
+    it("A cannot read the payment totals on B and C's deal", async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/payments/deal/${dealOfBC}/summary`)
+        .set('Authorization', `Bearer ${tokenA}`);
+      expect([403, 404]).toContain(res.status);
+    });
+
+    it('B can list the payments on its own deal — the control', async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/payments/deal/${dealOfBC}`)
+        .set('Authorization', `Bearer ${tokenB}`);
+      expect(res.status).toBe(200);
+    });
+  });
+
   describe('unauthenticated access', () => {
     it('rejects requests with no token', () => {
       return request(app.getHttpServer()).get('/organizations').expect(401);

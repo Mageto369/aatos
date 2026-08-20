@@ -1,8 +1,24 @@
-import { Controller, Get, Post, Body, Param, Query, UseGuards, Request, Patch, ForbiddenException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query, UseGuards, Request, Patch, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { PaymentsService } from './payments.service';
+
+/**
+ * A payment belongs to exactly two organizations: the payer and the payee.
+ * These handlers took an id from the path with no request, so any
+ * authenticated user could read another company's payment — and, on
+ * PATCH :id/status, move it between states. @Roles only asserted the caller
+ * held a finance role somewhere, not that the payment was theirs.
+ */
+function assertPartyToPayment(req: any, payment: { payerOrgId?: string; payeeOrgId?: string }): void {
+  const orgId = req?.user?.orgId;
+  if (req?.user?.role === 'platform_admin') return;
+  if (!orgId || (payment.payerOrgId !== orgId && payment.payeeOrgId !== orgId)) {
+    // 404 rather than 403: a stranger should not learn the payment exists.
+    throw new NotFoundException('Payment not found');
+  }
+}
 
 @ApiTags('Payments')
 @Controller('payments')
@@ -38,20 +54,28 @@ export class PaymentsController {
 
   @Get('deal/:dealId')
   @ApiOperation({ summary: 'Get all payments for a deal' })
-  async getDealPayments(@Param('dealId') dealId: string) {
+  async getDealPayments(@Param('dealId') dealId: string, @Request() req: any) {
+    if (!(await this.paymentsService.isPartyToDeal(dealId, req?.user?.orgId))) {
+      throw new NotFoundException('Deal not found');
+    }
     return this.paymentsService.getDealPayments(dealId);
   }
 
   @Get('deal/:dealId/summary')
   @ApiOperation({ summary: 'Get payment summary for a deal' })
-  async getPaymentSummary(@Param('dealId') dealId: string) {
+  async getPaymentSummary(@Param('dealId') dealId: string, @Request() req: any) {
+    if (!(await this.paymentsService.isPartyToDeal(dealId, req?.user?.orgId))) {
+      throw new NotFoundException('Deal not found');
+    }
     return this.paymentsService.getPaymentSummary(dealId);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get payment by ID' })
-  async findOne(@Param('id') id: string) {
-    return this.paymentsService.findOne(id);
+  async findOne(@Param('id') id: string, @Request() req: any) {
+    const payment = await this.paymentsService.findOne(id);
+    assertPartyToPayment(req, payment);
+    return payment;
   }
 
   @Post(':id/initiate')
@@ -99,7 +123,9 @@ export class PaymentsController {
     @Param('id') id: string,
     @Body('status') status: string,
     @Body() data: any,
+    @Request() req: any,
   ) {
+    assertPartyToPayment(req, await this.paymentsService.findOne(id));
     return this.paymentsService.updateStatus(id, status, data);
   }
 }

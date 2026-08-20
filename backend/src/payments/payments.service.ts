@@ -2,6 +2,7 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Payment } from './entities/payment.entity';
+import { Deal } from '../deals/entities/deal.entity';
 import { FlutterwaveService } from './flutterwave.service';
 
 @Injectable()
@@ -9,6 +10,8 @@ export class PaymentsService {
   private readonly logger = new Logger(PaymentsService.name);
 
   constructor(
+    @InjectRepository(Deal)
+    private readonly dealRepo: Repository<Deal>,
     @InjectRepository(Payment)
     private readonly paymentRepo: Repository<Payment>,
     private readonly flutterwaveService: FlutterwaveService,
@@ -240,4 +243,22 @@ export class PaymentsService {
 
     return this.paymentRepo.save(payment);
   }
+
+  /**
+   * Whether an organization is buyer or supplier on a deal.
+   *
+   * GET /payments/deal/:dealId/summary took the deal id from the path with no
+   * caller, so any authenticated user could read another deal's payment
+   * position — how much has been paid, held and released.
+   */
+  async isPartyToDeal(dealId: string, orgId?: string): Promise<boolean> {
+    if (!orgId) return false;
+    const deal = await this.dealRepo.findOne({
+      where: { id: dealId },
+      select: { id: true, buyerOrgId: true, supplierOrgId: true },
+    });
+    if (!deal) return false;
+    return deal.buyerOrgId === orgId || deal.supplierOrgId === orgId;
+  }
+
 }

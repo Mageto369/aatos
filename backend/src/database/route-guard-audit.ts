@@ -62,18 +62,17 @@ const EXPECTED_BLIND: Record<string, string> = {
   'GET /enterprise/matches/buyer/:orgId': 'UNSCOPED — enterprise feature, unused in pilot',
   'GET /enterprise/subscriptions/:orgId': 'UNSCOPED — enterprise feature, unused in pilot',
   'GET /enterprise/white-label/:orgId': 'UNSCOPED — enterprise feature, unused in pilot',
+  'GET /organizations/:id/members': 'UNSCOPED — member list of any organization',
   'PUT /inventory/items/:id/quantity': 'UNSCOPED — writes another org inventory',
   'PUT /inventory/items/:id/status': 'UNSCOPED — writes another org inventory',
   'GET /inventory/products/:productId': 'UNSCOPED — reads another org inventory',
   'GET /inventory/warehouses/:id/items': 'UNSCOPED — reads another org inventory',
   'GET /inventory/warehouses/:id': 'UNSCOPED — reads another org warehouse',
-  'GET /organizations/:id/members': 'UNSCOPED — member list of any organization',
-  'PATCH /payments/:id/status': 'UNSCOPED — writes another org payment state',
-  'GET /payments/:id': 'UNSCOPED — reads another org payment',
-  'GET /payments/deal/:dealId/summary': 'UNSCOPED — reads another deal payment summary',
-  'POST /workflows/inspection/:id/result': 'UNSCOPED — triggers workflow on any inspection',
-  'POST /workflows/milestone/:id/complete': 'UNSCOPED — triggers workflow on any milestone',
-  'POST /workflows/rfq/:id/publish': 'UNSCOPED — publishes any RFQ',
+  // Manual override tooling, restricted to platform_admin. They act on an id
+  // from the path by design; the control is the role, not the tenant.
+  'POST /workflows/inspection/:id/result': 'platform_admin only — manual override',
+  'POST /workflows/milestone/:id/complete': 'platform_admin only — manual override',
+  'POST /workflows/rfq/:id/publish': 'platform_admin only — manual override',
 };
 
 interface Route {
@@ -146,19 +145,31 @@ function parse(file: string): Route[] {
       if (depth <= 0 && k > i - 1 && params.length) break;
     }
 
+    // Walk back over the handler's own decorators and stop. The first version
+    // of this loop also consumed any line starting with a closing bracket,
+    // which meant it walked straight through the previous handler's closing
+    // brace and swallowed that handler's decorators too. The route then took
+    // the *earlier* @Get()'s path: GET /payments/deal/:dealId was recorded as
+    // a second GET /payments and so escaped the blind check entirely. A
+    // decorator that leaked the same way would have been @Public().
+    //
+    // Read bottom-up, tracking bracket depth. At depth 0 only a line opening a
+    // decorator belongs to the block: one starting with '@', or with ')',
+    // which closes a decorator wrapped over several lines. A line starting
+    // with '}' closes a function body, never a decorator, and ends the walk.
     const block: string[] = [];
+    let bracket = 0;
     for (let j = i - 1; j >= 0; j--) {
       const line = lines[j].trim();
       if (line === '' || line.startsWith('//') || line.startsWith('*') || line.startsWith('/*')) {
         continue;
       }
-      // Decorators may wrap across lines; keep consuming while the line is
-      // part of a decorator or its continuation.
-      if (line.startsWith('@') || /^[)\]}]/.test(line) || /[,({[]$/.test(line)) {
-        block.unshift(lines[j]);
-        continue;
+      if (bracket === 0 && !line.startsWith('@') && !line.startsWith(')')) break;
+      block.unshift(lines[j]);
+      for (const ch of line) {
+        if (ch === '(' || ch === '[' || ch === '{') bracket--;
+        else if (ch === ')' || ch === ']' || ch === '}') bracket++;
       }
-      break;
     }
     if (!block.length) continue;
 
@@ -267,6 +278,31 @@ function main(): number {
       '\nEach cannot scope to the caller: it has no request, so it cannot know who\n' +
         'is asking. Add @Request() and check ownership, or record it in EXPECTED_BLIND\n' +
         'with the reason it is legitimately caller-independent.',
+    );
+  }
+
+  // Two handlers claiming one method+path. Nest binds the first and the second
+  // is dead code, so this is a real defect either way — but it is also how the
+  // decorator walk-back bug announced itself: a mis-parsed route took its
+  // neighbour's @Get() and showed up as a duplicate of it while its own path
+  // vanished from the matrix, taking it out of the blind check unnoticed.
+  const seen = new Map<string, Route[]>();
+  for (const r of routes) {
+    const key = `${r.method} ${r.path}`;
+    seen.set(key, [...(seen.get(key) ?? []), r]);
+  }
+  const collisions = [...seen.entries()].filter(([, rs]) => rs.length > 1);
+
+  if (collisions.length) {
+    failed = true;
+    console.error(`\nRoutes declared more than once (${collisions.length}):`);
+    for (const [key, rs] of collisions) {
+      console.error(`  ${key}`);
+      for (const r of rs) console.error(`      ${r.file} → ${r.handler}`);
+    }
+    console.error(
+      '\nOnly the first is reachable. Either two handlers really do collide, or\n' +
+        'this audit mis-parsed one of them and its true path is not being checked.',
     );
   }
 
