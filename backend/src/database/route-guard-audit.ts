@@ -63,11 +63,6 @@ const EXPECTED_BLIND: Record<string, string> = {
   'GET /enterprise/subscriptions/:orgId': 'UNSCOPED — enterprise feature, unused in pilot',
   'GET /enterprise/white-label/:orgId': 'UNSCOPED — enterprise feature, unused in pilot',
   'GET /organizations/:id/members': 'UNSCOPED — member list of any organization',
-  'PUT /inventory/items/:id/quantity': 'UNSCOPED — writes another org inventory',
-  'PUT /inventory/items/:id/status': 'UNSCOPED — writes another org inventory',
-  'GET /inventory/products/:productId': 'UNSCOPED — reads another org inventory',
-  'GET /inventory/warehouses/:id/items': 'UNSCOPED — reads another org inventory',
-  'GET /inventory/warehouses/:id': 'UNSCOPED — reads another org warehouse',
   // Manual override tooling, restricted to platform_admin. They act on an id
   // from the path by design; the control is the role, not the tenant.
   'POST /workflows/inspection/:id/result': 'platform_admin only — manual override',

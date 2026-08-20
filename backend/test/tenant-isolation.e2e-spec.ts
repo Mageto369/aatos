@@ -952,6 +952,152 @@ describe('Tenant isolation (e2e)', () => {
     });
   });
 
+  describe('inventory', () => {
+    /**
+     * Two of these routes took the organization straight off the query string,
+     * and three took a warehouse or item id with no request at all. So a
+     * caller could enumerate another company's warehouses, read its stock
+     * valuation, and re-quantity or re-status its goods.
+     *
+     * The store behind these endpoints is in-process and non-durable, so this
+     * block creates what it reads within the same instance.
+     */
+    let warehouseOfB: string;
+    let itemOfB: string;
+
+    beforeAll(async () => {
+      const wh = await request(app.getHttpServer())
+        .post('/inventory/warehouses')
+        .set('Authorization', `Bearer ${tokenB}`)
+        .send({
+          name: `B Warehouse ${uniq()}`,
+          location: { country: 'KE', city: 'Nairobi', address: 'Enterprise Road' },
+          type: 'origin',
+          capacity: 100000,
+          certifications: ['ISO-9001'],
+          active: true,
+        })
+        .expect(201);
+      warehouseOfB = wh.body.data.id;
+
+      const item = await request(app.getHttpServer())
+        .post('/inventory/items')
+        .set('Authorization', `Bearer ${tokenB}`)
+        .send({
+          warehouseId: warehouseOfB,
+          warehouseName: 'ignored, taken from the warehouse',
+          location: { country: 'KE', city: 'Nairobi', address: 'Enterprise Road' },
+          productId: productOfB,
+          productName: 'Green coffee',
+          quantity: 5000,
+          unit: 'kg',
+          quality: 'AA',
+          status: 'available',
+          metadata: { price: 5 },
+        })
+        .expect(201);
+      itemOfB = item.body.data.id;
+    });
+
+    it('a warehouse is owned by the caller who created it, not by the body', async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/inventory/warehouses/${warehouseOfB}`)
+        .set('Authorization', `Bearer ${tokenB}`)
+        .expect(200);
+      expect(res.body.data.orgId).toBe(orgB);
+    });
+
+    it("A cannot read B's warehouse", async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/inventory/warehouses/${warehouseOfB}`)
+        .set('Authorization', `Bearer ${tokenA}`);
+      expect([403, 404]).toContain(res.status);
+    });
+
+    it("A cannot list the stock in B's warehouse", async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/inventory/warehouses/${warehouseOfB}/items`)
+        .set('Authorization', `Bearer ${tokenA}`);
+      expect([403, 404]).toContain(res.status);
+    });
+
+    it("A's warehouse list does not include B's warehouse", async () => {
+      const res = await request(app.getHttpServer())
+        .get('/inventory/warehouses')
+        .set('Authorization', `Bearer ${tokenA}`)
+        .expect(200);
+      const ids = res.body.data.map((w: { id: string }) => w.id);
+      expect(ids).not.toContain(warehouseOfB);
+    });
+
+    it("A cannot see B's stock of a product", async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/inventory/products/${productOfB}`)
+        .set('Authorization', `Bearer ${tokenA}`)
+        .expect(200);
+      expect(res.body.data).toEqual([]);
+    });
+
+    it("A cannot re-quantity B's stock", async () => {
+      const res = await request(app.getHttpServer())
+        .put(`/inventory/items/${itemOfB}/quantity`)
+        .set('Authorization', `Bearer ${tokenA}`)
+        .send({ quantity: 0 });
+      expect([403, 404]).toContain(res.status);
+
+      const check = await request(app.getHttpServer())
+        .get(`/inventory/warehouses/${warehouseOfB}/items`)
+        .set('Authorization', `Bearer ${tokenB}`)
+        .expect(200);
+      expect(check.body.data.find((i: { id: string }) => i.id === itemOfB).quantity).toBe(5000);
+    });
+
+    it("A cannot re-status B's stock", async () => {
+      const res = await request(app.getHttpServer())
+        .put(`/inventory/items/${itemOfB}/status`)
+        .set('Authorization', `Bearer ${tokenA}`)
+        .send({ status: 'sold' });
+      expect([403, 404]).toContain(res.status);
+    });
+
+    it("A cannot place stock in B's warehouse", async () => {
+      const res = await request(app.getHttpServer())
+        .post('/inventory/items')
+        .set('Authorization', `Bearer ${tokenA}`)
+        .send({
+          warehouseId: warehouseOfB,
+          warehouseName: 'intruder',
+          location: { country: 'KE', city: 'Nairobi', address: 'x' },
+          productId: productOfB,
+          productName: 'Not mine',
+          quantity: 1,
+          unit: 'kg',
+          quality: 'AA',
+          status: 'available',
+          metadata: {},
+        });
+      expect([403, 404]).toContain(res.status);
+    });
+
+    it("A's summary does not count B's stock", async () => {
+      const res = await request(app.getHttpServer())
+        .get('/inventory/summary')
+        .set('Authorization', `Bearer ${tokenA}`)
+        .expect(200);
+      expect(res.body.data.totalItems).toBe(0);
+      expect(res.body.data.totalValue).toBe(0);
+    });
+
+    it('B sees its own stock and its value — the control', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/inventory/summary')
+        .set('Authorization', `Bearer ${tokenB}`)
+        .expect(200);
+      expect(res.body.data.totalItems).toBe(1);
+      expect(res.body.data.totalValue).toBe(25000);
+    });
+  });
+
   describe('unauthenticated access', () => {
     it('rejects requests with no token', () => {
       return request(app.getHttpServer()).get('/organizations').expect(401);

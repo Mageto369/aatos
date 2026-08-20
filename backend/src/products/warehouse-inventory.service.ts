@@ -37,18 +37,27 @@ export interface Warehouse {
 }
 
 /**
- * Warehouse & Inventory Visibility Service
- * Tracks inventory across warehouses for supply chain visibility.
+ * Warehouse and inventory visibility.
+ *
+ * NOT DURABLE. Everything here lives in two in-process Maps: a restart empties
+ * them, and with more than one replica a write lands on whichever instance
+ * served it while reads go somewhere else. This is a prototype surface, not a
+ * system of record, and it must not carry stock a trade depends on until it is
+ * backed by tables. Nothing in the product reads these endpoints today.
+ *
+ * It previously seeded three invented warehouses under two organization ids
+ * that do not exist, and served them through authenticated endpoints as if
+ * they were real holdings. That seed is gone.
+ *
+ * Every read and write is scoped by the caller's organization. Items have no
+ * orgId of their own, so ownership resolves through the warehouse that holds
+ * them; an item in no known warehouse belongs to nobody and is invisible.
  */
 @Injectable()
 export class WarehouseInventoryService {
   private readonly logger = new Logger(WarehouseInventoryService.name);
   private readonly warehouses: Map<string, Warehouse> = new Map();
   private readonly inventory: Map<string, WarehouseInventory> = new Map();
-
-  constructor() {
-    this.initializeWarehouses();
-  }
 
   async addWarehouse(warehouse: Omit<Warehouse, 'id'>): Promise<Warehouse> {
     const newWarehouse: Warehouse = {
@@ -60,15 +69,31 @@ export class WarehouseInventoryService {
     return newWarehouse;
   }
 
-  async getWarehouse(id: string): Promise<Warehouse | undefined> {
-    return this.warehouses.get(id);
+  /** The warehouse, only if it belongs to orgId. Otherwise undefined. */
+  async getWarehouse(id: string, orgId: string): Promise<Warehouse | undefined> {
+    const warehouse = this.warehouses.get(id);
+    return warehouse && warehouse.orgId === orgId ? warehouse : undefined;
   }
 
   async getWarehousesByOrg(orgId: string): Promise<Warehouse[]> {
-    return Array.from(this.warehouses.values()).filter(w => w.orgId === orgId);
+    if (!orgId) return [];
+    return Array.from(this.warehouses.values()).filter((w) => w.orgId === orgId);
   }
 
-  async addInventory(item: Omit<WarehouseInventory, 'id' | 'lastUpdated'>): Promise<WarehouseInventory> {
+  /** The organization holding an item, via the warehouse it sits in. */
+  private ownerOf(item: WarehouseInventory): string | undefined {
+    return this.warehouses.get(item.warehouseId)?.orgId;
+  }
+
+  private ownedItem(itemId: string, orgId: string): WarehouseInventory | undefined {
+    const item = this.inventory.get(itemId);
+    if (!item || !orgId || this.ownerOf(item) !== orgId) return undefined;
+    return item;
+  }
+
+  async addInventory(
+    item: Omit<WarehouseInventory, 'id' | 'lastUpdated'>,
+  ): Promise<WarehouseInventory> {
     const newItem: WarehouseInventory = {
       ...item,
       id: crypto.randomUUID(),
@@ -79,8 +104,12 @@ export class WarehouseInventoryService {
     return newItem;
   }
 
-  async updateInventoryQuantity(itemId: string, newQuantity: number): Promise<WarehouseInventory | undefined> {
-    const item = this.inventory.get(itemId);
+  async updateInventoryQuantity(
+    itemId: string,
+    newQuantity: number,
+    orgId: string,
+  ): Promise<WarehouseInventory | undefined> {
+    const item = this.ownedItem(itemId, orgId);
     if (!item) return undefined;
 
     item.quantity = newQuantity;
@@ -89,8 +118,12 @@ export class WarehouseInventoryService {
     return item;
   }
 
-  async updateInventoryStatus(itemId: string, status: WarehouseInventory['status']): Promise<WarehouseInventory | undefined> {
-    const item = this.inventory.get(itemId);
+  async updateInventoryStatus(
+    itemId: string,
+    status: WarehouseInventory['status'],
+    orgId: string,
+  ): Promise<WarehouseInventory | undefined> {
+    const item = this.ownedItem(itemId, orgId);
     if (!item) return undefined;
 
     item.status = status;
@@ -100,18 +133,26 @@ export class WarehouseInventoryService {
     return item;
   }
 
-  async getInventoryByWarehouse(warehouseId: string): Promise<WarehouseInventory[]> {
-    return Array.from(this.inventory.values()).filter(i => i.warehouseId === warehouseId);
+  async getInventoryByWarehouse(warehouseId: string, orgId: string): Promise<WarehouseInventory[]> {
+    const warehouse = await this.getWarehouse(warehouseId, orgId);
+    if (!warehouse) return [];
+    return Array.from(this.inventory.values()).filter((i) => i.warehouseId === warehouseId);
   }
 
-  async getInventoryByProduct(productId: string): Promise<WarehouseInventory[]> {
-    return Array.from(this.inventory.values()).filter(i => i.productId === productId);
-  }
-
-  async getAvailableInventory(productId: string): Promise<WarehouseInventory[]> {
+  async getInventoryByProduct(productId: string, orgId: string): Promise<WarehouseInventory[]> {
+    if (!orgId) return [];
     return Array.from(this.inventory.values()).filter(
-      i => i.productId === productId && i.status === 'available' && i.quantity > 0,
+      (i) => i.productId === productId && this.ownerOf(i) === orgId,
     );
+  }
+
+  /**
+   * Stock a buyer may draw on. Callers pass the organization whose stock they
+   * are asking about — this is not a cross-tenant view.
+   */
+  async getAvailableInventory(productId: string, orgId: string): Promise<WarehouseInventory[]> {
+    const items = await this.getInventoryByProduct(productId, orgId);
+    return items.filter((i) => i.status === 'available' && i.quantity > 0);
   }
 
   async getInventorySummary(orgId: string): Promise<{
@@ -125,63 +166,19 @@ export class WarehouseInventoryService {
     const warehouses = await this.getWarehousesByOrg(orgId);
     const items: WarehouseInventory[] = [];
     for (const w of warehouses) {
-      const warehouseItems = await this.getInventoryByWarehouse(w.id);
-      items.push(...warehouseItems);
+      items.push(...(await this.getInventoryByWarehouse(w.id, orgId)));
     }
 
-    const totalValue = items.reduce((sum, i) => sum + (i.quantity * (i.metadata.price as number || 0)), 0);
-    const availableValue = items
-      .filter(i => i.status === 'available')
-      .reduce((sum, i) => sum + (i.quantity * (i.metadata.price as number || 0)), 0);
-    const reservedValue = items
-      .filter(i => i.status === 'reserved')
-      .reduce((sum, i) => sum + (i.quantity * (i.metadata.price as number || 0)), 0);
-    const lowStockItems = items.filter(i => i.quantity < 100).length;
+    const value = (of: WarehouseInventory[]): number =>
+      of.reduce((sum, i) => sum + i.quantity * ((i.metadata.price as number) || 0), 0);
 
     return {
       totalWarehouses: warehouses.length,
       totalItems: items.length,
-      totalValue,
-      availableValue,
-      reservedValue,
-      lowStockItems,
+      totalValue: value(items),
+      availableValue: value(items.filter((i) => i.status === 'available')),
+      reservedValue: value(items.filter((i) => i.status === 'reserved')),
+      lowStockItems: items.filter((i) => i.quantity < 100).length,
     };
-  }
-
-  private initializeWarehouses(): void {
-    // Initialize with sample warehouses for demonstration
-    const sampleWarehouses: Omit<Warehouse, 'id'>[] = [
-      {
-        name: 'Nairobi Coffee Hub',
-        orgId: 'sample-org-1',
-        location: { country: 'KE', city: 'Nairobi', address: 'Industrial Area, Enterprise Road' },
-        type: 'origin',
-        capacity: 500000,
-        certifications: ['ISO-9001', 'BRC'],
-        active: true,
-      },
-      {
-        name: 'Mombasa Export Terminal',
-        orgId: 'sample-org-1',
-        location: { country: 'KE', city: 'Mombasa', address: 'Kilindini Harbour' },
-        type: 'transit',
-        capacity: 1000000,
-        certifications: ['AEO', 'ISO-9001'],
-        active: true,
-      },
-      {
-        name: 'New Jersey Distribution Center',
-        orgId: 'sample-org-2',
-        location: { country: 'US', city: 'Newark', address: 'Port Newark-Elizabeth' },
-        type: 'destination',
-        capacity: 750000,
-        certifications: ['USDA-Organic', 'SQF'],
-        active: true,
-      },
-    ];
-
-    for (const w of sampleWarehouses) {
-      this.addWarehouse(w);
-    }
   }
 }
