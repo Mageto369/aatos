@@ -1147,6 +1147,136 @@ describe('Tenant isolation (e2e)', () => {
     });
   });
 
+  describe('enterprise and analytics, scoped by orgId', () => {
+    /**
+     * These routes name the organization directly — five reads take it from
+     * the path, and five writes used to take it from the request body. An
+     * organization id is not a secret: the marketplace directory hands them
+     * out. So "knows the id" was the whole access check.
+     *
+     * The body-supplied ones never appeared in the route audit at all, which
+     * only inspects path parameters. They are the reason the audit's own
+     * documentation now says so.
+     */
+    const forbidden = (res: { status: number }) => expect([403, 404]).toContain(res.status);
+
+    it("A cannot read B's trade analytics", async () => {
+      forbidden(
+        await request(app.getHttpServer())
+          .get(`/analytics/organization/${orgB}`)
+          .set('Authorization', `Bearer ${tokenA}`),
+      );
+    });
+
+    it('B can read its own — the control', async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/analytics/organization/${orgB}`)
+        .set('Authorization', `Bearer ${tokenB}`);
+      expect(res.status).toBe(200);
+    });
+
+    it('counts the supplier side of a deal, not just the buyer side', async () => {
+      // C is the supplier on the B–C deal and is the buyer on nothing. When
+      // this only counted buyerOrgId it reported zero deals and zero volume
+      // for every supplier on the platform — a wrong number rather than an
+      // error, so nothing failed and nobody would have noticed until a
+      // supplier asked why its dashboard was empty.
+      const res = await request(app.getHttpServer())
+        .get(`/analytics/organization/${orgC}`)
+        .set('Authorization', `Bearer ${tokenC}`)
+        .expect(200);
+
+      expect(res.body.data.totalDeals).toBeGreaterThan(0);
+    });
+
+    it("A cannot read B's subscription", async () => {
+      forbidden(
+        await request(app.getHttpServer())
+          .get(`/enterprise/subscriptions/${orgB}`)
+          .set('Authorization', `Bearer ${tokenA}`),
+      );
+    });
+
+    it("A cannot read B's sustainability score or ESG report", async () => {
+      forbidden(
+        await request(app.getHttpServer())
+          .get(`/enterprise/esg/score/${orgB}`)
+          .set('Authorization', `Bearer ${tokenA}`),
+      );
+      forbidden(
+        await request(app.getHttpServer())
+          .get(`/enterprise/esg/report/${orgB}?period=2026-Q1`)
+          .set('Authorization', `Bearer ${tokenA}`),
+      );
+    });
+
+    it("A cannot read B's white-label configuration", async () => {
+      forbidden(
+        await request(app.getHttpServer())
+          .get(`/enterprise/white-label/${orgB}`)
+          .set('Authorization', `Bearer ${tokenA}`),
+      );
+    });
+
+    it("A cannot read the supplier matches computed for B", async () => {
+      forbidden(
+        await request(app.getHttpServer())
+          .get(`/enterprise/matches/buyer/${orgB}`)
+          .set('Authorization', `Bearer ${tokenA}`),
+      );
+    });
+
+    it('an API key created by A belongs to A, whatever the body says', async () => {
+      const created = await request(app.getHttpServer())
+        .post('/enterprise/api-keys')
+        .set('Authorization', `Bearer ${tokenA}`)
+        .send({ orgId: orgB, name: 'planted', scopes: ['read'] });
+
+      if (created.status < 400) {
+        expect(created.body.data.orgId).toBe(orgA);
+      }
+
+      // And B's own key list does not contain it.
+      const bsKeys = await request(app.getHttpServer())
+        .get(`/enterprise/api-keys/${orgB}`)
+        .set('Authorization', `Bearer ${tokenB}`);
+      if (bsKeys.status === 200) {
+        expect(
+          bsKeys.body.data.some((k: { name: string }) => k.name === 'planted'),
+        ).toBe(false);
+      }
+    });
+
+    it('a subscription created by A belongs to A, whatever the body says', async () => {
+      const created = await request(app.getHttpServer())
+        .post('/enterprise/subscriptions')
+        .set('Authorization', `Bearer ${tokenA}`)
+        .send({ orgId: orgB, tierId: 'growth', billingCycle: 'monthly' });
+
+      if (created.status < 400) {
+        expect(created.body.data.orgId).toBe(orgA);
+      }
+
+      const bs = await request(app.getHttpServer())
+        .get(`/enterprise/subscriptions/${orgB}`)
+        .set('Authorization', `Bearer ${tokenB}`);
+      if (bs.status === 200 && bs.body.data) {
+        expect(bs.body.data.tierId).not.toBe('growth');
+      }
+    });
+
+    it('a white-label configuration created by A belongs to A', async () => {
+      const created = await request(app.getHttpServer())
+        .post('/enterprise/white-label')
+        .set('Authorization', `Bearer ${tokenA}`)
+        .send({ orgId: orgB, config: { brandName: 'Planted', primaryColor: '#000000' } });
+
+      if (created.status < 400) {
+        expect(created.body.data.orgId).toBe(orgA);
+      }
+    });
+  });
+
   describe('unauthenticated access', () => {
     it('rejects requests with no token', () => {
       return request(app.getHttpServer()).get('/organizations').expect(401);

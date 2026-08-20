@@ -15,6 +15,23 @@ import { MatchingEngineService } from './matching-engine.service';
  * @Roles and no request, so any authenticated user could read any
  * organization's API keys.
  */
+/**
+ * The caller's organization, for routes that used to take an orgId in the
+ * request body. A body-supplied orgId is hearsay: the four POST routes here
+ * created a subscription, a white-label config, an API key, a webhook and a
+ * government filing under whatever organization the caller named, and @Roles
+ * only asserted they were an owner or admin of *some* organization. The route
+ * audit cannot see this shape — it only knows about ids in the path — so these
+ * were never on its list.
+ */
+function callerOrg(req: any): string {
+  const orgId = req?.user?.orgId;
+  if (!orgId) {
+    throw new ForbiddenException('No organization on this account');
+  }
+  return orgId;
+}
+
 function assertOwnOrg(req: any, orgId: string): void {
   if (req?.user?.role === 'platform_admin') return;
   if (req?.user?.orgId !== orgId) {
@@ -46,13 +63,21 @@ export class EnterpriseController {
   @Post('subscriptions')
   @ApiOperation({ summary: 'Create subscription' })
   @Roles('owner', 'admin')
-  async createSubscription(@Body() data: { orgId: string; tierId: string; billingCycle?: 'monthly' | 'annual' }) {
-    return this.pricingService.createSubscription(data.orgId, data.tierId, data.billingCycle);
+  async createSubscription(
+    @Body() data: { tierId: string; billingCycle?: 'monthly' | 'annual' },
+    @Request() req: any,
+  ) {
+    return this.pricingService.createSubscription(
+      callerOrg(req),
+      data.tierId,
+      data.billingCycle,
+    );
   }
 
   @Get('subscriptions/:orgId')
   @ApiOperation({ summary: 'Get organization subscription' })
-  async getSubscription(@Param('orgId') orgId: string) {
+  async getSubscription(@Param('orgId') orgId: string, @Request() req: any) {
+    assertOwnOrg(req, orgId);
     return this.pricingService.getSubscription(orgId);
   }
 
@@ -66,13 +91,19 @@ export class EnterpriseController {
 
   @Get('esg/score/:orgId')
   @ApiOperation({ summary: 'Get sustainability score' })
-  async getSustainabilityScore(@Param('orgId') orgId: string) {
+  async getSustainabilityScore(@Param('orgId') orgId: string, @Request() req: any) {
+    assertOwnOrg(req, orgId);
     return this.esgService.calculateSustainabilityScore(orgId);
   }
 
   @Get('esg/report/:orgId')
   @ApiOperation({ summary: 'Generate ESG report' })
-  async getESGReport(@Param('orgId') orgId: string, @Query('period') period: string) {
+  async getESGReport(
+    @Param('orgId') orgId: string,
+    @Query('period') period: string,
+    @Request() req: any,
+  ) {
+    assertOwnOrg(req, orgId);
     return this.esgService.generateESGReport(orgId, period);
   }
 
@@ -80,13 +111,17 @@ export class EnterpriseController {
   @Post('white-label')
   @ApiOperation({ summary: 'Create white-label config' })
   @Roles('owner', 'admin')
-  async createWhiteLabel(@Body() data: { orgId: string; config: Parameters<WhiteLabelService['createConfig']>[1] }) {
-    return this.whiteLabelService.createConfig(data.orgId, data.config);
+  async createWhiteLabel(
+    @Body() data: { config: Parameters<WhiteLabelService['createConfig']>[1] },
+    @Request() req: any,
+  ) {
+    return this.whiteLabelService.createConfig(callerOrg(req), data.config);
   }
 
   @Get('white-label/:orgId')
   @ApiOperation({ summary: 'Get white-label config' })
-  async getWhiteLabel(@Param('orgId') orgId: string) {
+  async getWhiteLabel(@Param('orgId') orgId: string, @Request() req: any) {
+    assertOwnOrg(req, orgId);
     return this.whiteLabelService.getConfigByOrg(orgId);
   }
 
@@ -94,8 +129,11 @@ export class EnterpriseController {
   @Post('api-keys')
   @ApiOperation({ summary: 'Create API key' })
   @Roles('owner', 'admin')
-  async createApiKey(@Body() data: { orgId: string; name: string; scopes: string[] }) {
-    return this.partnerApiService.createApiKey(data.orgId, data.name, data.scopes);
+  async createApiKey(
+    @Body() data: { name: string; scopes: string[] },
+    @Request() req: any,
+  ) {
+    return this.partnerApiService.createApiKey(callerOrg(req), data.name, data.scopes);
   }
 
   @Get('api-keys/:orgId')
@@ -108,8 +146,11 @@ export class EnterpriseController {
   @Post('webhooks')
   @ApiOperation({ summary: 'Create webhook' })
   @Roles('owner', 'admin')
-  async createWebhook(@Body() data: { orgId: string; url: string; events: string[] }) {
-    return this.partnerApiService.createWebhook(data.orgId, data);
+  async createWebhook(
+    @Body() data: { url: string; events: string[] },
+    @Request() req: any,
+  ) {
+    return this.partnerApiService.createWebhook(callerOrg(req), data);
   }
 
   // Government Trade
@@ -122,14 +163,34 @@ export class EnterpriseController {
   @Post('filings')
   @ApiOperation({ summary: 'Submit trade filing' })
   @Roles('owner', 'admin', 'compliance_officer')
-  async submitFiling(@Body() data: { orgId: string; dealId: string; systemId: string; filingType: string; data: Record<string, unknown> }) {
-    return this.govTradeService.submitFiling(data.orgId, data.dealId, data.systemId, data.filingType, data.data);
+  async submitFiling(
+    @Body()
+    data: {
+      dealId: string;
+      systemId: string;
+      filingType: string;
+      data: Record<string, unknown>;
+    },
+    @Request() req: any,
+  ) {
+    return this.govTradeService.submitFiling(
+      callerOrg(req),
+      data.dealId,
+      data.systemId,
+      data.filingType,
+      data.data,
+    );
   }
 
   // Matching Engine
   @Get('matches/buyer/:orgId')
   @ApiOperation({ summary: 'Find supplier matches for buyer' })
-  async findMatchesForBuyer(@Param('orgId') orgId: string, @Query('limit') limit?: string) {
+  async findMatchesForBuyer(
+    @Param('orgId') orgId: string,
+    @Request() req: any,
+    @Query('limit') limit?: string,
+  ) {
+    assertOwnOrg(req, orgId);
     return this.matchingService.findMatchesForBuyer(orgId, limit ? parseInt(limit, 10) : 10);
   }
 

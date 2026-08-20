@@ -118,14 +118,32 @@ export class AnalyticsService {
     const org = await this.orgRepo.findOne({ where: { id: orgId } });
     if (!org) return null;
 
+    // A deal belongs to both parties, so an organization's deals are the ones
+    // it is on either side of. Counting only buyerOrgId meant every supplier
+    // saw zero deals and zero volume however much it had shipped — and the
+    // pilot is Kenyan suppliers selling to U.S. buyers, so that was most of
+    // the users.
+    const isParty = [{ buyerOrgId: orgId }, { supplierOrgId: orgId }];
+
     const [totalDeals, completedDeals, totalRFQs, tradeVolumeResult] = await Promise.all([
-      this.dealRepo.count({ where: { buyerOrgId: orgId } }),
-      this.dealRepo.count({ where: { buyerOrgId: orgId, status: 'completed' } }),
+      this.dealRepo.count({ where: isParty }),
+      this.dealRepo.count({
+        where: [
+          { buyerOrgId: orgId, status: 'completed' },
+          { supplierOrgId: orgId, status: 'completed' },
+        ],
+      }),
       this.rfqRepo.count({ where: { buyerOrgId: orgId } }),
       this.dealRepo
         .createQueryBuilder('d')
         .select('COALESCE(SUM(d.total_value_usd), 0)', 'total')
-        .where('d.buyer_id = :orgId', { orgId })
+        // Property path, not a column name. `d.buyer_id` is neither: the
+        // property is buyerOrgId and the column is buyer_org_id, so TypeORM
+        // passed it through untouched and every call to this endpoint failed
+        // with `column d.buyer_id does not exist`. It 500'd for its own
+        // organization, not only for a stranger, which is why no cross-tenant
+        // test had caught the missing scope either.
+        .where('d.buyerOrgId = :orgId OR d.supplierOrgId = :orgId', { orgId })
         .andWhere('d.status = :status', { status: 'completed' })
         .getRawOne(),
     ]);

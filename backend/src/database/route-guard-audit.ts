@@ -40,6 +40,20 @@ const EXPECTED_PUBLIC: Record<string, string> = {
 /**
  * Routes that legitimately need no caller identity, with the reason. Mostly
  * marketplace reads that are the same for every tenant by design.
+ *
+ * This list carried a second section — routes that took a path id and could
+ * not scope to the caller, recorded as known debt rather than silently
+ * allowed. It is now empty: all twelve have been scoped. Nothing here is
+ * debt any more, so anything added below has to be genuinely
+ * caller-independent, not merely not-yet-fixed.
+ *
+ * One limitation worth stating, because it is not obvious from the code: this
+ * audit only sees ids in the *path*. A handler that takes an orgId from the
+ * query string or the request body looks perfectly scoped to it. Five
+ * enterprise POST routes were creating subscriptions, API keys, webhooks and
+ * government filings under whatever organization the body named, and two
+ * inventory reads took an orgId from the query — none of them ever appeared
+ * in this report.
  */
 const EXPECTED_BLIND: Record<string, string> = {
   // Marketplace reads: the same for every tenant by design. A buyer must be
@@ -50,18 +64,6 @@ const EXPECTED_BLIND: Record<string, string> = {
   'GET /compliance-tools/hs-codes/:code': 'reference data, not tenant-specific',
   'GET /platform/flags/:key': 'feature flag value, not tenant-specific',
 
-  // Known debt, deliberately listed rather than silently allowed. Each takes an
-  // id from the path and cannot scope to the caller. They are lower severity
-  // than the three fixed alongside this list — mostly reads of data a
-  // counterparty already sees, or enterprise routes for features the pilot does
-  // not use — but each is a real gap and should be closed before those features
-  // carry live data.
-  'GET /analytics/organization/:orgId': 'UNSCOPED — reads another org analytics',
-  'GET /enterprise/esg/report/:orgId': 'UNSCOPED — enterprise feature, unused in pilot',
-  'GET /enterprise/esg/score/:orgId': 'UNSCOPED — enterprise feature, unused in pilot',
-  'GET /enterprise/matches/buyer/:orgId': 'UNSCOPED — enterprise feature, unused in pilot',
-  'GET /enterprise/subscriptions/:orgId': 'UNSCOPED — enterprise feature, unused in pilot',
-  'GET /enterprise/white-label/:orgId': 'UNSCOPED — enterprise feature, unused in pilot',
   // Manual override tooling, restricted to platform_admin. They act on an id
   // from the path by design; the control is the role, not the tenant.
   'POST /workflows/inspection/:id/result': 'platform_admin only — manual override',
