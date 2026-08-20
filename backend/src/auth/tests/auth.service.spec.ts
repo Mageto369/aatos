@@ -37,6 +37,7 @@ describe('AuthService', () => {
           provide: getRepositoryToken(User),
           useValue: {
             findOne: jest.fn(),
+            createQueryBuilder: jest.fn(),
             create: jest.fn(),
             save: jest.fn(),
           },
@@ -98,11 +99,27 @@ describe('AuthService', () => {
   });
 
   describe('login', () => {
+    /**
+     * passwordHash is select: false, so login goes through
+     * findUserWithSecrets, which builds a query rather than calling findOne.
+     * Returns the captured builder so a test can assert what was selected.
+     */
+    const stubLookup = (user: User | null) => {
+      const addSelect = jest.fn().mockReturnThis();
+      const builder = {
+        where: jest.fn().mockReturnThis(),
+        addSelect,
+        getOne: jest.fn().mockResolvedValue(user),
+      };
+      (userRepo.createQueryBuilder as jest.Mock).mockReturnValue(builder);
+      return builder;
+    };
+
     it('should return tokens for valid credentials', async () => {
       const dto = { email: 'test@example.com', password: 'password123' };
       const user = mockUser();
       user.passwordHash = await bcrypt.hash(dto.password, 12);
-      userRepo.findOne.mockResolvedValue(user);
+      stubLookup(user);
       userRepo.save.mockResolvedValue(user);
 
       const result = await service.login(dto);
@@ -111,11 +128,26 @@ describe('AuthService', () => {
       expect(userRepo.save).toHaveBeenCalled();
     });
 
+    it('asks for the unselected secret columns, or the password check reads undefined', async () => {
+      const dto = { email: 'test@example.com', password: 'password123' };
+      const user = mockUser();
+      user.passwordHash = await bcrypt.hash(dto.password, 12);
+      const builder = stubLookup(user);
+      userRepo.save.mockResolvedValue(user);
+
+      await service.login(dto);
+
+      const asked = builder.addSelect.mock.calls.flat();
+      expect(asked).toContain('user.passwordHash');
+      expect(asked).toContain('user.mfaSecret');
+      expect(asked).toContain('user.mfaLastVerifiedCounter');
+    });
+
     it('should throw UnauthorizedException for wrong password', async () => {
       const dto = { email: 'test@example.com', password: 'wrongpassword' };
       const user = mockUser();
       user.passwordHash = await bcrypt.hash('password123', 12);
-      userRepo.findOne.mockResolvedValue(user);
+      stubLookup(user);
       userRepo.save.mockResolvedValue(user);
 
       await expect(service.login(dto)).rejects.toThrow(UnauthorizedException);
@@ -123,7 +155,7 @@ describe('AuthService', () => {
 
     it('should throw UnauthorizedException for unknown email', async () => {
       const dto = { email: 'unknown@example.com', password: 'password123' };
-      userRepo.findOne.mockResolvedValue(null);
+      stubLookup(null);
 
       await expect(service.login(dto)).rejects.toThrow(UnauthorizedException);
     });

@@ -38,6 +38,27 @@ export class FakeUserRepository {
     return this.users.find((user) => matches(user as any, where)) ?? null;
   }
 
+  /**
+   * Enough of a query builder for findUserWithSecrets, which authentication
+   * uses to pull the columns marked select: false. The double stores whole
+   * objects and has no column projection to undo, so addSelect is a no-op
+   * here — what is being exercised is that the production code asks for the
+   * secrets at all.
+   */
+  createQueryBuilder(_alias?: string) {
+    let criteria: Record<string, any> = {};
+    const builder = {
+      where: (w: Record<string, any>) => {
+        criteria = w;
+        return builder;
+      },
+      addSelect: () => builder,
+      getOne: async (): Promise<User | null> =>
+        this.users.find((user) => matches(user as any, criteria)) ?? null,
+    };
+    return builder;
+  }
+
   create(data: Partial<User>): User {
     return data as User;
   }

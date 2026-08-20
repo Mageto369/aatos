@@ -91,7 +91,13 @@ export class OrganizationsController {
 
   @Get(':id/members')
   @ApiOperation({ summary: 'Get organization members' })
-  getMembers(@Param('id') id: string) {
+  getMembers(@Param('id') id: string, @Request() req: any) {
+    // A roster of names, emails and roles is not marketplace data. This took
+    // the id from the path with no request, so any caller could list the staff
+    // of any organization — and, because it loads the user relation and the
+    // secret columns were selectable, receive their password hashes and TOTP
+    // secrets with it.
+    assertOwnOrg(req, id);
     return this.orgService.getMembers(id);
   }
 

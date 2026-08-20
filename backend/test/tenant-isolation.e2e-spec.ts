@@ -864,6 +864,55 @@ describe('Tenant isolation (e2e)', () => {
       expect(res.status).toBe(200);
     });
 
+    it("A cannot list the members of B's organization", async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/organizations/${orgB}/members`)
+        .set('Authorization', `Bearer ${tokenA}`);
+      expect([403, 404]).toContain(res.status);
+    });
+
+    it('the member roster carries no password hash and no MFA secret', async () => {
+      // This route loads the user relation. The secret columns on the user
+      // entity were selectable, so before the fix a stranger calling it
+      // received, for every member of any organization on the platform, the
+      // live bcrypt hash and the AES-wrapped TOTP secret — enough to attack
+      // the password offline and then produce valid second-factor codes.
+      // Verified against a running server: status 200, and the response
+      // carried passwordHash, mfaSecret and mfaPendingSecret.
+      const res = await request(app.getHttpServer())
+        .get(`/organizations/${orgB}/members`)
+        .set('Authorization', `Bearer ${tokenB}`)
+        .expect(200);
+
+      expect(res.body.data.length).toBeGreaterThan(0);
+      const serialised = JSON.stringify(res.body);
+      for (const secret of [
+        'passwordHash',
+        'mfaSecret',
+        'mfaPendingSecret',
+        'mfaLastVerifiedCounter',
+      ]) {
+        expect(serialised).not.toContain(secret);
+      }
+      // Still useful as a roster.
+      expect(res.body.data[0].user.email).toBeTruthy();
+      expect(res.body.data[0].role).toBeTruthy();
+    });
+
+    it('a plain user load leaves the secret columns behind', async () => {
+      // The durable half of the fix: the columns are select: false, so this
+      // holds for any future query that joins a user, not just this route.
+      const [row] = await dataSource.query('SELECT id FROM organizations WHERE id = $1', [orgB]);
+      expect(row).toBeTruthy();
+
+      const users = await dataSource
+        .getRepository('User')
+        .find({ where: { id: userB }, take: 1 });
+      expect(users.length).toBe(1);
+      expect((users[0] as any).passwordHash).toBeUndefined();
+      expect((users[0] as any).mfaSecret).toBeUndefined();
+    });
+
     it("A cannot read B's API keys", async () => {
       const res = await request(app.getHttpServer())
         .get(`/enterprise/api-keys/${orgB}`)

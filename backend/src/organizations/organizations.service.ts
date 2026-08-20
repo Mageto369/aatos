@@ -121,8 +121,28 @@ export class OrganizationsService {
 
   async getMembers(organizationId: string) {
     return this.memberRepo.find({
-      where: { organizationId,  },
+      where: { organizationId },
       relations: ['user'],
+      // Named explicitly rather than taking whatever the relation happens to
+      // carry. The secret columns are select: false now, but a roster still
+      // has no reason to ship login counters or lockout state, and the next
+      // column added to the user table should not appear here by default.
+      select: {
+        id: true,
+        organizationId: true,
+        userId: true,
+        role: true,
+        joinedAt: true,
+        user: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          displayName: true,
+          avatarUrl: true,
+          status: true,
+        },
+      },
     });
   }
 

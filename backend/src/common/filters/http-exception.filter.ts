@@ -21,6 +21,17 @@ export class HttpExceptionFilter implements ExceptionFilter {
       requestId: (request as any).id || 'unknown',
       timestamp: new Date().toISOString(),
       errors: Array.isArray(exceptionResponse.message) ? exceptionResponse.message : undefined,
+      // A machine-readable discriminator, when the thrower supplied one. RFC
+      // 7807 allows extension members and this is what they are for.
+      //
+      // Login throws UnauthorizedException({ code: 'mfa_required' }) so the
+      // client knows to prompt for a second factor rather than telling the
+      // user their password was wrong, and 'mfa_invalid' to say the code was
+      // the part that failed. This filter rebuilt the body from a fixed set of
+      // fields and dropped `code` on the floor, so both arrived as an
+      // indistinguishable 401 and the only thing left to branch on was the
+      // English prose in `detail`.
+      code: typeof exceptionResponse.code === 'string' ? exceptionResponse.code : undefined,
     };
 
     this.logger.error(

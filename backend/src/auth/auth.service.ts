@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { User } from './entities/user.entity';
+import { User, findUserWithSecrets } from './entities/user.entity';
 import { RegisterDto, LoginDto, AuthResponse } from './dto';
 import { RefreshTokenService } from './services/refresh-token.service';
 import { MfaService } from './mfa.service';
@@ -59,7 +59,9 @@ export class AuthService {
   }
 
   async login(dto: LoginDto): Promise<FullAuthResponse> {
-    const user = await this.userRepo.findOne({ where: { email: dto.email.toLowerCase() } });
+    // The password hash and the TOTP secret are select: false, so login has
+    // to ask for them explicitly.
+    const user = await findUserWithSecrets(this.userRepo, { email: dto.email.toLowerCase() });
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }

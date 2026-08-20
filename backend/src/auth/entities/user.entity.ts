@@ -37,14 +37,24 @@ export class User {
   @Column({ type: 'varchar', name: 'avatar_url', length: 500, nullable: true })
   avatarUrl: string | null;
 
-  @Column({ name: 'password_hash', length: 255 })
+  /**
+   * select: false. A relation load — `relations: ['user']` — pulls every
+   * selected column, and one such load on the organization members route
+   * handed the live bcrypt hash and the TOTP secret of every member of every
+   * organization to any caller holding any valid token. Marking the secrets
+   * unselected means a query has to name them to get them, so the default for
+   * anything that merely joins a user is to leave them behind.
+   *
+   * Loading them deliberately: SECRET_COLUMNS below.
+   */
+  @Column({ name: 'password_hash', length: 255, select: false })
   passwordHash: string;
 
   @Column({ name: 'mfa_enabled', default: false })
   mfaEnabled: boolean;
 
   /** AES-256-GCM envelope around the base32 TOTP secret; never plaintext. */
-  @Column({ type: 'varchar', name: 'mfa_secret', length: 255, nullable: true })
+  @Column({ type: 'varchar', name: 'mfa_secret', length: 255, nullable: true, select: false })
   mfaSecret: string | null;
 
   /**
@@ -52,7 +62,7 @@ export class User {
    * apart from mfaSecret so opening the enrolment screen cannot break the
    * authenticator that currently works.
    */
-  @Column({ type: 'varchar', name: 'mfa_pending_secret', length: 255, nullable: true })
+  @Column({ type: 'varchar', name: 'mfa_pending_secret', length: 255, nullable: true, select: false })
   mfaPendingSecret: string | null;
 
   @Column({ name: 'mfa_enrolled_at', type: 'timestamptz', nullable: true })
@@ -65,7 +75,7 @@ export class User {
    *
    * bigint, so TypeORM hands it back as a string.
    */
-  @Column({ name: 'mfa_last_verified_counter', type: 'bigint', nullable: true })
+  @Column({ name: 'mfa_last_verified_counter', type: 'bigint', nullable: true, select: false })
   mfaLastVerifiedCounter: string | null;
 
   @Column({ name: 'mfa_recovery_codes_issued_at', type: 'timestamptz', nullable: true })
@@ -94,4 +104,32 @@ export class User {
 
   @DeleteDateColumn({ name: 'deleted_at', type: 'timestamptz', nullable: true })
   deletedAt: Date | null;
+}
+
+/**
+ * The columns marked `select: false` above. A query that needs them must name
+ * them; this is the list, so the set stays in one place and a new secret
+ * column does not get silently forgotten by half the call sites.
+ */
+export const SECRET_COLUMNS = [
+  'passwordHash',
+  'mfaSecret',
+  'mfaPendingSecret',
+  'mfaLastVerifiedCounter',
+] as const;
+
+/**
+ * Load a user with the unselected secret columns included.
+ *
+ * Authentication and MFA genuinely need them; nothing else does. Going
+ * through one helper keeps the deliberate loads countable — grep for it and
+ * every place that touches a password hash or a TOTP secret is listed.
+ */
+export async function findUserWithSecrets(
+  repo: import('typeorm').Repository<User>,
+  where: import('typeorm').FindOptionsWhere<User>,
+): Promise<User | null> {
+  const qb = repo.createQueryBuilder('user').where(where);
+  for (const column of SECRET_COLUMNS) qb.addSelect(`user.${column}`);
+  return qb.getOne();
 }

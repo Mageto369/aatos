@@ -12,7 +12,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Repository } from 'typeorm';
 import { authenticator } from 'otplib';
 import { randomInt } from 'crypto';
-import { User } from './entities/user.entity';
+import { User, findUserWithSecrets } from './entities/user.entity';
 import { MfaRecoveryCode } from './entities/mfa-recovery-code.entity';
 import { OrganizationMember } from '../organizations/entities/organization-member.entity';
 import { MfaCryptoService } from './services/mfa-crypto.service';
@@ -212,7 +212,7 @@ export class MfaService {
    * works.
    */
   async beginEnrolment(userId: string): Promise<MfaEnrolmentChallenge> {
-    const user = await this.userRepo.findOne({ where: { id: userId } });
+    const user = await findUserWithSecrets(this.userRepo, { id: userId });
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -238,7 +238,7 @@ export class MfaService {
    * recovery codes — the only time they exist in plaintext.
    */
   async confirmEnrolment(userId: string, token: string): Promise<{ recoveryCodes: string[] }> {
-    const user = await this.userRepo.findOne({ where: { id: userId } });
+    const user = await findUserWithSecrets(this.userRepo, { id: userId });
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -387,7 +387,7 @@ export class MfaService {
   }
 
   async getStatus(userId: string): Promise<MfaStatus> {
-    const user = await this.userRepo.findOne({ where: { id: userId } });
+    const user = await findUserWithSecrets(this.userRepo, { id: userId });
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -413,7 +413,7 @@ export class MfaService {
   }
 
   private async requireEnrolledUser(userId: string): Promise<User> {
-    const user = await this.userRepo.findOne({ where: { id: userId } });
+    const user = await findUserWithSecrets(this.userRepo, { id: userId });
     if (!user) {
       throw new NotFoundException('User not found');
     }
