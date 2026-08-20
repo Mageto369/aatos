@@ -37,10 +37,18 @@ import { satisfyMfaEnrolment } from './mfa-fixture';
  * cross-tenant quote acceptance — have since been fixed, and their
  * assertions now run as ordinary guards.
  *
- *   - GET  /rfqs/:id                      any tenant reads any RFQ, drafts too
- *   - GET  /rfqs/:id/quotes               any tenant reads competitors' prices
- *   - POST /rfqs/:id/quotes/:qid/accept   any tenant awards anyone's RFQ
- *   - POST /deals                         buyerOrgId/supplierOrgId are hearsay
+ * What each of them was, before the fix in ef48026:
+ *
+ *   - GET  /rfqs/:id                      read any RFQ, unpublished drafts too
+ *   - GET  /rfqs/:id/quotes               read competitors' prices on a tender
+ *   - POST /rfqs/:id/quotes/:qid/accept   award anyone's RFQ, minting a deal
+ *                                         between two unrelated companies
+ *   - POST /deals                         buyerOrgId/supplierOrgId were hearsay
+ *
+ * A fifth, POST /workflows/quote/:id/accept, reached the same award path with
+ * no organization check at all. It was found by grepping for other callers
+ * rather than by a test, which is worth remembering: this suite covers routes
+ * it knows about.
  */
 describe('Tenant isolation (e2e)', () => {
   let app: INestApplication;
