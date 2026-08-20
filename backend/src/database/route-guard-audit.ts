@@ -37,6 +37,45 @@ const EXPECTED_PUBLIC: Record<string, string> = {
   'POST /webhooks/flutterwave': 'provider callback, authenticated by signature',
 };
 
+/**
+ * Routes that legitimately need no caller identity, with the reason. Mostly
+ * marketplace reads that are the same for every tenant by design.
+ */
+const EXPECTED_BLIND: Record<string, string> = {
+  // Marketplace reads: the same for every tenant by design. A buyer must be
+  // able to look up a supplier and a product listing, which is the point.
+  'GET /products/:id': 'public product listing, identical for every caller',
+  'GET /organizations/:id': 'public organization profile in the marketplace directory',
+  'GET /organizations/slug/:slug': 'public organization profile by slug',
+  'GET /compliance-tools/hs-codes/:code': 'reference data, not tenant-specific',
+  'GET /platform/flags/:key': 'feature flag value, not tenant-specific',
+
+  // Known debt, deliberately listed rather than silently allowed. Each takes an
+  // id from the path and cannot scope to the caller. They are lower severity
+  // than the three fixed alongside this list — mostly reads of data a
+  // counterparty already sees, or enterprise routes for features the pilot does
+  // not use — but each is a real gap and should be closed before those features
+  // carry live data.
+  'GET /analytics/organization/:orgId': 'UNSCOPED — reads another org analytics',
+  'GET /enterprise/esg/report/:orgId': 'UNSCOPED — enterprise feature, unused in pilot',
+  'GET /enterprise/esg/score/:orgId': 'UNSCOPED — enterprise feature, unused in pilot',
+  'GET /enterprise/matches/buyer/:orgId': 'UNSCOPED — enterprise feature, unused in pilot',
+  'GET /enterprise/subscriptions/:orgId': 'UNSCOPED — enterprise feature, unused in pilot',
+  'GET /enterprise/white-label/:orgId': 'UNSCOPED — enterprise feature, unused in pilot',
+  'PUT /inventory/items/:id/quantity': 'UNSCOPED — writes another org inventory',
+  'PUT /inventory/items/:id/status': 'UNSCOPED — writes another org inventory',
+  'GET /inventory/products/:productId': 'UNSCOPED — reads another org inventory',
+  'GET /inventory/warehouses/:id/items': 'UNSCOPED — reads another org inventory',
+  'GET /inventory/warehouses/:id': 'UNSCOPED — reads another org warehouse',
+  'GET /organizations/:id/members': 'UNSCOPED — member list of any organization',
+  'PATCH /payments/:id/status': 'UNSCOPED — writes another org payment state',
+  'GET /payments/:id': 'UNSCOPED — reads another org payment',
+  'GET /payments/deal/:dealId/summary': 'UNSCOPED — reads another deal payment summary',
+  'POST /workflows/inspection/:id/result': 'UNSCOPED — triggers workflow on any inspection',
+  'POST /workflows/milestone/:id/complete': 'UNSCOPED — triggers workflow on any milestone',
+  'POST /workflows/rfq/:id/publish': 'UNSCOPED — publishes any RFQ',
+};
+
 interface Route {
   method: string;
   path: string;
@@ -44,6 +83,8 @@ interface Route {
   file: string;
   isPublic: boolean;
   roles: string[];
+  /** Whether the handler receives the request, and so can know who is calling. */
+  seesCaller: boolean;
 }
 
 function controllerFiles(dir: string): string[] {
@@ -89,6 +130,22 @@ function parse(file: string): Route[] {
     const sig = lines[i].match(signature);
     if (!sig) continue;
 
+    // The handler's parameter list, which may wrap over several lines. A
+    // handler that never receives the request cannot scope anything to the
+    // caller — that is the signature shared by twelve cross-tenant holes found
+    // in this codebase, several of them literally an unused orgId beside a
+    // where clause that ignored it.
+    let params = '';
+    let depth = 0;
+    for (let k = i; k < lines.length && k < i + 25; k++) {
+      for (const ch of lines[k]) {
+        if (ch === '(') depth++;
+        else if (ch === ')') depth--;
+        if (depth > 0) params += ch;
+      }
+      if (depth <= 0 && k > i - 1 && params.length) break;
+    }
+
     const block: string[] = [];
     for (let j = i - 1; j >= 0; j--) {
       const line = lines[j].trim();
@@ -121,6 +178,7 @@ function parse(file: string): Route[] {
       file: file.replace(/^.*\/src\//, 'src/'),
       isPublic: classPublic || /@Public\(\)/.test(text),
       roles,
+      seesCaller: /@(Request|Req|CurrentUser)\(/.test(params),
     });
   }
   return routes;
@@ -150,10 +208,20 @@ function main(): number {
     console.log();
   }
 
+  const unscopedDebt = Object.entries(EXPECTED_BLIND).filter(([, why]) =>
+    why.startsWith('UNSCOPED'),
+  );
+
   console.log(
     `${routes.length} routes — ${publicRoutes.length} public, ${guarded.length} authenticated ` +
       `(${mutating.length - mutatingNoRoles.length} of ${mutating.length} mutating routes carry @Roles).`,
   );
+  if (unscopedDebt.length) {
+    console.log(
+      `${unscopedDebt.length} routes take a path id and cannot scope to the caller — ` +
+        'recorded in EXPECTED_BLIND, not yet fixed.',
+    );
+  }
 
   const unexpected = publicRoutes.filter((r) => !(`${r.method} ${r.path}` in EXPECTED_PUBLIC));
   const missing = Object.keys(EXPECTED_PUBLIC).filter(
@@ -179,6 +247,27 @@ function main(): number {
     console.error('\nExpected public but no longer are:');
     for (const k of missing) console.error(`  ${k} — ${EXPECTED_PUBLIC[k]}`);
     console.error('\nIf a route moved, update EXPECTED_PUBLIC; users cannot sign in without these.');
+  }
+
+  // Handlers that take a resource id from the path but never receive the
+  // request. Such a handler cannot scope to the caller — it has no way to know
+  // who is asking — so any per-tenant check is structurally impossible. Every
+  // cross-tenant hole found in this codebase had exactly this shape.
+  const blind = guarded.filter(
+    (r) => /:[A-Za-z]/.test(r.path) && !r.seesCaller && !(`${r.method} ${r.path}` in EXPECTED_BLIND),
+  );
+
+  if (blind.length) {
+    failed = true;
+    console.error(`\nHandlers taking a path id but never receiving the request (${blind.length}):`);
+    for (const r of blind) {
+      console.error(`  ${r.method.padEnd(6)} ${r.path.padEnd(44)} ${r.file} → ${r.handler}`);
+    }
+    console.error(
+      '\nEach cannot scope to the caller: it has no request, so it cannot know who\n' +
+        'is asking. Add @Request() and check ownership, or record it in EXPECTED_BLIND\n' +
+        'with the reason it is legitimately caller-independent.',
+    );
   }
 
   if (mutatingNoRoles.length) {

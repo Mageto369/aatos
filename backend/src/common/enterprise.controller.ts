@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query, UseGuards, Request, ForbiddenException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -8,6 +8,19 @@ import { WhiteLabelService } from './white-label.service';
 import { PartnerApiService } from './partner-api.service';
 import { GovernmentTradeService } from './government-trade.service';
 import { MatchingEngineService } from './matching-engine.service';
+
+/**
+ * Enterprise routes take the organization from the path. Without a caller the
+ * handler cannot tell whose data it is returning — GET api-keys/:orgId had no
+ * @Roles and no request, so any authenticated user could read any
+ * organization's API keys.
+ */
+function assertOwnOrg(req: any, orgId: string): void {
+  if (req?.user?.role === 'platform_admin') return;
+  if (req?.user?.orgId !== orgId) {
+    throw new ForbiddenException('You do not have access to this organization');
+  }
+}
 
 @ApiTags('Enterprise')
 @Controller('enterprise')
@@ -87,7 +100,8 @@ export class EnterpriseController {
 
   @Get('api-keys/:orgId')
   @ApiOperation({ summary: 'List API keys' })
-  async getApiKeys(@Param('orgId') orgId: string) {
+  async getApiKeys(@Param('orgId') orgId: string, @Request() req: any) {
+    assertOwnOrg(req, orgId);
     return this.partnerApiService.getApiKeys(orgId);
   }
 

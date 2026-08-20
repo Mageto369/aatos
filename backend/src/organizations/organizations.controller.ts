@@ -98,7 +98,16 @@ export class OrganizationsController {
   @Post(':id/members')
   @ApiOperation({ summary: 'Add member to organization' })
   @Roles('owner', 'admin')
-  addMember(@Param('id') orgId: string, @Body('userId') userId: string, @Body('role') role: string) {
+  addMember(
+    @Param('id') orgId: string,
+    @Body('userId') userId: string,
+    @Body('role') role: string,
+    @Request() req: any,
+  ) {
+    // @Roles('owner','admin') only asserts the caller owns *some* organization.
+    // Without this, any owner could add themselves to any organization on the
+    // platform — a complete takeover of another tenant.
+    assertOwnOrg(req, orgId);
     return this.orgService.addMember(orgId, userId, role);
   }
 }

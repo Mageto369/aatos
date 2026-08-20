@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Query, UseGuards, Request, DefaultValuePipe, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query, UseGuards, Request, DefaultValuePipe, ParseIntPipe, ForbiddenException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -27,7 +27,11 @@ export class MessagesController {
     @Param('dealId') dealId: string,
     @Query('cursor') cursor?: string,
     @Query('limit', new DefaultValuePipe(50), ParseIntPipe) limit?: number,
+    @Request() req?: any,
   ) {
+    if (!(await this.messagesService.isPartyToDeal(dealId, req?.user?.orgId))) {
+      throw new ForbiddenException('You are not a party to this deal');
+    }
     return this.messagesService.getDealMessages(dealId, cursor, limit);
   }
 }

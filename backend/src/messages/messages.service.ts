@@ -2,10 +2,13 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Message } from './entities/message.entity';
+import { Deal } from '../deals/entities/deal.entity';
 
 @Injectable()
 export class MessagesService {
   constructor(
+    @InjectRepository(Deal)
+    private readonly dealRepo: Repository<Deal>,
     @InjectRepository(Message)
     private readonly messageRepo: Repository<Message>,
   ) {}
@@ -52,4 +55,22 @@ export class MessagesService {
 
     await this.messageRepo.update(messageId, { readBy });
   }
+
+  /**
+   * Whether an organization is a party to a deal.
+   *
+   * Deal-room messages are the private negotiation between exactly two
+   * companies. GET /messages/deal/:dealId took the id from the path with no
+   * caller at all, so any authenticated user could read any deal's messages.
+   */
+  async isPartyToDeal(dealId: string, orgId: string): Promise<boolean> {
+    if (!orgId) return false;
+    const deal = await this.dealRepo.findOne({
+      where: { id: dealId },
+      select: { id: true, buyerOrgId: true, supplierOrgId: true },
+    });
+    if (!deal) return false;
+    return deal.buyerOrgId === orgId || deal.supplierOrgId === orgId;
+  }
+
 }

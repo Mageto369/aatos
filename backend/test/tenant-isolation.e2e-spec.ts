@@ -830,6 +830,48 @@ describe('Tenant isolation (e2e)', () => {
     });
   });
 
+  describe('takeover and disclosure via path-id handlers', () => {
+    /**
+     * These three handlers took an id from the path and never received the
+     * request, so they could not scope to the caller at all. The route audit
+     * now flags that shape; these assert the specific consequences.
+     */
+    it("A cannot add itself to B's organization", async () => {
+      const res = await request(app.getHttpServer())
+        .post(`/organizations/${orgB}/members`)
+        .set('Authorization', `Bearer ${tokenA}`)
+        .send({ userId: userC, role: 'admin' });
+      expect([403, 404]).toContain(res.status);
+
+      const rows = await dataSource.query(
+        'SELECT user_id FROM organization_members WHERE organization_id = $1 AND user_id = $2',
+        [orgB, userC],
+      );
+      expect(rows.length).toBe(0);
+    });
+
+    it("A cannot read B's deal-room messages", async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/messages/deal/${dealOfBC}`)
+        .set('Authorization', `Bearer ${tokenA}`);
+      expect([403, 404]).toContain(res.status);
+    });
+
+    it('B, a party to the deal, can read its messages — the control', async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/messages/deal/${dealOfBC}`)
+        .set('Authorization', `Bearer ${tokenB}`);
+      expect(res.status).toBe(200);
+    });
+
+    it("A cannot read B's API keys", async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/enterprise/api-keys/${orgB}`)
+        .set('Authorization', `Bearer ${tokenA}`);
+      expect([403, 404]).toContain(res.status);
+    });
+  });
+
   describe('unauthenticated access', () => {
     it('rejects requests with no token', () => {
       return request(app.getHttpServer()).get('/organizations').expect(401);
