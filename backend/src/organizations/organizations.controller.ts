@@ -1,10 +1,27 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards, Request, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards, Request, HttpCode, HttpStatus, ForbiddenException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { PilotGuardService } from '../common/pilot-guard.service';
 import { OrganizationsService } from './organizations.service';
 import { CreateOrganizationDto, UpdateOrganizationDto } from './dto';
+
+/**
+ * An organization may only be modified by its own members.
+ *
+ * PATCH and DELETE took the id straight from the path with no acting
+ * organization — the handlers had no `req` parameter at all, the same
+ * signature as every other cross-tenant hole in this codebase. @Roles('owner')
+ * only asserts the caller is an owner of *some* organization, so any owner
+ * could rewrite, or soft-delete, any organization on the platform. Verified
+ * before the fix: one tenant deleted another's organization and got a 204.
+ */
+function assertOwnOrg(req: any, orgId: string): void {
+  if (req.user?.role === 'platform_admin') return;
+  if (req.user?.orgId !== orgId) {
+    throw new ForbiddenException('You do not have access to this organization');
+  }
+}
 
 @ApiTags('Organizations')
 @Controller('organizations')
@@ -58,7 +75,8 @@ export class OrganizationsController {
   @Patch(':id')
   @ApiOperation({ summary: 'Update organization' })
   @Roles('owner', 'admin')
-  update(@Param('id') id: string, @Body() dto: UpdateOrganizationDto) {
+  update(@Param('id') id: string, @Body() dto: UpdateOrganizationDto, @Request() req: any) {
+    assertOwnOrg(req, id);
     return this.orgService.update(id, dto);
   }
 
@@ -66,7 +84,8 @@ export class OrganizationsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete organization' })
   @Roles('owner')
-  remove(@Param('id') id: string) {
+  remove(@Param('id') id: string, @Request() req: any) {
+    assertOwnOrg(req, id);
     return this.orgService.remove(id);
   }
 

@@ -778,6 +778,58 @@ describe('Tenant isolation (e2e)', () => {
     });
   });
 
+  describe('organizations', () => {
+    /**
+     * PATCH and DELETE /organizations/:id took the id from the path with no
+     * acting organization — the handlers had no req parameter at all.
+     * @Roles('owner') only asserts the caller owns *some* organization, so any
+     * owner could rewrite or soft-delete any organization on the platform.
+     * Demonstrated before the fix: A patched B's description (200) and then
+     * soft-deleted B's organization (204).
+     */
+    it("A cannot modify B's organization", async () => {
+      const res = await request(app.getHttpServer())
+        .patch(`/organizations/${orgB}`)
+        .set('Authorization', `Bearer ${tokenA}`)
+        .send({ description: 'seized by alpha' });
+      expect([403, 404]).toContain(res.status);
+
+      const [row] = await dataSource.query(
+        'SELECT description FROM organizations WHERE id = $1',
+        [orgB],
+      );
+      expect(row.description ?? '').not.toBe('seized by alpha');
+    });
+
+    it("A cannot delete B's organization", async () => {
+      const res = await request(app.getHttpServer())
+        .delete(`/organizations/${orgB}`)
+        .set('Authorization', `Bearer ${tokenA}`);
+      expect([403, 404]).toContain(res.status);
+
+      const [row] = await dataSource.query(
+        'SELECT deleted_at FROM organizations WHERE id = $1',
+        [orgB],
+      );
+      expect(row.deleted_at).toBeNull();
+    });
+
+    it('B can still modify its own organization — the control', async () => {
+      const marker = `owned by bravo ${Date.now()}`;
+      await request(app.getHttpServer())
+        .patch(`/organizations/${orgB}`)
+        .set('Authorization', `Bearer ${tokenB}`)
+        .send({ description: marker })
+        .expect(200);
+
+      const [row] = await dataSource.query(
+        'SELECT description FROM organizations WHERE id = $1',
+        [orgB],
+      );
+      expect(row.description).toBe(marker);
+    });
+  });
+
   describe('unauthenticated access', () => {
     it('rejects requests with no token', () => {
       return request(app.getHttpServer()).get('/organizations').expect(401);

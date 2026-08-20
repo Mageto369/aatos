@@ -37,6 +37,11 @@ import * as Joi from 'joi';
         JWT_SECRET: Joi.string().required(),
         JWT_EXPIRES_IN: Joi.string().default('1h'),
         JWT_REFRESH_SECRET: Joi.string().required(),
+        // Optional rather than required: both fall back to safe behaviour
+        // (MFA reuses JWT_SECRET; the webhook refuses unverified deliveries),
+        // and making them required would break existing deployments on deploy.
+        MFA_ENCRYPTION_KEY: Joi.string().min(32).optional(),
+        FLUTTERWAVE_WEBHOOK_HASH: Joi.string().optional(),
         AWS_S3_BUCKET: Joi.string().default('aatos-documents'),
         AWS_REGION: Joi.string().default('us-east-1'),
         AWS_ACCESS_KEY_ID: Joi.string().optional(),
